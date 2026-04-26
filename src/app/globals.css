@@ -409,10 +409,6 @@ section {
   }
 }
 
-.mobile-nav-drawer > summary::-webkit-details-marker {
-  display: none;
-}
-
 .mobile-nav-trigger {
   display: inline-flex;
   align-items: center;
@@ -454,6 +450,20 @@ section {
   transition: transform 0.24s ease;
 }
 
+.mobile-nav-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #2d4263;
+  color: #f8f9fa;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .mobile-nav-link {
   display: block;
   width: 100%;
@@ -464,12 +474,12 @@ section {
   text-align: left;
 }
 
-.mobile-nav-drawer[open] .mobile-nav-overlay {
+.mobile-nav-toggle:checked ~ .mobile-nav-overlay {
   opacity: 1;
   pointer-events: auto;
 }
 
-.mobile-nav-drawer[open] .mobile-nav-panel {
+.mobile-nav-toggle:checked ~ .mobile-nav-panel {
   transform: translateX(0);
 }
 

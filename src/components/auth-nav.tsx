@@ -14,6 +14,7 @@ export async function AuthNav({ locale }: AuthNavProps) {
   const profile = await getCurrentProfile();
 
   if (!profile) {
+    const drawerId = `mobile-nav-toggle-guest-${locale}`;
     return (
       <>
         <div className="hidden items-center gap-3 md:flex">
@@ -21,12 +22,18 @@ export async function AuthNav({ locale }: AuthNavProps) {
             {t("login")}
           </Link>
         </div>
-        <details className="mobile-nav-drawer relative md:hidden">
-          <summary className="mobile-nav-trigger">
+        <div className="mobile-nav-drawer relative md:hidden">
+          <input id={drawerId} type="checkbox" className="mobile-nav-toggle peer sr-only" />
+          <label htmlFor={drawerId} className="mobile-nav-trigger">
             <Menu className="h-5 w-5" />
-          </summary>
-          <div className="mobile-nav-overlay" />
+          </label>
+          <label htmlFor={drawerId} className="mobile-nav-overlay" aria-label="Close menu" />
           <div className="mobile-nav-panel">
+            <div className="flex justify-end">
+              <label htmlFor={drawerId} className="mobile-nav-close" aria-label="Close menu">
+                ×
+              </label>
+            </div>
             <nav className="flex flex-col gap-3">
               <Link href={`/${locale}/tutors`} className="mobile-nav-link">
                 {t("tutors")}
@@ -41,11 +48,12 @@ export async function AuthNav({ locale }: AuthNavProps) {
               </Link>
             </div>
           </div>
-        </details>
+        </div>
       </>
     );
   }
 
+  const drawerId = `mobile-nav-toggle-auth-${locale}`;
   return (
     <>
       <div className="hidden items-center gap-3 md:flex">
@@ -65,12 +73,18 @@ export async function AuthNav({ locale }: AuthNavProps) {
         </form>
       </div>
 
-      <details className="mobile-nav-drawer relative md:hidden">
-        <summary className="mobile-nav-trigger">
+      <div className="mobile-nav-drawer relative md:hidden">
+        <input id={drawerId} type="checkbox" className="mobile-nav-toggle peer sr-only" />
+        <label htmlFor={drawerId} className="mobile-nav-trigger">
           <Menu className="h-5 w-5" />
-        </summary>
-        <div className="mobile-nav-overlay" />
+        </label>
+        <label htmlFor={drawerId} className="mobile-nav-overlay" aria-label="Close menu" />
         <div className="mobile-nav-panel">
+          <div className="flex justify-end">
+            <label htmlFor={drawerId} className="mobile-nav-close" aria-label="Close menu">
+              ×
+            </label>
+          </div>
           <nav className="flex flex-col gap-3">
             <Link href={`/${locale}/tutors`} className="mobile-nav-link">
               {t("tutors")}
@@ -100,7 +114,7 @@ export async function AuthNav({ locale }: AuthNavProps) {
             </form>
           </div>
         </div>
-      </details>
+      </div>
     </>
   );
 }
