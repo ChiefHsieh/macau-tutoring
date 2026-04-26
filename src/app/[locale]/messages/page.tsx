@@ -24,10 +24,7 @@ type MessageRow = {
 export default async function MessagesInboxPage({ params, searchParams }: MessagesInboxPageProps) {
   const { locale } = await params;
   const query = await searchParams;
-  const { profile } = await requireProfile(locale);
-  if (profile.role !== "student" && profile.role !== "tutor") {
-    redirect(`/${locale}/dashboard`);
-  }
+  await requireProfile(locale);
 
   const t = await getTranslations("Messages");
   const supabase = await createClient();
@@ -63,16 +60,25 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
   }
 
   const peerIds = [...threadLast.keys()];
-  const { data: peers } =
+  const [{ data: peers }, { data: peerTutorProfiles }] =
     peerIds.length > 0
-      ? await supabase.from("users").select("id, full_name").in("id", peerIds)
-      : { data: [] as { id: string; full_name: string }[] };
+      ? await Promise.all([
+          supabase.from("users").select("id, full_name").in("id", peerIds),
+          supabase.from("tutor_profiles").select("id, display_name").in("id", peerIds),
+        ])
+      : [{ data: [] as { id: string; full_name: string }[] }, { data: [] as { id: string; display_name: string }[] }];
 
-  const nameById = new Map((peers ?? []).map((p) => [p.id, p.full_name]));
+  const userNameById = new Map((peers ?? []).map((p) => [p.id, p.full_name?.trim() || ""]));
+  const tutorNameById = new Map((peerTutorProfiles ?? []).map((p) => [p.id, p.display_name?.trim() || ""]));
 
   return (
     <main className="space-y-6">
       <PageSection title={t("inboxTitle")} description={t("inboxSubtitle")}>
+      {query.error === "support_manager_not_found" ? (
+        <Card>
+          <CardContent className="pt-5 text-sm text-red-700">{t("supportManagerMissing")}</CardContent>
+        </Card>
+      ) : null}
       {query.error === "missing_peer" ? (
         <Card>
           <CardContent className="pt-5 text-sm text-red-700">{t("missingPeer")}</CardContent>
@@ -87,13 +93,14 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
           {peerIds.map((peerId) => {
             const last = threadLast.get(peerId)!;
             const unread = unreadByPeer.get(peerId) ?? 0;
+            const peerName = userNameById.get(peerId) || tutorNameById.get(peerId) || t("unknownUser");
             return (
               <li key={peerId}>
                 <Link href={`/${locale}/messages/${peerId}`}>
                   <Card className="transition-shadow hover:shadow-md">
                     <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
                       <div>
-                        <p className="font-semibold text-[#1D2129]">{nameById.get(peerId) ?? t("unknownUser")}</p>
+                        <p className="font-semibold text-[#1D2129]">{peerName}</p>
                         <p className="mt-1 line-clamp-2 text-sm text-zinc-600">{last.content}</p>
                         <p className="mt-1 text-xs text-zinc-500">
                           {new Date(last.created_at).toLocaleString(locale === "en" ? "en-GB" : "zh-HK")}

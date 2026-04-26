@@ -59,9 +59,6 @@ export async function LandingSiteFooter({
           <Link href={`/${locale}/auth`} className="block text-zinc-700 hover:text-[#000225]">
             {t("footerLinkBecomeTutor")}
           </Link>
-          <Link href={`/${locale}/roadmap`} className="block text-zinc-700 hover:text-[#000225]">
-            {t("footerLinkTutorGuide")}
-          </Link>
           <Link href={`/${locale}/tutor/profile/setup`} className="block text-zinc-700 hover:text-[#000225]">
             {t("footerLinkTutorProfile")}
           </Link>
@@ -88,9 +85,6 @@ export async function LandingSiteFooter({
           </Link>
           <Link href={`/${locale}/dashboard`} className="block text-zinc-700 hover:text-[#000225]">
             {t("footerLinkDashboard")}
-          </Link>
-          <Link href={`/${locale}/roadmap`} className="block text-zinc-700 hover:text-[#000225]">
-            {t("footerLinkRoadmap")}
           </Link>
           <Link href={`/${locale}/faq`} className="block text-zinc-700 hover:text-[#000225]">
             {t("footerLinkFaq")}

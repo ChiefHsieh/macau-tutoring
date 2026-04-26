@@ -5,22 +5,20 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageThreadClient } from "@/components/message-thread-client";
 import { markThreadReadAction } from "../actions";
 
 type MessageThreadPageProps = {
   params: Promise<{ locale: string; peerId: string }>;
-  searchParams: Promise<{ fromBooking?: string }>;
+  searchParams: Promise<{ fromBooking?: string; support?: string }>;
 };
 
 export default async function MessageThreadPage({ params, searchParams }: MessageThreadPageProps) {
   const { locale, peerId } = await params;
   const query = await searchParams;
-  const { profile } = await requireProfile(locale);
-  if (profile.role !== "student" && profile.role !== "tutor") {
-    redirect(`/${locale}/dashboard`);
-  }
+  await requireProfile(locale);
 
   const t = await getTranslations("Messages");
   const supabase = await createClient();
@@ -33,8 +31,12 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
     redirect(`/${locale}/messages`);
   }
 
-  const { data: peer } = await supabase.from("users").select("id, full_name").eq("id", peerId).maybeSingle();
-  const peerName = peer?.full_name ?? t("unknownUser");
+  const [{ data: peerUser }, { data: peerTutorProfile }] = await Promise.all([
+    supabase.from("users").select("id, full_name, role").eq("id", peerId).maybeSingle(),
+    supabase.from("tutor_profiles").select("id, display_name").eq("id", peerId).maybeSingle(),
+  ]);
+  const peerName = peerUser?.full_name?.trim() || peerTutorProfile?.display_name?.trim() || t("unknownUser");
+  const isSupportThread = query.support === "1" || peerUser?.role === "admin";
 
   const [{ data: outgoing }, { data: incoming }] = await Promise.all([
     supabase
@@ -60,8 +62,8 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
   return (
     <main className="space-y-6">
       <PageSection
-        title={t("threadTitle", { name: peerName })}
-        description={t("threadSubtitle")}
+        title={isSupportThread ? t("supportThreadTitle") : t("threadTitle", { name: peerName })}
+        description={isSupportThread ? t("supportThreadSubtitle") : t("threadSubtitle")}
         action={
           <Button asChild variant="outline" size="sm">
             <Link href={`/${locale}/messages`}>{t("backToInbox")}</Link>
@@ -70,8 +72,13 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
       >
         <Card>
           <CardContent className="space-y-4 pt-5">
+            {isSupportThread ? (
+              <Badge variant="warning" className="w-fit">
+                {t("supportBadge")}
+              </Badge>
+            ) : null}
             {query.fromBooking === "1" ? (
-              <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900 ring-1 ring-emerald-200">
+              <p className="rounded-md border border-[#1A2456] bg-[#0A0F35] px-3 py-2 text-sm text-[#E2E8F0]">
                 {t("fromBookingBanner")}
               </p>
             ) : null}

@@ -77,6 +77,7 @@
     "dashboard": "我的家教中心",
     "logout": "退出",
     "messages": "訊息",
+    "supportCenter": "客服中心",
     "notificationsAria": "通知"
   },
   "Auth": {
@@ -161,7 +162,7 @@
     "tutorVerifiedStatus": "認證狀態：已通過管理員審核",
     "tutorPendingStatus": "認證狀態：等待管理員審核",
     "adminVerificationQueueTitle": "導師文件審核隊列",
-    "adminVerificationQueueSummary": "待審核：{pending} / {total} 位導師",
+    "adminVerificationQueueSummary": "待審核：{pending} 位導師",
     "adminNoTutors": "暫未有導師資料。",
     "adminVerified": "已認證",
     "adminNotVerified": "未認證",
@@ -208,11 +209,15 @@
     "unknownUser": "用戶",
     "threadTitle": "與 {name} 的對話",
     "threadSubtitle": "訊息僅雙方可見；在平台規則允許前請謹慎分享個人聯絡方式。",
+    "supportThreadTitle": "客服中心",
+    "supportThreadSubtitle": "這是官方客服會話，可直接描述你的問題或需求。",
+    "supportBadge": "官方客服",
     "backToInbox": "返回列表",
     "composePlaceholder": "輸入訊息內容…",
     "send": "發送",
     "fromBookingBanner": "預約已建立。請在下方繼續溝通；導師同時會收到預約通知。",
-    "missingPeer": "該用戶尚未完成可聯絡資料，暫時無法開啟對話。"
+    "missingPeer": "該用戶尚未完成可聯絡資料，暫時無法開啟對話。",
+    "supportManagerMissing": "客服管理員未設定。請在環境變數設定 SUPPORT_MANAGER_USER_ID。"
   },
   "TutorSetup": {
     "title": "導師資料多步驟設置",
@@ -387,11 +392,12 @@
     "reviewPostedToast": "評價已提交，已自動跳轉到最新公開評價區。"
   },
   "Landing": {
-    "heroTitle": "5 分鐘找到澳門認證導師 | 更低佣金、更強透明度",
-    "heroSubtitle": "你可以像傳統中介一樣快速留資，也可以直接瀏覽導師、篩選對比並發起預約。",
-    "heroValue1": "智能篩選：按年級、科目、區域與預算快速收窄人選",
-    "heroValue2": "支援上門與線上，導師授課形式一目了然",
-    "heroValue3": "留資後預計 24 小時內專人跟進（實際時間視需求而定）",
+    "heroTitle": "A*Marketplace",
+    "heroSubtitle": "透明高效，零中介費",
+    "heroBody": "顛覆傳統家教溝通模式，讓家長直接連接優質導師，節省時間與金錢。",
+    "heroValue1": "嚴格認證：所有導師身份與資格雙重審核",
+    "heroValue2": "公開透明：完整學歷、經驗與評價一覽無遺",
+    "heroValue3": "自主預約：選擇合適導師，直接發起課程預約",
     "heroIllustrationCaption": "更清晰、更可信賴的補習匹配與預約體驗。",
     "ctaBrowse": "瀏覽導師目錄",
     "ctaAuth": "登入 / 註冊",
@@ -413,6 +419,7 @@
     "statMatches": "累計預約／匹配",
     "statTutors": "已入駐導師",
     "statSubjects": "可授課科目條目",
+    "statStudents": "已入駐學生",
     "statReviews": "平台評價",
     "statLeads": "家長需求線索",
     "howParentsTitle": "家長怎麼用",
@@ -425,7 +432,7 @@
     "howTutors3": "接收預約請求並跟進後續溝通",
     "featuredTitle": "最新導師",
     "recentDemandsTitle": "最近家長需求",
-    "recentDemandsSubtitle": "已脫敏展示（不含電話與微信），按提交時間由新到舊排列。",
+    "recentDemandsSubtitle": "",
     "recentDemandsDemoNote": "暫無可展示的匿名動態，以下為示例卡片；在 Supabase 執行 `parent-lead-public-feed.sql` 並有新留資後，會自動替換為真實匿名需求。",
     "recentDemandsDistrictUnknown": "地區待補充",
     "recentDemandsBudget": "預算參考：約 MOP {amount}/小時",
@@ -548,6 +555,7 @@
       "音樂": "音樂",
       "日文": "日文",
       "法文": "法文",
+      "德文": "德文",
       "西班牙文": "西班牙文",
       "Mathematics": "數學",
       "English": "英文",
@@ -568,6 +576,7 @@
       "PE": "體育",
       "Japanese": "日文",
       "French": "法文",
+      "German": "德文",
       "Putonghua": "普通話"
     },
     "gradeOptions": {

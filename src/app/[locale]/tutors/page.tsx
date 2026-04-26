@@ -63,7 +63,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     query.min ? Number(query.min) : 100,
     query.max ? Number(query.max) : 1000,
   );
-  const sort = query.sort ?? "newest";
+  const sort = query.sort ?? "rating";
 
   const filterFormKey = [
     subjects.join(","),

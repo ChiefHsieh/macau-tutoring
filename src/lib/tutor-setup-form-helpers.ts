@@ -32,6 +32,7 @@ export const teachableSubjectOptions = [
   "音樂",
   "日文",
   "法文",
+  "德文",
   "西班牙文",
 ] as const;
 

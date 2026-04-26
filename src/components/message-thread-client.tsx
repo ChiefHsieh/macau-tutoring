@@ -82,9 +82,9 @@ export function MessageThreadClient({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3 rounded-xl border bg-white p-4">
+      <div className="space-y-3 rounded-xl border border-[#1A2456] bg-[#0A0F35] p-4">
         {sorted.length === 0 ? (
-          <p className="text-sm text-zinc-600">{labels.placeholder}</p>
+          <p className="text-sm text-[#94A3B8]">{labels.placeholder}</p>
         ) : (
           <ul className="space-y-3">
             {sorted.map((m) => {
@@ -96,11 +96,13 @@ export function MessageThreadClient({
                 >
                   <div
                     className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                      mine ? "bg-[#000225] text-white" : "bg-zinc-100 text-[#1D2129]"
+                      mine
+                        ? "border border-[#E6C699]/30 bg-[#101742] text-white"
+                        : "border border-[#1A2456] bg-[#0D143D] text-[#E2E8F0]"
                     }`}
                   >
                     <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                    <p className={`mt-1 text-[10px] ${mine ? "text-white/80" : "text-zinc-500"}`}>
+                    <p className={`mt-1 text-[10px] ${mine ? "text-white/80" : "text-[#94A3B8]"}`}>
                       {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>

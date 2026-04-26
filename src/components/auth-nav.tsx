@@ -25,6 +25,9 @@ export async function AuthNav({ locale }: AuthNavProps) {
   return (
     <div className="flex items-center gap-3">
       <NotificationNavLink locale={locale} />
+      <Link href={`/${locale}/support`} className="rounded-md border border-[#2D4263] px-4 py-2 text-base text-[#F8F9FA] hover:bg-[#2D4263]">
+        {t("supportCenter")}
+      </Link>
       <Link href={`/${locale}/messages`} className="rounded-md border border-[#2D4263] px-4 py-2 text-base text-[#F8F9FA] hover:bg-[#2D4263]">
         {t("messages")}
       </Link>

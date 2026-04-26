@@ -49,7 +49,8 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
     ...tutor,
     latestDoc: docByTutorId.get(tutor.id) ?? null,
   }));
-  const pendingCount = queue.filter((item) => item.latestDoc && !item.is_verified).length;
+  const pendingQueue = queue.filter((item) => item.latestDoc && !item.is_verified);
+  const pendingCount = pendingQueue.length;
 
   return (
     <main className="space-y-6">
@@ -79,15 +80,14 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
           <p className="text-sm text-zinc-700">
             {t("adminVerificationQueueSummary", {
               pending: String(pendingCount),
-              total: String(queue.length),
             })}
           </p>
 
-          {queue.length === 0 ? (
+          {pendingQueue.length === 0 ? (
             <p className="ui-empty-state">{t("adminNoTutors")}</p>
           ) : (
             <ul className="space-y-3">
-              {queue.map((item) => (
+              {pendingQueue.map((item) => (
                 <li key={item.id} className="ui-list-row rounded-lg border border-zinc-200 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>

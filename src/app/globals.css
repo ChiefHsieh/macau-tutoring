@@ -289,3 +289,119 @@ section {
 .tutor-filters-drawer-panel {
   animation: tutor-filters-drawer-in 0.22s ease-out;
 }
+
+@keyframes shiny-rating-glint {
+  0%,
+  100% {
+    text-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.35),
+      0 0 0 rgba(255, 255, 255, 0);
+    filter: brightness(1);
+  }
+  45% {
+    text-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.35),
+      0 0 8px rgba(240, 214, 176, 0.45);
+    filter: brightness(1.08);
+  }
+  55% {
+    text-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.35),
+      0 0 14px rgba(255, 244, 214, 0.72);
+    filter: brightness(1.14);
+  }
+}
+
+.ui-shiny-rating {
+  animation: shiny-rating-glint 1.6s ease-in-out infinite !important;
+  animation-play-state: running !important;
+}
+
+.ui-shiny-rating-sweep {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.ui-shiny-rating-sweep::after {
+  content: "";
+  position: absolute;
+  inset: -40% -30%;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 247, 220, 0.65) 47%,
+    rgba(255, 255, 255, 0) 64%
+  );
+  transform: translateX(-170%);
+  pointer-events: none;
+  animation: shiny-rating-sweep 1.7s linear infinite !important;
+  animation-play-state: running !important;
+}
+
+@keyframes shiny-rating-sweep {
+  0%,
+  40% {
+    transform: translateX(-170%);
+  }
+  68%,
+  100% {
+    transform: translateX(170%);
+  }
+}
+
+@keyframes hero-brand-star-glint {
+  0%,
+  100% {
+    filter: brightness(1);
+    text-shadow:
+      0 0 0 rgba(255, 255, 255, 0),
+      0 0 8px rgba(230, 198, 153, 0.18);
+  }
+  35% {
+    filter: brightness(1.06);
+    text-shadow:
+      0 0 10px rgba(255, 245, 221, 0.45),
+      0 0 22px rgba(230, 198, 153, 0.32);
+  }
+  55% {
+    filter: brightness(1.14);
+    text-shadow:
+      0 0 14px rgba(255, 255, 255, 0.68),
+      0 0 30px rgba(230, 198, 153, 0.5);
+  }
+}
+
+.ui-hero-brand {
+  position: relative;
+  display: inline-block;
+  color: transparent;
+  background-image: linear-gradient(100deg, #fff6d6 8%, #ffe7a8 32%, #ffffff 50%, #e6c699 68%, #fff3d1 92%);
+  background-size: 100% 100%;
+  background-position: 50% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  animation:
+    hero-brand-star-glint 2.2s ease-in-out infinite,
+    hero-brand-breathe 2.6s ease-in-out infinite;
+}
+
+.ui-hero-brand-aurora {
+  overflow: hidden;
+}
+
+.ui-hero-brand-aurora::after {
+  content: none;
+}
+
+@keyframes hero-brand-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025);
+  }
+}
+

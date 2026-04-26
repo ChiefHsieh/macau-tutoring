@@ -2,7 +2,7 @@ import { gradeLevelValues, teachableSubjectOptions } from "@/lib/tutor-setup-for
 import { macauRegionValues, macauSubareasByRegion } from "@/lib/tutor-setup-form-helpers";
 
 /** Subjects shown as chips; values must match `tutor_subjects.subject` strings. */
-export const DIRECTORY_SUBJECT_OPTIONS = [...teachableSubjectOptions, "Putonghua"] as const;
+export const DIRECTORY_SUBJECT_OPTIONS = [...teachableSubjectOptions] as const;
 
 export type DirectorySubjectOption = (typeof DIRECTORY_SUBJECT_OPTIONS)[number];
 

@@ -136,8 +136,8 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       <input type="hidden" name="district" value={region} />
 
       <fieldset className="min-w-0 space-y-2 border-0 p-0">
-        <legend className="text-sm font-medium text-[#1D2129]">{t("subjectsLegend")}</legend>
-        <p className="text-xs text-zinc-500">{t("subjectsHint")}</p>
+        <legend className="text-sm font-medium text-white">{t("subjectsLegend")}</legend>
+        <p className="text-xs text-[#94A3B8]">{t("subjectsHint")}</p>
         <div className="flex flex-wrap gap-2">
           {DIRECTORY_SUBJECT_OPTIONS.map((opt) => (
             <label
@@ -163,7 +163,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       </fieldset>
 
       <fieldset className="min-w-0 space-y-2 border-0 p-0">
-        <legend className="text-sm font-medium text-[#1D2129]">{t("gradeLegend")}</legend>
+        <legend className="text-sm font-medium text-white">{t("gradeLegend")}</legend>
         <div className="flex flex-wrap gap-2">
           <label className={chipClass(!selectedGrade)}>
             <input
@@ -196,12 +196,12 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       </fieldset>
 
       <div className="space-y-1">
-        <p className="text-sm font-medium text-[#1D2129]">{t("budgetLegend")}</p>
+        <p className="text-sm font-medium text-white">{t("budgetLegend")}</p>
         <DualRangeBudget low={low} high={high} onLow={setLow} onHigh={setHigh} />
       </div>
 
       <fieldset className="space-y-2 border-0 p-0">
-        <legend className="text-sm font-medium text-[#1D2129]">{t("districtLegend")}</legend>
+        <legend className="text-sm font-medium text-white">{t("districtLegend")}</legend>
         <div className="flex flex-wrap gap-2">
           <label className={chipClass(!region)}>
             <input
@@ -235,7 +235,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
 
       {region ? (
         <fieldset className="space-y-2 border-0 p-0">
-          <legend className="text-sm font-medium text-[#1D2129]">{t("areaLegend")}</legend>
+          <legend className="text-sm font-medium text-white">{t("areaLegend")}</legend>
           <div className="flex flex-wrap gap-2">
             {macauSubareasByRegion[region as keyof typeof macauSubareasByRegion].map((area) => (
               <label

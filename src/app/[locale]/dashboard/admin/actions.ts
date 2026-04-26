@@ -38,6 +38,17 @@ export async function verifyTutorDocumentAction(formData: FormData) {
     redirect(`/${locale}/dashboard/admin?error=${encodeURIComponent(updateError.message)}`);
   }
 
+  // For invalid decision, remove current verification docs from queue so reviewed tutors disappear.
+  if (!isVerified) {
+    const { error: clearDocError } = await supabase
+      .from("tutor_verification_documents")
+      .delete()
+      .eq("tutor_id", tutorId);
+    if (clearDocError) {
+      redirect(`/${locale}/dashboard/admin?error=${encodeURIComponent(clearDocError.message)}`);
+    }
+  }
+
   const noticeTitle = isVerified ? "Verification approved" : "Verification rejected";
   const noticeBody = isVerified
     ? "Your tutor profile has been verified and now shows a verified badge."

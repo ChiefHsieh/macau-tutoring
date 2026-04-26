@@ -83,10 +83,9 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
             <h3 className="text-lg font-bold leading-snug tracking-tight text-[#0F2C59]">{tutor.display_name}</h3>
             <p className="text-sm text-zinc-600">{tutor.district}</p>
           </div>
-          <div className="text-right text-xs text-zinc-600">
-            <div className="font-semibold text-zinc-900">⭐ {Number(tutor.average_rating).toFixed(1)}</div>
-            <div>
-              {tutor.total_reviews} {labels.reviews}
+          <div className="text-right">
+            <div className="ui-shiny-rating ui-shiny-rating-sweep text-base font-bold text-[#E6C699] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">
+              ⭐ {Number(tutor.average_rating).toFixed(1)}
             </div>
           </div>
         </div>

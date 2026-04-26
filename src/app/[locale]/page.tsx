@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Activity, BookOpen, CalendarCheck2, Search, ShieldCheck, Star, Users } from "lucide-react";
+import { Activity, BookOpen, CalendarCheck2, GraduationCap, Search, ShieldCheck, Star, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
@@ -23,7 +23,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
 
   let tutorCount = 0;
   let subjectCount = 0;
-  let reviewCount = 0;
+  let studentCount = 0;
   let leadCount = 0;
   let verifiedTutorCount = 0;
   let activeLeadCount = 0;
@@ -63,7 +63,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
     const [
       { count: tutorCountResult },
       { count: subjectCountResult },
-      { count: reviewCountResult },
+      { count: studentCountResult },
       { count: leadCountResult },
       { count: verifiedTutorCountResult },
       { count: bookingMatchCountResult },
@@ -72,7 +72,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
     ] = await Promise.all([
       supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }),
       supabase.from("tutor_subjects").select("id", { head: true, count: "exact" }),
-      supabase.from("reviews").select("id", { head: true, count: "exact" }),
+      supabase.from("users").select("id", { head: true, count: "exact" }).eq("role", "student"),
       supabase.from("parent_leads").select("id", { head: true, count: "exact" }),
       supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }).eq("is_verified", true),
       supabase.from("bookings").select("id", { head: true, count: "exact" }),
@@ -89,7 +89,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
 
     tutorCount = tutorCountResult ?? 0;
     subjectCount = subjectCountResult ?? 0;
-    reviewCount = reviewCountResult ?? 0;
+    studentCount = studentCountResult ?? 0;
     leadCount = leadCountResult ?? 0;
     verifiedTutorCount = verifiedTutorCountResult ?? 0;
     bookingMatchCount = bookingMatchCountResult ?? 0;
@@ -103,21 +103,39 @@ export default async function LandingPage({ params }: LandingPageProps) {
 
     const featuredIds = featured.map((item) => item.id);
     if (featuredIds.length > 0) {
-      const { data: subjectLines } = await supabase
-        .from("tutor_subjects")
-        .select("tutor_id, subject, grade_level")
-        .in("tutor_id", featuredIds);
+      const [{ data: subjectLines }, { data: reviewLines }] = await Promise.all([
+        supabase
+          .from("tutor_subjects")
+          .select("tutor_id, subject, grade_level")
+          .in("tutor_id", featuredIds),
+        supabase
+          .from("reviews")
+          .select("tutor_id, rating")
+          .in("tutor_id", featuredIds),
+      ]);
 
       const map = new Map<string, string[]>();
+      const reviewStatsMap = new Map<string, { total: number; avg: number }>();
       (subjectLines ?? []).forEach((row) => {
         const label = `${row.subject} (${row.grade_level})`;
         const list = map.get(row.tutor_id) ?? [];
         list.push(label);
         map.set(row.tutor_id, list);
       });
+      (reviewLines ?? []).forEach((row) => {
+        const current = reviewStatsMap.get(row.tutor_id) ?? { total: 0, avg: 0 };
+        const nextTotal = current.total + 1;
+        const nextAvg = (current.avg * current.total + Number(row.rating ?? 0)) / nextTotal;
+        reviewStatsMap.set(row.tutor_id, { total: nextTotal, avg: nextAvg });
+      });
 
       featured.forEach((row) => {
         row.subjectSummary = (map.get(row.id) ?? []).slice(0, 3).join(" · ");
+        const realtime = reviewStatsMap.get(row.id);
+        if (realtime) {
+          row.average_rating = realtime.avg;
+          row.total_reviews = realtime.total;
+        }
       });
     }
 
@@ -171,8 +189,14 @@ export default async function LandingPage({ params }: LandingPageProps) {
                 <Link href="/en">{tHome("langEn")}</Link>
               </Button>
             </div>
-            <h1 className="text-3xl font-bold leading-tight tracking-tight text-[#F8F9FA] md:text-5xl">{t("heroTitle")}</h1>
+            <h1
+              className="ui-hero-brand ui-hero-brand-aurora font-extrabold leading-tight tracking-tight text-[#F8F9FA]"
+              style={{ fontSize: "clamp(3.75rem, 6.67vw, 6rem)" }}
+            >
+              {t("heroTitle")}
+            </h1>
             <p className="text-base font-normal leading-relaxed text-[#E2E8F0] md:text-lg">{t("heroSubtitle")}</p>
+            <p className="text-sm font-normal leading-relaxed text-[#E2E8F0] md:text-base">{t("heroBody")}</p>
             <ul className="list-inside list-disc space-y-1 text-sm font-normal leading-relaxed text-[#E2E8F0] md:text-base">
               <li>{t("heroValue1")}</li>
               <li>{t("heroValue2")}</li>
@@ -271,9 +295,9 @@ export default async function LandingPage({ params }: LandingPageProps) {
         </Card>
         <Card className="border-dashed">
           <CardContent className="pt-5">
-            <Star className="h-5 w-5 text-zinc-400" />
-            <p className="text-sm text-zinc-600">{t("statReviews")}</p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-800">{reviewCount}</p>
+            <GraduationCap className="h-5 w-5 text-zinc-400" />
+            <p className="text-sm text-zinc-600">{t("statStudents")}</p>
+            <p className="mt-2 text-2xl font-semibold text-zinc-800">{studentCount}</p>
           </CardContent>
         </Card>
         <Card className="border-dashed">

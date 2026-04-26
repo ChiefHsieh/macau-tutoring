@@ -77,6 +77,7 @@
     "dashboard": "Dashboard",
     "logout": "Logout",
     "messages": "Messages",
+    "supportCenter": "Support Center",
     "notificationsAria": "Notifications"
   },
   "Auth": {
@@ -161,7 +162,7 @@
     "tutorVerifiedStatus": "Verification status: verified by admin",
     "tutorPendingStatus": "Verification status: pending admin review",
     "adminVerificationQueueTitle": "Tutor verification queue",
-    "adminVerificationQueueSummary": "Pending review: {pending} / {total} tutor profiles",
+    "adminVerificationQueueSummary": "Pending review: {pending} tutor profiles",
     "adminNoTutors": "No tutor profiles yet.",
     "adminVerified": "Verified",
     "adminNotVerified": "Not verified",
@@ -208,11 +209,15 @@
     "unknownUser": "User",
     "threadTitle": "Chat with {name}",
     "threadSubtitle": "Messages are private. Be careful sharing personal contact before platform rules allow it.",
+    "supportThreadTitle": "Support Center",
+    "supportThreadSubtitle": "This is an official support thread. Describe your issue directly here.",
+    "supportBadge": "Official Support",
     "backToInbox": "All threads",
     "composePlaceholder": "Write a message…",
     "send": "Send",
     "fromBookingBanner": "Your booking was created. You can continue the conversation below — the tutor also received a booking alert.",
-    "missingPeer": "This user profile is not ready for messaging yet."
+    "missingPeer": "This user profile is not ready for messaging yet.",
+    "supportManagerMissing": "Support manager is not configured. Please set SUPPORT_MANAGER_USER_ID in environment variables."
   },
   "TutorSetup": {
     "title": "Tutor Multi-step Profile Setup",
@@ -387,11 +392,12 @@
     "reviewPostedToast": "Review submitted. Jumped to the latest public review section."
   },
   "Landing": {
-    "heroTitle": "Find verified Macau tutors in 5 minutes | Lower fees, more transparency",
-    "heroSubtitle": "Submit a lead for WeChat follow-up, or browse tutors with filters and book directly.",
-    "heroValue1": "Smart filters: grade, subject, district, and budget to shortlist fast",
-    "heroValue2": "In-person and online — each tutor’s service type is visible up front",
-    "heroValue3": "After a lead, we aim to follow up within ~24h (timing may vary by demand)",
+    "heroTitle": "A*Marketplace",
+    "heroSubtitle": "Transparent, efficient, zero agency fee",
+    "heroBody": "Redefine the traditional tutoring communication model by letting parents connect directly with quality tutors, saving both time and money.",
+    "heroValue1": "Strict verification: every tutor goes through identity and qualification checks",
+    "heroValue2": "Full transparency: education, experience, and ratings at a glance",
+    "heroValue3": "Self-service booking: choose the right tutor and send booking requests directly",
     "heroIllustrationCaption": "Clarity, trust, and a smoother booking flow for families and tutors.",
     "ctaBrowse": "Browse tutors",
     "ctaAuth": "Sign in / Sign up",
@@ -413,6 +419,7 @@
     "statMatches": "Bookings / matches (total)",
     "statTutors": "Tutors onboarded",
     "statSubjects": "Subject rows",
+    "statStudents": "Students onboarded",
     "statReviews": "Reviews",
     "statLeads": "Parent leads",
     "howParentsTitle": "For parents",
@@ -548,6 +555,7 @@
       "音樂": "Music",
       "日文": "Japanese",
       "法文": "French",
+      "德文": "German",
       "西班牙文": "Spanish",
       "Mathematics": "Mathematics",
       "English": "English",
@@ -568,6 +576,7 @@
       "PE": "PE",
       "Japanese": "Japanese",
       "French": "French",
+      "German": "German",
       "Putonghua": "Putonghua"
     },
     "gradeOptions": {
