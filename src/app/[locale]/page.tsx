@@ -191,7 +191,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
             </div>
             <h1
               className="ui-hero-brand ui-hero-brand-aurora font-extrabold leading-tight tracking-tight text-[#F8F9FA]"
-              style={{ fontSize: "clamp(3.75rem, 6.67vw, 6rem)" }}
+              style={{ fontSize: "clamp(2.4rem, 11vw, 3.6rem)" }}
             >
               {t("heroTitle")}
             </h1>
