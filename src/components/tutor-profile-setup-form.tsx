@@ -513,8 +513,8 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
         <Badge>
           {t("step")} {step + 1} / 5
         </Badge>
-        <Tabs value={`step-${step}`} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs value={`step-${step}`} className="w-full overflow-x-auto">
+          <TabsList className="grid min-w-[360px] grid-cols-5 md:min-w-0 md:w-full">
             {[0, 1, 2, 3, 4].map((idx) => (
               <TabsTrigger key={idx} value={`step-${idx}`} disabled>
                 {idx + 1}
@@ -973,22 +973,22 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
         </Card>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3 pt-1">
+      <div className="flex flex-wrap items-center gap-3 pt-1 md:flex-nowrap">
         {submitError ? (
           <p className="w-full rounded-md bg-red-100 px-3 py-2 text-sm" style={{ color: "#000000" }}>
             {submitError}
           </p>
         ) : null}
-        <Button type="button" onClick={prevStep} variant="outline" disabled={step === 0 || isSaving}>
+        <Button type="button" onClick={prevStep} variant="outline" disabled={step === 0 || isSaving} className="w-[48%] md:w-auto">
           {t("previous")}
         </Button>
 
         {step < 4 ? (
-          <Button type="button" onClick={nextStep} disabled={isSaving}>
+          <Button type="button" onClick={nextStep} disabled={isSaving} className="w-[48%] md:w-auto">
             {t("next")}
           </Button>
         ) : (
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} className="w-[48%] md:w-auto">
             {isSaving ? t("saving") : t("submit")}
           </Button>
         )}
