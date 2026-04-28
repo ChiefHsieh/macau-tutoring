@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
 import { formatRelativeTimeShort } from "@/lib/format-relative-time";
+import { teachableSubjectOptions } from "@/lib/tutor-setup-form-helpers";
 import { FeaturedTutorCard } from "@/components/featured-tutor-card";
 import { RecentDemandSection, type RecentDemandCardModel } from "@/components/recent-demand-section";
 import { LandingSiteFooter } from "@/components/landing-site-footer";
@@ -22,9 +23,9 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const tHome = await getTranslations("Home");
 
   let tutorCount = 0;
-  let subjectCount = 0;
+  let subjectCount = teachableSubjectOptions.length;
   let studentCount = 0;
-  let leadCount = 0;
+  let reviewActivityCount = 0;
   let verifiedTutorCount = 0;
   let activeLeadCount = 0;
   let bookingMatchCount = 0;
@@ -62,21 +63,19 @@ export default async function LandingPage({ params }: LandingPageProps) {
 
     const [
       { count: tutorCountResult },
-      { count: subjectCountResult },
       { count: studentCountResult },
-      { count: leadCountResult },
+      { count: reviewActivityCountResult },
       { count: verifiedTutorCountResult },
       { count: bookingMatchCountResult },
       { count: activeLeadCountResult },
       { data: featuredRows },
     ] = await Promise.all([
       supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }),
-      supabase.from("tutor_subjects").select("id", { head: true, count: "exact" }),
       supabase.from("users").select("id", { head: true, count: "exact" }).eq("role", "student"),
-      supabase.from("parent_leads").select("id", { head: true, count: "exact" }),
+      supabase.from("reviews").select("id", { head: true, count: "exact" }),
       supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }).eq("is_verified", true),
       supabase.from("bookings").select("id", { head: true, count: "exact" }),
-      supabase.from("parent_leads").select("id", { head: true, count: "exact" }).gte("created_at", sinceIso),
+      supabase.from("bookings").select("id", { head: true, count: "exact" }).gte("created_at", sinceIso),
       supabase
         .from("tutor_profiles")
         .select(
@@ -88,9 +87,8 @@ export default async function LandingPage({ params }: LandingPageProps) {
     ]);
 
     tutorCount = tutorCountResult ?? 0;
-    subjectCount = subjectCountResult ?? 0;
     studentCount = studentCountResult ?? 0;
-    leadCount = leadCountResult ?? 0;
+    reviewActivityCount = reviewActivityCountResult ?? 0;
     verifiedTutorCount = verifiedTutorCountResult ?? 0;
     bookingMatchCount = bookingMatchCountResult ?? 0;
     activeLeadCount = activeLeadCountResult ?? 0;
@@ -117,9 +115,12 @@ export default async function LandingPage({ params }: LandingPageProps) {
       const map = new Map<string, string[]>();
       const reviewStatsMap = new Map<string, { total: number; avg: number }>();
       (subjectLines ?? []).forEach((row) => {
-        const label = `${row.subject} (${row.grade_level})`;
+        const label = row.subject?.trim() ?? "";
+        if (!label) return;
         const list = map.get(row.tutor_id) ?? [];
-        list.push(label);
+        if (!list.includes(label)) {
+          list.push(label);
+        }
         map.set(row.tutor_id, list);
       });
       (reviewLines ?? []).forEach((row) => {
@@ -302,9 +303,9 @@ export default async function LandingPage({ params }: LandingPageProps) {
         </Card>
         <Card className="border-dashed">
           <CardContent className="pt-5">
-            <CalendarCheck2 className="h-5 w-5 text-zinc-400" />
+            <Star className="h-5 w-5 text-zinc-400" />
             <p className="text-sm text-zinc-600">{t("statLeads")}</p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-800">{leadCount}</p>
+            <p className="mt-2 text-2xl font-semibold text-zinc-800">{reviewActivityCount}</p>
           </CardContent>
         </Card>
       </section>

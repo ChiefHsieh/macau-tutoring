@@ -166,9 +166,12 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   const subjectMap = new Map<string, string[]>();
   const reviewStatsMap = new Map<string, { total: number; avg: number }>();
   (subjectRows ?? []).forEach((row) => {
-    const label = `${row.subject} (${row.grade_level})`;
+    const label = row.subject?.trim() ?? "";
+    if (!label) return;
     const list = subjectMap.get(row.tutor_id) ?? [];
-    list.push(label);
+    if (!list.includes(label)) {
+      list.push(label);
+    }
     subjectMap.set(row.tutor_id, list);
   });
   (reviewRatingRows ?? []).forEach((row) => {
