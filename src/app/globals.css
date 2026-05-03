@@ -428,7 +428,8 @@ section {
   background: rgba(0, 0, 0, 0.45);
   opacity: 0;
   pointer-events: none;
-  z-index: 39;
+  /* Above all page content (hero title, cards, z-50 filters); drawer sits in header DOM */
+  z-index: 10000;
   transition: opacity 0.24s ease;
 }
 
@@ -436,7 +437,7 @@ section {
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 40;
+  z-index: 10001;
   width: min(84vw, 340px);
   height: 100dvh;
   background: #0a0f35;
@@ -556,6 +557,13 @@ section {
 
   h1.ui-hero-brand {
     line-height: 1.06;
+  }
+
+  /* Featured tutor cards: keep headshot cropped (global img { height: auto } fights fixed media box) */
+  .featured-tutor-card-media img {
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
   }
 }
 

@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import Link from "next/link";
 import { AuthNav } from "@/components/auth-nav";
 import { AppToaster } from "@/components/app-toaster";
+import { NavigationTopLoader } from "@/components/navigation-top-loader";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <NavigationTopLoader />
       <div className="min-h-screen w-full bg-[#000225]">
         <div className="mobile-page-shell mx-auto flex w-full max-w-[1200px] flex-col gap-8 bg-[#000225] p-4 md:p-6">
           <header className="flex items-start justify-between gap-4 rounded-xl border border-[#2D4263] bg-[#000225] px-4 py-4 shadow-md shadow-black/20 backdrop-blur-sm md:px-6 md:py-6">

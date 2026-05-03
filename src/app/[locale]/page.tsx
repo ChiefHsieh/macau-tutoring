@@ -250,7 +250,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
           </Button>
         }
       >
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {featured.map((tutor) => (
             <FeaturedTutorCard
               key={tutor.id}
