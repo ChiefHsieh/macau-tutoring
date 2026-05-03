@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -106,6 +107,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
   const t = useTranslations("Directory");
   const tSubjects = useTranslations("Directory.subjectOptions");
   const tGrades = useTranslations("Directory.gradeOptions");
+  const router = useRouter();
   const formAction = `/${locale}/tutors`;
 
   const [low, setLow] = useState(defaults.min);
@@ -114,6 +116,21 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(defaults.subjects);
   const [selectedGrade, setSelectedGrade] = useState<string>(defaults.grade);
   const [selectedAreas, setSelectedAreas] = useState<string[]>(defaults.areas);
+  const [sort, setSort] = useState(defaults.sort);
+
+  function applyFiltersAndNavigate() {
+    const params = new URLSearchParams();
+    params.set("min", String(low));
+    params.set("max", String(high));
+    if (region) params.set("district", region);
+    selectedSubjects.forEach((s) => params.append("subject", s));
+    if (selectedGrade) params.set("grade", selectedGrade);
+    selectedAreas.forEach((a) => params.append("area", a));
+    params.set("sort", sort);
+    const qs = params.toString();
+    router.push(`${formAction}${qs ? `?${qs}` : ""}`);
+    onApply?.();
+  }
 
   const chipBaseClass =
     "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors";
@@ -127,14 +144,11 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       action={formAction}
       method="get"
       className="grid gap-4"
-      onSubmit={() => {
-        onApply?.();
+      onSubmit={(e) => {
+        e.preventDefault();
+        applyFiltersAndNavigate();
       }}
     >
-      <input type="hidden" name="min" value={low} />
-      <input type="hidden" name="max" value={high} />
-      <input type="hidden" name="district" value={region} />
-
       <fieldset className="min-w-0 space-y-2 border-0 p-0">
         <legend className="text-sm font-medium text-white">{t("subjectsLegend")}</legend>
         <p className="text-xs text-[#94A3B8]">{t("subjectsHint")}</p>
@@ -261,7 +275,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
         </fieldset>
       ) : null}
 
-      <Select name="sort" defaultValue={defaults.sort}>
+      <Select name="sort" value={sort} onChange={(e) => setSort(e.target.value)}>
         <option value="newest">{t("sortNewest")}</option>
         <option value="price">{t("sortPrice")}</option>
         <option value="rating">{t("sortRating")}</option>
