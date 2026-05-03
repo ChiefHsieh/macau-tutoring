@@ -15,6 +15,7 @@ import {
   type Resolver,
 } from "react-hook-form";
 import { z } from "zod";
+import { Plus } from "lucide-react";
 import { saveTutorProfileAction } from "@/app/[locale]/tutor/profile/setup/actions";
 import { trackEvent } from "@/lib/analytics";
 import {
@@ -801,8 +802,9 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
               ))}
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
+                variant="default"
+                size="default"
+                className="w-full gap-2 shadow-md sm:w-auto"
                 onClick={() =>
                   appendEducation({
                     degree_type: "",
@@ -812,6 +814,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                   })
                 }
               >
+                <Plus className="h-4 w-4 shrink-0" aria-hidden />
                 {t("addEducation")}
               </Button>
               {errors.education_entries?.root?.message ? (
@@ -846,13 +849,14 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
             </label>
             <label className="text-sm">
               {t("profilePhoto")}
+              <input type="hidden" {...register("profile_photo")} />
               <div className="mt-2 space-y-3 rounded-md border border-[#1A2456] bg-[#0A0F35] p-3">
                 <input
                   ref={avatarInputRef}
                   type="file"
                   accept="image/png,image/jpeg,image/jpg"
                   onChange={handleAvatarFileSelect}
-                  className="block w-full text-sm text-[#4E5969] file:mr-3 file:rounded-md file:border file:bg-white file:px-3 file:py-2 file:text-sm"
+                  className="ui-file-input block w-full cursor-pointer text-sm text-zinc-300"
                 />
                 {avatarSrc ? (
                   <div className="grid gap-3 md:grid-cols-2">
@@ -919,8 +923,8 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                 </div>
                 {avatarUploadError ? <p className="text-xs text-red-600">{avatarUploadError}</p> : null}
                 <p className="text-xs text-zinc-500">{t("avatarHint")}</p>
+                <p className="text-xs text-zinc-500">{t("avatarReplaceHint")}</p>
               </div>
-              <Input {...register("profile_photo")} className="mt-2 w-full" readOnly />
               {errors.profile_photo ? (
                 <p className="mt-1 text-xs text-red-600">{errors.profile_photo.message as string}</p>
               ) : null}
@@ -932,6 +936,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
       {step === 4 ? (
         <Card>
           <CardContent className="grid gap-4 pt-6">
+            <input type="hidden" {...register("verification_document")} />
             <p className="text-sm text-[#4E5969]">{t("verificationPdfIntro")}</p>
             <p className="text-xs text-zinc-600">{t("verificationSampleNote")}</p>
             <label className="text-sm">
@@ -955,27 +960,19 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                 ref={pdfInputRef}
                 type="file"
                 accept="application/pdf"
-                className="block w-full text-sm text-[#4E5969] file:mr-3 file:rounded-md file:border file:bg-white file:px-3 file:py-2 file:text-sm"
+                className="ui-file-input block w-full cursor-pointer text-sm text-zinc-300"
               />
               <div className="flex flex-wrap items-center gap-2">
                 <Button type="button" variant="outline" disabled={isUploadingPdf} onClick={handlePdfUpload}>
                   {isUploadingPdf ? t("uploadingPdf") : t("uploadPdf")}
                 </Button>
-                {(watchedVerification ?? "").trim().length >= 8 ? (
-                  <Badge variant="success">{t("uploadLinkedBadge")}</Badge>
-                ) : null}
               </div>
               {uploadError ? <p className="text-xs text-red-600">{uploadError}</p> : null}
+              <p className="text-xs text-zinc-500">{t("verificationPdfReplaceHint")}</p>
             </div>
-            <label className="text-sm">
-              {t("verificationDocumentUrl")}
-              <Input {...register("verification_document")} className="mt-1 w-full" />
-              {errors.verification_document && (touchedFields.verification_document || isSubmitted) ? (
-                <p className="mt-1 text-xs text-red-600">{errors.verification_document.message}</p>
-              ) : null}
-            </label>
-            <p className="text-xs text-zinc-500">{t("privateNotice")}</p>
-            <p className="text-xs text-zinc-500">{t("verificationBucketHint")}</p>
+            {errors.verification_document && (touchedFields.verification_document || isSubmitted) ? (
+              <p className="mt-1 text-xs text-red-600">{errors.verification_document.message}</p>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}

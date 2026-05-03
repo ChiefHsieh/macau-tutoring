@@ -1,10 +1,12 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 
 export type AppRole = "tutor" | "student" | "admin";
 
-export async function getCurrentUser() {
+/** Deduped within one RSC request (e.g. AuthNav + NotificationNavLink both call profile). */
+export const getCurrentUser = cache(async () => {
   if (!hasSupabaseEnv()) return null;
 
   const supabase = await createClient();
@@ -12,9 +14,10 @@ export async function getCurrentUser() {
   if (error) return null;
 
   return data.user;
-}
+});
 
-export async function getCurrentProfile() {
+/** Deduped within one RSC request; avoids duplicate Supabase round-trips on navigation shell. */
+export const getCurrentProfile = cache(async () => {
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -28,7 +31,7 @@ export async function getCurrentProfile() {
   return data as
     | { id: string; role: AppRole; full_name: string; email: string }
     | null;
-}
+});
 
 export async function requireUser(locale: string) {
   const user = await getCurrentUser();

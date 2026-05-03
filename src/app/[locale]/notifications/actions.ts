@@ -4,6 +4,28 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+/** Clears the header bell badge: mark every unread row read, then go to the list. */
+export async function markAllNotificationsReadAction(formData: FormData) {
+  const locale = String(formData.get("locale") ?? "zh-HK");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect(`/${locale}/auth`);
+  }
+
+  await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .eq("is_read", false);
+
+  revalidatePath(`/${locale}`, "layout");
+  revalidatePath(`/${locale}/notifications`);
+  redirect(`/${locale}/notifications`);
+}
+
 export async function markNotificationReadAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const locale = String(formData.get("locale") ?? "zh-HK");

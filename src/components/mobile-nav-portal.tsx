@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { signOutAction } from "@/app/[locale]/auth/actions";
+import { markAllNotificationsReadAction } from "@/app/[locale]/notifications/actions";
 
 /** Must sit above all in-page layers (cards, loaders ~9990). Portal breaks header stacking limits. */
 const Z_OVERLAY = 2147483646;
@@ -121,13 +122,15 @@ export function MobileNavPortal({ locale, variant, labels }: MobileNavPortalProp
                     >
                       {labels.faq}
                     </Link>
-                    <Link
-                      href={`/${locale}/notifications`}
-                      className="mobile-nav-link"
-                      onClick={() => setOpen(false)}
-                    >
-                      {labels.notificationsAria ?? ""}
-                    </Link>
+                    <form action={markAllNotificationsReadAction}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <button
+                        type="submit"
+                        className="mobile-nav-link w-full cursor-pointer text-left"
+                      >
+                        {labels.notificationsAria ?? ""}
+                      </button>
+                    </form>
                     <Link
                       href={`/${locale}/support`}
                       className="mobile-nav-link"

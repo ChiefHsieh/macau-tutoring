@@ -11,7 +11,7 @@ export function NavigationTopLoader() {
     <NextTopLoader
       color="#E6C699"
       height={3}
-      showSpinner
+      showSpinner={false}
       speed={200}
       crawlSpeed={200}
       shadow="0 0 12px rgba(230, 198, 153, 0.45)"
