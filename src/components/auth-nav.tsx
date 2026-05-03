@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Menu } from "lucide-react";
 import { getCurrentProfile } from "@/lib/auth";
 import { signOutAction } from "@/app/[locale]/auth/actions";
 import { NotificationNavLink } from "@/components/notification-nav-link";
+import { MobileNavPortal } from "@/components/mobile-nav-portal";
 
 type AuthNavProps = {
   locale: string;
@@ -14,7 +14,6 @@ export async function AuthNav({ locale }: AuthNavProps) {
   const profile = await getCurrentProfile();
 
   if (!profile) {
-    const drawerId = `mobile-nav-toggle-guest-${locale}`;
     return (
       <>
         <div className="hidden items-center gap-3 md:flex">
@@ -22,38 +21,19 @@ export async function AuthNav({ locale }: AuthNavProps) {
             {t("login")}
           </Link>
         </div>
-        <div className="mobile-nav-drawer relative md:hidden">
-          <input id={drawerId} type="checkbox" className="mobile-nav-toggle peer sr-only" />
-          <label htmlFor={drawerId} className="mobile-nav-trigger">
-            <Menu className="h-5 w-5" />
-          </label>
-          <label htmlFor={drawerId} className="mobile-nav-overlay" aria-label="Close menu" />
-          <div className="mobile-nav-panel">
-            <div className="flex justify-end">
-              <label htmlFor={drawerId} className="mobile-nav-close" aria-label="Close menu">
-                ×
-              </label>
-            </div>
-            <nav className="flex flex-col gap-3">
-              <Link href={`/${locale}/tutors`} className="mobile-nav-link">
-                {t("tutors")}
-              </Link>
-              <Link href={`/${locale}/faq`} className="mobile-nav-link">
-                {t("faq")}
-              </Link>
-            </nav>
-            <div className="mt-auto flex flex-col gap-3 border-t border-[#1A2456] pt-4">
-              <Link href={`/${locale}/auth`} className="rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-3 text-center text-base text-[#0F2C59]">
-                {t("login")}
-              </Link>
-            </div>
-          </div>
-        </div>
+        <MobileNavPortal
+          locale={locale}
+          variant="guest"
+          labels={{
+            tutors: t("tutors"),
+            faq: t("faq"),
+            login: t("login"),
+          }}
+        />
       </>
     );
   }
 
-  const drawerId = `mobile-nav-toggle-auth-${locale}`;
   return (
     <>
       <div className="hidden items-center gap-3 md:flex">
@@ -73,48 +53,19 @@ export async function AuthNav({ locale }: AuthNavProps) {
         </form>
       </div>
 
-      <div className="mobile-nav-drawer relative md:hidden">
-        <input id={drawerId} type="checkbox" className="mobile-nav-toggle peer sr-only" />
-        <label htmlFor={drawerId} className="mobile-nav-trigger">
-          <Menu className="h-5 w-5" />
-        </label>
-        <label htmlFor={drawerId} className="mobile-nav-overlay" aria-label="Close menu" />
-        <div className="mobile-nav-panel">
-          <div className="flex justify-end">
-            <label htmlFor={drawerId} className="mobile-nav-close" aria-label="Close menu">
-              ×
-            </label>
-          </div>
-          <nav className="flex flex-col gap-3">
-            <Link href={`/${locale}/tutors`} className="mobile-nav-link">
-              {t("tutors")}
-            </Link>
-            <Link href={`/${locale}/faq`} className="mobile-nav-link">
-              {t("faq")}
-            </Link>
-            <Link href={`/${locale}/notifications`} className="mobile-nav-link">
-              {t("notificationsAria")}
-            </Link>
-            <Link href={`/${locale}/support`} className="mobile-nav-link">
-              {t("supportCenter")}
-            </Link>
-            <Link href={`/${locale}/messages`} className="mobile-nav-link">
-              {t("messages")}
-            </Link>
-          </nav>
-          <div className="mt-auto flex flex-col gap-3 border-t border-[#1A2456] pt-4">
-            <Link href={`/${locale}/dashboard`} className="rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-3 text-center text-base text-[#0F2C59]">
-              {t("dashboard")}
-            </Link>
-            <form action={signOutAction}>
-              <input type="hidden" name="locale" value={locale} />
-              <button className="w-full rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-3 text-base text-[#0F2C59]">
-                {t("logout")}
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
+      <MobileNavPortal
+        locale={locale}
+        variant="auth"
+        labels={{
+          tutors: t("tutors"),
+          faq: t("faq"),
+          notificationsAria: t("notificationsAria"),
+          supportCenter: t("supportCenter"),
+          messages: t("messages"),
+          dashboard: t("dashboard"),
+          logout: t("logout"),
+        }}
+      />
     </>
   );
 }
