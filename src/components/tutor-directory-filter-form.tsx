@@ -133,7 +133,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
   }
 
   const chipBaseClass =
-    "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors";
+    "inline-flex min-w-0 max-w-full cursor-pointer items-center gap-1.5 break-words rounded-full border px-3 py-1.5 text-sm leading-snug transition-colors [word-break:break-word]";
   const chipClass = (active: boolean) =>
     active
       ? `${chipBaseClass} border-[#E6C699] bg-[#E6C699] text-[#000225]`
@@ -143,7 +143,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
     <form
       action={formAction}
       method="get"
-      className="grid gap-4"
+      className="grid min-w-0 max-w-full gap-4 overflow-x-hidden"
       onSubmit={(e) => {
         e.preventDefault();
         applyFiltersAndNavigate();
@@ -152,7 +152,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       <fieldset className="min-w-0 space-y-2 border-0 p-0">
         <legend className="text-sm font-medium text-white">{t("subjectsLegend")}</legend>
         <p className="text-xs text-[#94A3B8]">{t("subjectsHint")}</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 max-w-full flex-wrap gap-2">
           {DIRECTORY_SUBJECT_OPTIONS.map((opt) => (
             <label
               key={opt}
@@ -178,7 +178,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
 
       <fieldset className="min-w-0 space-y-2 border-0 p-0">
         <legend className="text-sm font-medium text-white">{t("gradeLegend")}</legend>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 max-w-full flex-wrap gap-2">
           <label className={chipClass(!selectedGrade)}>
             <input
               type="radio"
@@ -216,7 +216,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
 
       <fieldset className="space-y-2 border-0 p-0">
         <legend className="text-sm font-medium text-white">{t("districtLegend")}</legend>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 max-w-full flex-wrap gap-2">
           <label className={chipClass(!region)}>
             <input
               type="radio"
@@ -250,7 +250,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       {region ? (
         <fieldset className="space-y-2 border-0 p-0">
           <legend className="text-sm font-medium text-white">{t("areaLegend")}</legend>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 max-w-full flex-wrap gap-2">
             {macauSubareasByRegion[region as keyof typeof macauSubareasByRegion].map((area) => (
               <label
                 key={area}

@@ -48,7 +48,7 @@ export function TutorFiltersMobileDrawer({ locale, filterKey, defaults }: TutorF
       </Button>
 
       {open ? (
-        <div className="fixed inset-0 z-50" role="presentation">
+        <div className="fixed inset-0 z-50 overflow-x-hidden" role="presentation">
           <button
             type="button"
             className="absolute inset-0 bg-black/50"
@@ -56,7 +56,7 @@ export function TutorFiltersMobileDrawer({ locale, filterKey, defaults }: TutorF
             onClick={() => setOpen(false)}
           />
           <div
-            className="tutor-filters-drawer-panel absolute left-0 right-0 top-0 z-10 max-h-[min(88vh,720px)] overflow-y-auto rounded-b-2xl border-x border-b border-[#F2F3F5] bg-white shadow-2xl"
+            className="tutor-filters-drawer-panel absolute left-0 right-0 top-0 z-10 max-h-[min(88vh,720px)] w-full min-w-0 max-w-full touch-pan-y overflow-y-auto overflow-x-hidden overscroll-y-contain rounded-b-2xl border-x border-b border-[#F2F3F5] bg-white shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tutor-filter-drawer-title"
@@ -77,7 +77,7 @@ export function TutorFiltersMobileDrawer({ locale, filterKey, defaults }: TutorF
               </Button>
             </div>
 
-            <div className="px-4 pb-6 pt-4">
+            <div className="min-w-0 max-w-full overflow-x-hidden px-4 pb-6 pt-4">
               <TutorDirectoryFilterForm
                 key={filterKey}
                 locale={locale}
