@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createBookingAction } from "@/app/[locale]/booking/actions";
 import { trackEvent } from "@/lib/analytics";
 import { Select } from "@/components/ui/select";
@@ -8,6 +8,31 @@ import { Button } from "@/components/ui/button";
 
 type Slot = { start_time: string; end_time: string };
 type TutorSubject = { subject: string; grade_level: string };
+
+function uniqueSubjectsInOrder(rows: TutorSubject[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of rows) {
+    if (!seen.has(r.subject)) {
+      seen.add(r.subject);
+      out.push(r.subject);
+    }
+  }
+  return out;
+}
+
+function gradeLevelsForSubject(rows: TutorSubject[], subject: string): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of rows) {
+    if (r.subject !== subject) continue;
+    if (!seen.has(r.grade_level)) {
+      seen.add(r.grade_level);
+      out.push(r.grade_level);
+    }
+  }
+  return out;
+}
 
 type BookingCreateFormProps = {
   locale: string;
@@ -28,6 +53,22 @@ export function BookingCreateForm({
   subjects,
   labels,
 }: BookingCreateFormProps) {
+  const subjectOptions = useMemo(() => uniqueSubjectsInOrder(subjects), [subjects]);
+
+  const [subject, setSubject] = useState(subjectOptions[0] ?? "");
+  const gradeOptions = useMemo(() => gradeLevelsForSubject(subjects, subject), [subjects, subject]);
+  const [gradeLevel, setGradeLevel] = useState(gradeOptions[0] ?? "");
+
+  useEffect(() => {
+    const subs = uniqueSubjectsInOrder(subjects);
+    setSubject((prev) => (subs.includes(prev) ? prev : subs[0] ?? ""));
+  }, [subjects]);
+
+  useEffect(() => {
+    const grades = gradeLevelsForSubject(subjects, subject);
+    setGradeLevel((prev) => (grades.includes(prev) ? prev : grades[0] ?? ""));
+  }, [subjects, subject]);
+
   const [slotValue, setSlotValue] = useState(
     slots[0] ? `${slots[0].start_time}|${slots[0].end_time}` : "",
   );
@@ -46,18 +87,18 @@ export function BookingCreateForm({
       <input type="hidden" name="tutor_id" value={tutorId} />
       <input type="hidden" name="session_date" value={sessionDate} />
 
-      <Select name="subject">
-        {subjects.map((s) => (
-          <option key={`${s.subject}-${s.grade_level}`} value={s.subject}>
-            {s.subject} ({s.grade_level})
+      <Select name="subject" value={subject} onChange={(e) => setSubject(e.target.value)} required>
+        {subjectOptions.map((sub) => (
+          <option key={sub} value={sub}>
+            {sub}
           </option>
         ))}
       </Select>
 
-      <Select name="grade_level">
-        {subjects.map((s) => (
-          <option key={`${s.grade_level}-${s.subject}`} value={s.grade_level}>
-            {s.grade_level}
+      <Select name="grade_level" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} required>
+        {gradeOptions.map((gl) => (
+          <option key={gl} value={gl}>
+            {gl}
           </option>
         ))}
       </Select>
