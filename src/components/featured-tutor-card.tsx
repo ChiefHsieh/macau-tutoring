@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { displayMacauRegion } from "@/lib/macau-location-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -81,7 +82,7 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
         <div className="flex items-start justify-between gap-2">
           <div>
             <h3 className="text-lg font-bold leading-snug tracking-tight text-[#0F2C59]">{tutor.display_name}</h3>
-            <p className="text-sm text-zinc-600">{tutor.district}</p>
+            <p className="text-sm text-zinc-600">{displayMacauRegion(locale, tutor.district)}</p>
           </div>
           <div className="text-right">
             <div className="ui-shiny-rating ui-shiny-rating-sweep text-base font-bold text-[#E6C699] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">

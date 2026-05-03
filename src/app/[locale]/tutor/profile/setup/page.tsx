@@ -62,7 +62,7 @@ export default async function TutorProfileSetupPage({
   const initialValues: ClientFormInput = {
     district: inferRegionFromAreas(initialAreas),
     service_areas: initialAreas,
-    hourly_rate: tutorProfile?.hourly_rate ?? 100,
+    hourly_rate: tutorProfile?.hourly_rate ?? 0,
     working_period_start: tutorProfile?.working_period_start ?? "",
     working_period_end: tutorProfile?.working_period_end ?? "",
     service_type: (tutorProfile?.service_type ?? "both") as

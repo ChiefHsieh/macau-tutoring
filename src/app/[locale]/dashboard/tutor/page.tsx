@@ -27,9 +27,25 @@ export default async function TutorDashboard({
   const today = new Date().toISOString().slice(0, 10);
   const { data: myProfile } = await supabase
     .from("tutor_profiles")
-    .select("average_rating, total_reviews, is_verified")
+    .select("average_rating, total_reviews, is_verified, created_at")
     .eq("id", user.id)
     .maybeSingle();
+  const [{ data: latestSubjectRow }, { data: latestVerificationRow }] = await Promise.all([
+    supabase
+      .from("tutor_subjects")
+      .select("created_at")
+      .eq("tutor_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("tutor_verification_documents")
+      .select("created_at")
+      .eq("tutor_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
   const { data: ratingRows } = await supabase.from("reviews").select("rating").eq("tutor_id", user.id);
   const { data: latestReviews } = await supabase
     .from("reviews")
@@ -45,6 +61,17 @@ export default async function TutorDashboard({
   const displayReviewCount = realtimeReviewCount > 0 ? realtimeReviewCount : (myProfile?.total_reviews ?? 0);
   const displayAverageRating =
     realtimeReviewCount > 0 ? realtimeAverageRating : Number(myProfile?.average_rating ?? 0);
+  const portfolioUpdatedAtCandidates = [
+    myProfile?.created_at ?? null,
+    latestSubjectRow?.created_at ?? null,
+    latestVerificationRow?.created_at ?? null,
+  ]
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
+    .map((value) => new Date(value));
+  const portfolioUpdatedAt =
+    portfolioUpdatedAtCandidates.length > 0
+      ? new Date(Math.max(...portfolioUpdatedAtCandidates.map((d) => d.getTime())))
+      : null;
 
   const { data: upcoming } = await supabase
     .from("bookings")
@@ -133,6 +160,27 @@ export default async function TutorDashboard({
               <Link href={`/${locale}/tutor/availability`}>{t("availabilityCta")}</Link>
             </Button>
           </div>
+          <Card className="border-[#1A2456] bg-[#0A0F35]">
+            <CardContent className="space-y-3 pt-5">
+              <p className="text-base font-semibold text-white">{t("portfolioSectionTitle")}</p>
+              <p className="text-sm text-[#E2E8F0]">{t("portfolioSectionBody")}</p>
+              <p className="text-xs text-[#94A3B8]">
+                {t("portfolioLastUpdated", {
+                  date: portfolioUpdatedAt
+                    ? portfolioUpdatedAt.toLocaleString(locale === "en" ? "en-GB" : "zh-HK")
+                    : "—",
+                })}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild>
+                  <Link href={`/${locale}/tutor/profile/setup`}>{t("portfolioSectionCta")}</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href={`/${locale}/tutor/availability`}>{t("availabilityCta")}</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </PageSection>
 

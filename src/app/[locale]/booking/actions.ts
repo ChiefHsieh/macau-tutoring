@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireProfile } from "@/lib/auth";
@@ -140,28 +141,9 @@ export async function createBookingAction(formData: FormData) {
     redirect(`/${locale}/booking/new?tutorId=${payload.tutor_id}&date=${payload.session_date}&error=${encodeURIComponent(error.message)}`);
   }
 
-  // Best-effort mirror: expose successful booking demand in public parent-lead feed.
-  // Never block booking success if this auxiliary insert fails.
-  try {
-    const { data: selfUser } = await supabase
-      .from("users")
-      .select("phone")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    const phoneForLead = String(selfUser?.phone ?? "").trim() || `booking-${user.id}`;
-    await supabase.from("parent_leads").insert({
-      child_grade: payload.grade_level,
-      subject: payload.subject,
-      phone: phoneForLead,
-      lead_source: "booking",
-      district: tutorProfile.district ?? null,
-      budget_max: tutorProfile.hourly_rate ?? null,
-      notes: `auto-from-booking:${payload.tutor_id}:${payload.session_date}:${payload.start_time}`,
-    });
-  } catch {
-    // no-op
-  }
+  // Recent-demand strip: `bookings` → DB trigger `tg_booking_append_recent_demand_feed`
+  // → `parent_leads` → `parent_lead_public_feed` (see supabase/bookings-mirror-to-recent-demands.sql).
+  revalidatePath(`/${locale}`);
 
   redirect(`/${locale}/messages/${payload.tutor_id}?fromBooking=1`);
 }

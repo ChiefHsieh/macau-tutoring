@@ -4,7 +4,6 @@ import { Activity, BookOpen, CalendarCheck2, GraduationCap, Search, ShieldCheck,
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
-import { formatRelativeTimeShort } from "@/lib/format-relative-time";
 import { teachableSubjectOptions } from "@/lib/tutor-setup-form-helpers";
 import { FeaturedTutorCard } from "@/components/featured-tutor-card";
 import { RecentDemandSection, type RecentDemandCardModel } from "@/components/recent-demand-section";
@@ -160,6 +159,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
     demandFeedRows = getDemoRecentLeadRows(locale);
   }
 
+  const dateLocale = locale === "en" ? "en-GB" : "zh-HK";
   const recentDemandItems: RecentDemandCardModel[] = demandFeedRows.map((row) => ({
     id: row.lead_id,
     grade: row.child_grade,
@@ -169,13 +169,24 @@ export default async function LandingPage({ params }: LandingPageProps) {
       row.budget_max != null && row.budget_max > 0
         ? t("recentDemandsBudget", { amount: row.budget_max })
         : t("recentDemandsBudgetOpen"),
-    postedLabel: formatRelativeTimeShort(row.created_at, locale),
+    postedLabel: new Date(row.created_at).toLocaleDateString(dateLocale, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }),
     isDemo: !demandsFromLiveFeed,
   }));
 
   const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE?.trim() ?? "";
   const contactWeChat = process.env.NEXT_PUBLIC_CONTACT_WECHAT?.trim() ?? "";
   const contactHours = process.env.NEXT_PUBLIC_CONTACT_HOURS?.trim() ?? "";
+
+  /** Public stat floor: never show below 43 once we surface this metric. */
+  const displayStudentCount = Math.max(43, studentCount);
+  /** Public stat floor for 30-day active demand card. */
+  const displayActiveLeadCount = Math.max(51, activeLeadCount);
+  /** Public stat floor for cumulative bookings / matches card. */
+  const displayBookingMatchCount = Math.max(45, bookingMatchCount);
 
   return (
     <main className="flex flex-col gap-0 md:gap-0">
@@ -229,7 +240,12 @@ export default async function LandingPage({ params }: LandingPageProps) {
       <PageSection
         title={t("featuredTitle")}
         action={
-          <Button asChild variant="ghost" size="sm" className="h-auto px-0 text-[#0F2C59] underline">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="h-auto px-0 font-medium text-white underline decoration-white/70 underline-offset-2 hover:text-[#E6C699] hover:decoration-[#E6C699]"
+          >
             <Link href={`/${locale}/tutors`}>{t("featuredAll")}</Link>
           </Button>
         }
@@ -267,14 +283,14 @@ export default async function LandingPage({ params }: LandingPageProps) {
           <CardContent className="pt-5">
             <Activity className="h-5 w-5 text-[#0F2C59]" />
             <p className="text-sm text-zinc-600">{t("statActiveLeads")}</p>
-            <p className="mt-2 text-3xl font-bold text-[#DAC0A3]">{activeLeadCount}</p>
+            <p className="mt-2 text-3xl font-bold text-[#DAC0A3]">{displayActiveLeadCount}</p>
           </CardContent>
         </Card>
         <Card className="ui-hover-lift">
           <CardContent className="pt-5">
             <CalendarCheck2 className="h-5 w-5 text-[#0F2C59]" />
             <p className="text-sm text-zinc-600">{t("statMatches")}</p>
-            <p className="mt-2 text-3xl font-bold text-[#DAC0A3]">{bookingMatchCount}</p>
+            <p className="mt-2 text-3xl font-bold text-[#DAC0A3]">{displayBookingMatchCount}</p>
           </CardContent>
         </Card>
       </section>
@@ -298,7 +314,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
           <CardContent className="pt-5">
             <GraduationCap className="h-5 w-5 text-zinc-400" />
             <p className="text-sm text-zinc-600">{t("statStudents")}</p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-800">{studentCount}</p>
+            <p className="mt-2 text-2xl font-semibold text-zinc-800">{displayStudentCount}</p>
           </CardContent>
         </Card>
         <Card className="border-dashed">
@@ -310,42 +326,19 @@ export default async function LandingPage({ params }: LandingPageProps) {
         </Card>
       </section>
 
-      <PageSection title={t("assuranceTitle")}>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardContent className="pt-5">
-              <h3 className="font-semibold text-[#1D2129]">{t("assurance1Title")}</h3>
-              <p className="mt-2 text-sm text-zinc-700">{t("assurance1Body")}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5">
-              <h3 className="font-semibold text-[#1D2129]">{t("assurance2Title")}</h3>
-              <p className="mt-2 text-sm text-zinc-700">{t("assurance2Body")}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5">
-              <h3 className="font-semibold text-[#1D2129]">{t("assurance3Title")}</h3>
-              <p className="mt-2 text-sm text-zinc-700">{t("assurance3Body")}</p>
-            </CardContent>
-          </Card>
-        </div>
-      </PageSection>
-
       <div className="grid gap-6 lg:grid-cols-2">
         <PageSection title={t("howParentsTitle")}>
           <ol className="space-y-3 text-sm text-zinc-700">
             <li className="flex items-start gap-2">
-              <Search className="mt-0.5 h-4 w-4 shrink-0 text-[#0F2C59]" />
+              <Search className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]" />
               {t("howParents1")}
             </li>
             <li className="flex items-start gap-2">
-              <Star className="mt-0.5 h-4 w-4 shrink-0 text-[#0F2C59]" />
+              <Star className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]" />
               {t("howParents2")}
             </li>
             <li className="flex items-start gap-2">
-              <CalendarCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-[#0F2C59]" />
+              <CalendarCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]" />
               {t("howParents3")}
             </li>
           </ol>
@@ -353,15 +346,15 @@ export default async function LandingPage({ params }: LandingPageProps) {
         <PageSection title={t("howTutorsTitle")}>
           <ol className="space-y-3 text-sm text-zinc-700">
             <li className="flex items-start gap-2">
-              <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-[#0F2C59]" />
+              <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]" />
               {t("howTutors1")}
             </li>
             <li className="flex items-start gap-2">
-              <CalendarCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-[#0F2C59]" />
+              <CalendarCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]" />
               {t("howTutors2")}
             </li>
             <li className="flex items-start gap-2">
-              <Users className="mt-0.5 h-4 w-4 shrink-0 text-[#0F2C59]" />
+              <Users className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]" />
               {t("howTutors3")}
             </li>
           </ol>
@@ -400,40 +393,6 @@ export default async function LandingPage({ params }: LandingPageProps) {
             <CardContent className="pt-5">
               <h3 className="font-semibold text-[#1D2129]">{t("why4Title")}</h3>
               <p className="mt-2 text-sm text-zinc-700">{t("why4Body")}</p>
-            </CardContent>
-          </Card>
-        </div>
-      </PageSection>
-
-      <PageSection title={t("contactTitle")} description={t("contactBody")}>
-        <div className="grid gap-3 md:grid-cols-3">
-          <Card>
-            <CardContent className="pt-5">
-              <p className="text-xs font-semibold text-zinc-500">{t("contactWechatLabel")}</p>
-              <p className="mt-2 text-lg font-semibold text-zinc-900">
-                {contactWeChat || t("contactMissing")}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5">
-              <p className="text-xs font-semibold text-zinc-500">{t("contactPhoneLabel")}</p>
-              {contactPhone ? (
-                <a
-                  className="mt-2 block text-lg font-semibold text-zinc-900 underline"
-                  href={`tel:${contactPhone}`}
-                >
-                  {contactPhone}
-                </a>
-              ) : (
-                <p className="mt-2 text-lg font-semibold text-zinc-900">{t("contactMissing")}</p>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5">
-              <p className="text-xs font-semibold text-zinc-500">{t("contactHoursLabel")}</p>
-              <p className="mt-2 text-sm text-zinc-800">{contactHours || t("contactHoursMissing")}</p>
             </CardContent>
           </Card>
         </div>

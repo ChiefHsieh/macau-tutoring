@@ -52,7 +52,10 @@ export function RecentDemandSection({
                 </Badge>
               ) : null}
               <div className="flex items-start gap-2 pr-14">
-                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-[#000225]" aria-hidden />
+                <BookOpen
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[#E6C699] drop-shadow-[0_0_4px_rgba(230,198,153,0.55)]"
+                  aria-hidden
+                />
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{item.grade}</p>
                   <p className="text-base font-semibold text-[#1D2129]">{item.subject}</p>
@@ -60,13 +63,19 @@ export function RecentDemandSection({
               </div>
               <div className="space-y-1 text-sm text-zinc-600">
                 <p className="flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 shrink-0 text-zinc-400" aria-hidden />
+                  <MapPin
+                    className="h-3.5 w-3.5 shrink-0 text-[#E6C699] drop-shadow-[0_0_3px_rgba(230,198,153,0.5)]"
+                    aria-hidden
+                  />
                   {item.districtLine}
                 </p>
                 <p className="font-medium text-zinc-800">{item.budgetLine}</p>
               </div>
               <p className="flex items-center gap-1.5 border-t border-zinc-100 pt-2 text-xs text-zinc-500">
-                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <Clock
+                  className="h-3.5 w-3.5 shrink-0 text-[#E6C699] drop-shadow-[0_0_3px_rgba(230,198,153,0.5)]"
+                  aria-hidden
+                />
                 {item.postedLabel}
               </p>
             </CardContent>

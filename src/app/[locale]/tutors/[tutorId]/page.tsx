@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { parseServiceAreasFromDb } from "@/lib/tutor-setup-form-helpers";
+import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,10 +120,11 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
                   ⭐ {displayAverageRating.toFixed(1)} · {displayReviewCount} {t("reviews")}
                 </p>
                 <p className="text-2xl font-bold text-[#000225]">MOP{tutor.hourly_rate}/hr</p>
-                <p className="text-sm text-zinc-700">{tutor.district}</p>
+                <p className="text-sm text-zinc-700">{displayMacauRegion(locale, tutor.district)}</p>
                 {shownAreas.length > 0 ? (
                   <p className="text-sm text-zinc-700">
-                    {t("serviceAreasLabel")}: {shownAreas.join(" · ")}
+                    {t("serviceAreasLabel")}:{" "}
+                    {shownAreas.map((a) => displayMacauSubarea(locale, a)).join(" · ")}
                     {remainingAreas > 0 ? ` +${remainingAreas}` : ""}
                   </p>
                 ) : null}

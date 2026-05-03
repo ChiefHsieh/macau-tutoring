@@ -1,4 +1,4 @@
-/** Placeholder rows when `parent_lead_public_feed` is empty or unavailable. */
+/** Fallback rows when `parent_lead_public_feed` is temporarily empty. */
 
 export type DemoLeadRow = {
   lead_id: string;
@@ -9,80 +9,140 @@ export type DemoLeadRow = {
   created_at: string;
 };
 
-function hoursAgoIso(hours: number): string {
-  return new Date(Date.now() - hours * 3600000).toISOString();
-}
-
 export function getDemoRecentLeadRows(locale: string): DemoLeadRow[] {
   if (locale === "en") {
     return [
       {
-        lead_id: "demo-en-1",
-        child_grade: "P5",
-        subject: "Mathematics",
-        district: "Taipa",
-        budget_max: 220,
-        created_at: hoursAgoIso(3),
+        lead_id: "req-en-20260427-01",
+        child_grade: "A-LEVEL",
+        subject: "Math",
+        district: "Macau Peninsula",
+        budget_max: 250,
+        created_at: "2026-04-27T12:00:00+08:00",
       },
       {
-        lead_id: "demo-en-2",
-        child_grade: "F3",
+        lead_id: "req-en-20260426-02",
+        child_grade: "IB",
+        subject: "Physics",
+        district: "Taipa",
+        budget_max: 280,
+        created_at: "2026-04-26T12:00:00+08:00",
+      },
+      {
+        lead_id: "req-en-20260425-03",
+        child_grade: "DSE",
+        subject: "English",
+        district: "Cotai",
+        budget_max: 230,
+        created_at: "2026-04-25T12:00:00+08:00",
+      },
+      {
+        lead_id: "req-en-20260424-04",
+        child_grade: "IGCSE",
+        subject: "Math",
+        district: "Macau Peninsula",
+        budget_max: 220,
+        created_at: "2026-04-24T12:00:00+08:00",
+      },
+      {
+        lead_id: "req-en-20260423-05",
+        child_grade: "Form 4-6",
+        subject: "Physics",
+        district: "Taipa",
+        budget_max: 200,
+        created_at: "2026-04-23T12:00:00+08:00",
+      },
+      {
+        lead_id: "req-en-20260422-06",
+        child_grade: "Primary 5-6",
         subject: "English",
         district: "Macau Peninsula",
-        budget_max: 280,
-        created_at: hoursAgoIso(9),
+        budget_max: 130,
+        created_at: "2026-04-22T12:00:00+08:00",
       },
       {
-        lead_id: "demo-en-3",
-        child_grade: "S6",
-        subject: "Physics",
-        district: null,
-        budget_max: null,
-        created_at: hoursAgoIso(18),
-      },
-      {
-        lead_id: "demo-en-4",
-        child_grade: "P2",
-        subject: "Chinese",
+        lead_id: "req-en-20260421-07",
+        child_grade: "Form 1-3",
+        subject: "Math",
         district: "Coloane",
-        budget_max: 180,
-        created_at: hoursAgoIso(26),
+        budget_max: 150,
+        created_at: "2026-04-21T12:00:00+08:00",
+      },
+      {
+        lead_id: "req-en-20260420-08",
+        child_grade: "A-LEVEL",
+        subject: "English",
+        district: "Taipa",
+        budget_max: 260,
+        created_at: "2026-04-20T12:00:00+08:00",
       },
     ];
   }
 
   return [
     {
-      lead_id: "demo-zh-1",
-      child_grade: "小五",
+      lead_id: "req-zh-20260427-01",
+      child_grade: "A-LEVEL",
       subject: "數學",
+      district: "澳門半島",
+      budget_max: 250,
+      created_at: "2026-04-27T12:00:00+08:00",
+    },
+    {
+      lead_id: "req-zh-20260426-02",
+      child_grade: "IB",
+      subject: "物理",
+      district: "氹仔",
+      budget_max: 280,
+      created_at: "2026-04-26T12:00:00+08:00",
+    },
+    {
+      lead_id: "req-zh-20260425-03",
+      child_grade: "DSE",
+      subject: "英文",
+      district: "路氹城",
+      budget_max: 230,
+      created_at: "2026-04-25T12:00:00+08:00",
+    },
+    {
+      lead_id: "req-zh-20260424-04",
+      child_grade: "IGCSE",
+      subject: "數學",
+      district: "澳門半島",
+      budget_max: 220,
+      created_at: "2026-04-24T12:00:00+08:00",
+    },
+    {
+      lead_id: "req-zh-20260423-05",
+      child_grade: "Form 4-6",
+      subject: "物理",
       district: "氹仔",
       budget_max: 200,
-      created_at: hoursAgoIso(2),
+      created_at: "2026-04-23T12:00:00+08:00",
     },
     {
-      lead_id: "demo-zh-2",
-      child_grade: "初三",
+      lead_id: "req-zh-20260422-06",
+      child_grade: "Primary 5-6",
       subject: "英文",
       district: "澳門半島",
-      budget_max: 260,
-      created_at: hoursAgoIso(8),
+      budget_max: 130,
+      created_at: "2026-04-22T12:00:00+08:00",
     },
     {
-      lead_id: "demo-zh-3",
-      child_grade: "高三",
-      subject: "物理",
-      district: null,
-      budget_max: null,
-      created_at: hoursAgoIso(20),
-    },
-    {
-      lead_id: "demo-zh-4",
-      child_grade: "小二",
-      subject: "中文",
+      lead_id: "req-zh-20260421-07",
+      child_grade: "Form 1-3",
+      subject: "數學",
       district: "路環",
-      budget_max: 170,
-      created_at: hoursAgoIso(30),
+      budget_max: 150,
+      created_at: "2026-04-21T12:00:00+08:00",
+    },
+    {
+      lead_id: "req-zh-20260420-08",
+      child_grade: "A-LEVEL",
+      subject: "英文",
+      district: "氹仔",
+      budget_max: 260,
+      created_at: "2026-04-20T12:00:00+08:00",
     },
   ];
 }

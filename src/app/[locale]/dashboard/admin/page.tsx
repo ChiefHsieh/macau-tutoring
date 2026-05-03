@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { displayMacauRegion } from "@/lib/macau-location-display";
 import { PageSection } from "@/components/page-section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -93,7 +94,7 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                     <div>
                       <p className="font-medium text-[#1D2129]">{item.display_name}</p>
                       <p className="text-xs text-zinc-600">
-                        {item.district} · MOP{item.hourly_rate}/hr
+                        {displayMacauRegion(locale, item.district)} · MOP{item.hourly_rate}/hr
                       </p>
                     </div>
                     <Badge variant={item.is_verified ? "success" : "warning"}>

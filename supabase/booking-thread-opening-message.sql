@@ -27,7 +27,7 @@ begin
     || left(new.end_time::text, 5)
     || '，科目：'
     || coalesce(nullif(trim(new.subject), ''), '—')
-    || '。請在控制台查看詳情，或直接在此回覆。'
+    || '。請在我的家教中心查看詳情，或直接在此回覆。'
     || E'\n'
     || '[Platform booking] I created a booking on the platform (payment pending): '
     || new.session_date::text
@@ -37,7 +37,7 @@ begin
     || left(new.end_time::text, 5)
     || ', subject: '
     || coalesce(nullif(trim(new.subject), ''), '—')
-    || '. Please check your dashboard or reply here.';
+    || '. Please check My Tutoring Center or reply here.';
 
   begin
     insert into public.messages (sender_id, receiver_id, booking_id, content)

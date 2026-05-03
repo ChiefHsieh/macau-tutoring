@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { computeAvailableSlots } from "@/lib/availability";
+import { displayMacauRegion } from "@/lib/macau-location-display";
 import { BookingCreateForm } from "@/components/booking-create-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
@@ -135,14 +136,14 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
             <>
               <input type="hidden" name="tutorId" value={selectedTutor.id} />
               <div className="flex h-10 items-center rounded-md border border-[#D1FAE5] bg-white/95 px-3 text-sm text-[#064E3B]">
-                {selectedTutor.display_name} · {selectedTutor.district} · MOP{selectedTutor.hourly_rate}
+                {selectedTutor.display_name} · {displayMacauRegion(locale, selectedTutor.district)} · MOP{selectedTutor.hourly_rate}
               </div>
             </>
           ) : (
             <Select name="tutorId" defaultValue={selectedTutorId}>
               {(tutors ?? []).map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.display_name} · {item.district} · MOP{item.hourly_rate}
+                  {item.display_name} · {displayMacauRegion(locale, item.district)} · MOP{item.hourly_rate}
                 </option>
               ))}
             </Select>

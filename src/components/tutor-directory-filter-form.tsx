@@ -14,6 +14,7 @@ import {
   macauRegionValues,
   macauSubareasByRegion,
 } from "@/lib/tutor-directory-filters";
+import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
 
 export type TutorDirectoryFilterDefaults = {
   subjects: string[];
@@ -23,7 +24,6 @@ export type TutorDirectoryFilterDefaults = {
   min: number;
   max: number;
   sort: string;
-  verifiedOnly: boolean;
 };
 
 type TutorDirectoryFilterFormProps = {
@@ -227,7 +227,7 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
                 onChange={() => setRegion(r)}
                 className="sr-only"
               />
-              {r}
+              {displayMacauRegion(locale, r)}
             </label>
           ))}
         </div>
@@ -254,17 +254,12 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
                   }}
                   className="sr-only"
                 />
-                {area}
+                {displayMacauSubarea(locale, area)}
               </label>
             ))}
           </div>
         </fieldset>
       ) : null}
-
-      <label className="flex items-center gap-2 text-sm text-[#1D2129]">
-        <input type="checkbox" name="verified" value="1" defaultChecked={defaults.verifiedOnly} />
-        {t("verifiedOnly")}
-      </label>
 
       <Select name="sort" defaultValue={defaults.sort}>
         <option value="newest">{t("sortNewest")}</option>

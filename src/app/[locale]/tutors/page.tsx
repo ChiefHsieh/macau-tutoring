@@ -13,6 +13,7 @@ import {
   parseAreasFromSearchParams,
   parseSubjectsFromSearchParams,
 } from "@/lib/tutor-directory-filters";
+import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
 
 type TutorsPageProps = {
   params: Promise<{ locale: string }>;
@@ -21,7 +22,6 @@ type TutorsPageProps = {
     grade?: string;
     district?: string;
     area?: string | string[];
-    verified?: string;
     min?: string;
     max?: string;
     sort?: string;
@@ -58,9 +58,8 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   const grade = query.grade?.trim() ?? "";
   const district = query.district?.trim() ?? "";
   const areas = parseAreasFromSearchParams(query.area);
-  const verifiedOnly = query.verified === "1";
   const { min, max } = clampRateRange(
-    query.min ? Number(query.min) : 100,
+    query.min ? Number(query.min) : 0,
     query.max ? Number(query.max) : 1000,
   );
   const sort = query.sort ?? "rating";
@@ -73,7 +72,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     String(min),
     String(max),
     sort,
-    verifiedOnly ? "1" : "0",
   ].join("|");
 
   const hasActiveFilters =
@@ -81,7 +79,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     Boolean(grade) ||
     Boolean(district) ||
     areas.length > 0 ||
-    verifiedOnly ||
     query.min !== undefined ||
     query.max !== undefined;
 
@@ -90,15 +87,29 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   let subjectQueryErrorMessage: string | null = null;
 
   if (subjects.length > 0 || grade) {
-    let subjectQuery = supabase.from("tutor_subjects").select("tutor_id");
-    if (subjects.length > 0) subjectQuery = subjectQuery.in("subject", subjects);
-    if (grade) subjectQuery = subjectQuery.eq("grade_level", grade);
+    const [{ data: subjectMatches, error: subjectError }, { data: gradeMatches, error: gradeError }] =
+      await Promise.all([
+        subjects.length > 0
+          ? supabase.from("tutor_subjects").select("tutor_id").in("subject", subjects)
+          : Promise.resolve({ data: null, error: null }),
+        grade
+          ? supabase.from("tutor_subjects").select("tutor_id").eq("grade_level", grade)
+          : Promise.resolve({ data: null, error: null }),
+      ]);
 
-    const { data: subjectMatches, error: subjectError } = await subjectQuery;
-    if (subjectError) {
-      subjectQueryErrorMessage = subjectError.message;
+    if (subjectError || gradeError) {
+      subjectQueryErrorMessage = subjectError?.message ?? gradeError?.message ?? "Subject filter query failed.";
     } else {
-      tutorIdsFilter = Array.from(new Set((subjectMatches ?? []).map((row) => row.tutor_id)));
+      const subjectTutorIds = new Set((subjectMatches ?? []).map((row) => row.tutor_id));
+      const gradeTutorIds = new Set((gradeMatches ?? []).map((row) => row.tutor_id));
+
+      if (subjects.length > 0 && grade) {
+        tutorIdsFilter = [...subjectTutorIds].filter((id) => gradeTutorIds.has(id));
+      } else if (subjects.length > 0) {
+        tutorIdsFilter = [...subjectTutorIds];
+      } else {
+        tutorIdsFilter = [...gradeTutorIds];
+      }
     }
   }
 
@@ -129,10 +140,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     if (areas.length > 0) {
       const orExpr = areas.map((area) => `exact_location.ilike.%|${area}|%`).join(",");
       tutorsQuery = tutorsQuery.or(orExpr);
-    }
-
-    if (verifiedOnly) {
-      tutorsQuery = tutorsQuery.eq("is_verified", true);
     }
 
     if (sort === "price") {
@@ -181,6 +188,41 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     reviewStatsMap.set(row.tutor_id, { total: nextTotal, avg: nextAvg });
   });
 
+  const sortedTutors = [...(tutors ?? [])].sort((a, b) => {
+    const aSubjects = subjectMap.get(a.id) ?? [];
+    const bSubjects = subjectMap.get(b.id) ?? [];
+    const aMatchCount = subjects.length > 0 ? aSubjects.filter((s) => subjects.includes(s)).length : 0;
+    const bMatchCount = subjects.length > 0 ? bSubjects.filter((s) => subjects.includes(s)).length : 0;
+
+    // 1) Always rank by how many selected subjects the tutor matches.
+    if (bMatchCount !== aMatchCount) return bMatchCount - aMatchCount;
+
+    // 2) Secondary sorting follows the chosen sort option in the UI.
+    if (sort === "price") {
+      if (a.hourly_rate !== b.hourly_rate) return a.hourly_rate - b.hourly_rate;
+      return a.display_name.localeCompare(b.display_name);
+    }
+
+    if (sort === "rating") {
+      const aRealtime = reviewStatsMap.get(a.id);
+      const bRealtime = reviewStatsMap.get(b.id);
+      const aRating = aRealtime ? aRealtime.avg : Number(a.average_rating ?? 0);
+      const bRating = bRealtime ? bRealtime.avg : Number(b.average_rating ?? 0);
+      if (bRating !== aRating) return bRating - aRating;
+
+      const aReviews = aRealtime ? aRealtime.total : Number(a.total_reviews ?? 0);
+      const bReviews = bRealtime ? bRealtime.total : Number(b.total_reviews ?? 0);
+      if (bReviews !== aReviews) return bReviews - aReviews;
+
+      return a.display_name.localeCompare(b.display_name);
+    }
+
+    const aTime = new Date(a.created_at).getTime();
+    const bTime = new Date(b.created_at).getTime();
+    if (bTime !== aTime) return bTime - aTime;
+    return a.display_name.localeCompare(b.display_name);
+  });
+
   return (
     <main className="space-y-8">
       <PageSection
@@ -203,7 +245,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
       </PageSection>
 
       <section className="grid gap-5 lg:grid-cols-[300px_1fr]">
-        <aside className="hidden h-fit lg:sticky lg:top-4 lg:block">
+        <aside className="hidden h-fit lg:sticky lg:top-4 lg:block lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1">
           <Card>
             <CardContent className="pt-5">
               <TutorDirectoryFilterForm
@@ -217,7 +259,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
                   min,
                   max,
                   sort,
-                  verifiedOnly,
                 }}
               />
             </CardContent>
@@ -236,7 +277,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
               min,
               max,
               sort,
-              verifiedOnly,
             }}
           />
 
@@ -251,7 +291,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
             </CardContent>
           </Card>
           <section className="grid gap-4 md:grid-cols-2">
-            {(tutors ?? []).map((tutor) => {
+            {sortedTutors.map((tutor) => {
               const realtime = reviewStatsMap.get(tutor.id);
               const displayRating = realtime ? realtime.avg : Number(tutor.average_rating ?? 0);
               const displayReviews = realtime ? realtime.total : Number(tutor.total_reviews ?? 0);
@@ -263,10 +303,17 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
                 <CardContent className="pt-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold text-[#1D2129]">{tutor.display_name}</h2>
-                      <p className="text-sm text-zinc-600">
-                        {tutor.district} · MOP{tutor.hourly_rate}/hr · {tutor.service_type}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-lg font-semibold text-[#1D2129]">{tutor.display_name}</h2>
+                        <span className="rounded-full border border-[#E6C699]/40 bg-[#E6C699]/10 px-2 py-0.5 text-xs font-semibold text-[#E6C699]">
+                          MOP {tutor.hourly_rate}/hr
+                        </span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                        <span className="text-zinc-600">{displayMacauRegion(locale, tutor.district)}</span>
+                        <span className="text-zinc-400">·</span>
+                        <span className="text-zinc-600">{tutor.service_type}</span>
+                      </div>
                     </div>
                     {tutor.is_verified ? (
                       <Badge variant="default" className="shrink-0">
@@ -283,7 +330,8 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
                   </p>
                   {shownAreas.length > 0 ? (
                     <p className="mt-1 text-xs text-zinc-600">
-                      {t("serviceAreasLabel")}: {shownAreas.join(" · ")}
+                      {t("serviceAreasLabel")}:{" "}
+                      {shownAreas.map((a) => displayMacauSubarea(locale, a)).join(" · ")}
                       {remainingAreas > 0 ? ` +${remainingAreas}` : ""}
                     </p>
                   ) : null}

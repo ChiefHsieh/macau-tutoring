@@ -9,7 +9,7 @@ export type DirectorySubjectOption = (typeof DIRECTORY_SUBJECT_OPTIONS)[number];
 const SUBJECT_ALLOW = new Set<string>(DIRECTORY_SUBJECT_OPTIONS);
 const AREA_ALLOW = new Set<string>(Object.values(macauSubareasByRegion).flat());
 
-export const DIRECTORY_RATE_MIN = 100;
+export const DIRECTORY_RATE_MIN = 0;
 export const DIRECTORY_RATE_MAX = 1000;
 export const DIRECTORY_RATE_STEP = 10;
 
@@ -44,3 +44,4 @@ export function clampRateRange(min: number, max: number): { min: number; max: nu
 
 export { gradeLevelValues };
 export { macauRegionValues, macauSubareasByRegion };
+

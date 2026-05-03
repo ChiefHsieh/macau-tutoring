@@ -37,6 +37,7 @@ import {
   type GradeLevel,
   type SubjectGroup,
 } from "@/lib/tutor-setup-form-helpers";
+import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,7 +129,7 @@ function buildClientFormSchema(t: (key: string) => string) {
     .object({
       district: z.enum(macauRegionValues),
       service_areas: z.array(z.string().min(1)).min(1, { message: t("serviceAreasRequired") }),
-      hourly_rate: z.coerce.number().int().min(100),
+      hourly_rate: z.coerce.number().int().min(0),
       working_period_start: z.string().min(1),
       working_period_end: z.string().min(1),
       service_type: z.enum(serviceTypeValues),
@@ -528,7 +529,11 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
         <Card className="border border-[#1A2456] bg-[#0A0F35]">
           <CardContent className="space-y-1 pt-4 text-xs text-[#E2E8F0]">
             <p className="font-semibold text-[#FFFFFF]">{t("summaryTitle")}</p>
-            <p>{t("summaryDistrict", { district: watchedDistrict ?? "—" })}</p>
+            <p>
+              {t("summaryDistrict", {
+                district: displayMacauRegion(locale, watchedDistrict ?? "—"),
+              })}
+            </p>
             <p>{t("summaryAreas", { count: watchedAreas?.length ?? 0 })}</p>
             <p>{t("summaryRate", { rate: watchedRate != null ? String(watchedRate) : "—" })}</p>
             <p>{t("summarySubjects", { count: watchedSubjectGroups?.length ?? 0 })}</p>
@@ -568,7 +573,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                       setValue("district", item, { shouldDirty: true, shouldValidate: true });
                     }}
                   >
-                    {item}
+                    {displayMacauRegion(locale, item)}
                   </Button>
                 ))}
               </div>
@@ -591,7 +596,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                       className="text-xs"
                       onClick={() => toggleServiceArea(area)}
                     >
-                      {area}
+                      {displayMacauSubarea(locale, area)}
                     </Button>
                   );
                 })}
@@ -611,7 +616,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
               {t("hourlyRate")}
               <Input
                 type="number"
-                min={100}
+                min={0}
                 {...register("hourly_rate")}
                 className="mt-1 w-full"
               />
@@ -898,7 +903,9 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                         </div>
                         <div className="space-y-1 p-2">
                           <p className="text-sm font-semibold text-white">{t("avatarPreviewTutorName")}</p>
-                          <p className="text-xs text-zinc-600">{watchedDistrict ?? "澳門半島"}</p>
+                          <p className="text-xs text-zinc-600">
+                            {displayMacauRegion(locale, watchedDistrict ?? "澳門半島")}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1000,3 +1007,4 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
     </form>
   );
 }
+
