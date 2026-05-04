@@ -36,7 +36,12 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
     supabase.from("tutor_profiles").select("id, display_name").eq("id", peerId).maybeSingle(),
   ]);
   const peerName = peerUser?.full_name?.trim() || peerTutorProfile?.display_name?.trim() || t("unknownUser");
-  const isSupportThread = query.support === "1" || peerUser?.role === "admin";
+  const supportManagerId =
+    process.env.SUPPORT_MANAGER_USER_ID?.trim() || process.env.NEXT_PUBLIC_SUPPORT_MANAGER_USER_ID?.trim() || "";
+  const isSupportThread =
+    query.support === "1" ||
+    peerUser?.role === "admin" ||
+    (!!supportManagerId && peerId === supportManagerId);
 
   const [{ data: outgoing }, { data: incoming }] = await Promise.all([
     supabase
