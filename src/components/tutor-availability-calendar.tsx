@@ -190,7 +190,7 @@ export function TutorAvailabilityCalendar({
               {labels.modeTitle}
             </h3>
             <p className="mt-1 text-sm text-zinc-600">{labels.modeDescription}</p>
-            <p className="mt-3 rounded-md bg-zinc-50 px-3 py-2 font-mono text-sm text-zinc-800">{choice.summaryLine}</p>
+            <p className="ui-readable-light-slab mt-3 rounded-md px-3 py-2 font-mono text-sm">{choice.summaryLine}</p>
             <div className="mt-5 flex flex-col gap-2">
               <Button type="button" className="w-full" disabled={pending} onClick={saveRecurring}>
                 {labels.modeRecurring}

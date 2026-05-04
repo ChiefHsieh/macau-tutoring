@@ -259,6 +259,14 @@ span {
   line-height: 1.7;
 }
 
+/* Light inset text (e.g. availability slot summary): global `p` color is for dark surfaces — force contrast on pale slabs. */
+.ui-readable-light-slab {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+  line-height: 1.5 !important;
+}
+
 section {
   margin-top: 24px;
   margin-bottom: 24px;
