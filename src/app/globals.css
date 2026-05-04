@@ -412,7 +412,12 @@ section {
 /**
  * Native file inputs: Tailwind `file:` variants are unreliable across browsers.
  * Forces readable label on the “Choose file” button (dark text on primary beige).
+ * Use with .ui-file-input--no-native-name on inputs that show filename in a sibling.
  */
+.ui-file-input.ui-file-input--no-native-name {
+  color: transparent;
+}
+
 .ui-file-input::file-selector-button,
 .ui-file-input::-webkit-file-upload-button {
   margin-right: 0.75rem;

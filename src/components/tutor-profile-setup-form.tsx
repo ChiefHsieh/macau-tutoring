@@ -246,6 +246,9 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
   const [avatarCrop, setAvatarCrop] = useState({ x: 0, y: 0 });
   const [avatarZoom, setAvatarZoom] = useState(1);
   const [avatarCropPixels, setAvatarCropPixels] = useState<Area | null>(null);
+  /** Shown next to file input (native “No file chosen” hidden via CSS). */
+  const [avatarPickLine, setAvatarPickLine] = useState("");
+  const [pdfPickLine, setPdfPickLine] = useState("");
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -388,6 +391,22 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
     })();
   };
 
+  const handlePdfFileSelect = () => {
+    setUploadError(null);
+    const file = pdfInputRef.current?.files?.[0];
+    if (!file) {
+      setPdfPickLine("");
+      return;
+    }
+    if (file.type !== "application/pdf") {
+      setUploadError(t("verificationPdfTypeRule"));
+      setPdfPickLine("");
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+      return;
+    }
+    setPdfPickLine(file.name);
+  };
+
   const handlePdfUpload = async () => {
     setUploadError(null);
     const input = pdfInputRef.current;
@@ -414,6 +433,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
         return;
       }
       setValue("verification_document", res.publicUrl, { shouldValidate: true, shouldDirty: true });
+      setPdfPickLine(t("verificationPdfAfterUploadLine"));
       trackEvent("upload_success", { locale });
       toast.success(t("uploadSuccessToast"));
       if (input) input.value = "";
@@ -425,11 +445,17 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
   const handleAvatarFileSelect = () => {
     setAvatarUploadError(null);
     const file = avatarInputRef.current?.files?.[0];
-    if (!file) return;
-    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      setAvatarUploadError(t("avatarTypeRule"));
+    if (!file) {
+      setAvatarPickLine("");
       return;
     }
+    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+      setAvatarUploadError(t("avatarTypeRule"));
+      setAvatarPickLine("");
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      return;
+    }
+    setAvatarPickLine(file.name);
     if (avatarSrc) URL.revokeObjectURL(avatarSrc);
     const objectUrl = URL.createObjectURL(file);
     setAvatarSrc(objectUrl);
@@ -501,6 +527,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
       if (avatarInputRef.current) avatarInputRef.current.value = "";
       URL.revokeObjectURL(avatarSrc);
       setAvatarSrc(null);
+      setAvatarPickLine(t("avatarAfterUploadLine"));
     } catch (error) {
       setAvatarUploadError(error instanceof Error ? error.message : t("avatarUploadFailed"));
     } finally {
@@ -851,13 +878,22 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
               {t("profilePhoto")}
               <input type="hidden" {...register("profile_photo")} />
               <div className="mt-2 space-y-3 rounded-md border border-[#1A2456] bg-[#0A0F35] p-3">
-                <input
-                  ref={avatarInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg"
-                  onChange={handleAvatarFileSelect}
-                  className="ui-file-input block w-full cursor-pointer text-sm text-zinc-300"
-                />
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-3">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg"
+                    onChange={handleAvatarFileSelect}
+                    className="ui-file-input ui-file-input--no-native-name block w-full min-w-0 cursor-pointer text-sm sm:max-w-[min(100%,280px)]"
+                  />
+                  <p
+                    className="min-w-0 flex-1 pt-0 text-xs leading-snug text-zinc-400 sm:pt-2"
+                    aria-live="polite"
+                  >
+                    {avatarPickLine ||
+                      (watchedPhoto ? t("avatarExistingPhotoHint") : t("avatarNoFileSelected"))}
+                  </p>
+                </div>
                 {avatarSrc ? (
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-2">
@@ -956,16 +992,27 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
             </label>
             <div className="space-y-2">
               <label className="text-sm font-medium text-white">{t("verificationPdfFile")}</label>
-              <input
-                ref={pdfInputRef}
-                type="file"
-                accept="application/pdf"
-                className="ui-file-input block w-full cursor-pointer text-sm text-zinc-300"
-              />
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-3">
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handlePdfFileSelect}
+                  className="ui-file-input ui-file-input--no-native-name block w-full min-w-0 cursor-pointer text-sm sm:max-w-[min(100%,280px)]"
+                />
+                <p
+                  className="min-w-0 flex-1 pt-0 text-xs leading-snug text-zinc-400 sm:pt-2"
+                  aria-live="polite"
+                >
+                  {pdfPickLine ||
+                    (watchedVerification ? t("verificationPdfExistingHint") : t("verificationPdfNoFileSelected"))}
+                </p>
+              </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button type="button" variant="outline" disabled={isUploadingPdf} onClick={handlePdfUpload}>
                   {isUploadingPdf ? t("uploadingPdf") : t("uploadPdf")}
                 </Button>
+                {watchedVerification ? <Badge variant="success">{t("uploadLinkedBadge")}</Badge> : null}
               </div>
               {uploadError ? <p className="text-xs text-red-600">{uploadError}</p> : null}
               <p className="text-xs text-zinc-500">{t("verificationPdfReplaceHint")}</p>
