@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidateUnreadNotificationCount } from "@/lib/notification-unread-count";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,6 +22,7 @@ export async function markAllNotificationsReadAction(formData: FormData) {
     .eq("user_id", user.id)
     .eq("is_read", false);
 
+  invalidateUnreadNotificationCount(user.id);
   revalidatePath(`/${locale}`, "layout");
   revalidatePath(`/${locale}/notifications`);
   redirect(`/${locale}/notifications`);
@@ -38,6 +40,7 @@ export async function markNotificationReadAction(formData: FormData) {
   if (!user) return;
 
   await supabase.from("notifications").update({ is_read: true }).eq("id", id).eq("user_id", user.id);
+  invalidateUnreadNotificationCount(user.id);
   revalidatePath(`/${locale}/notifications`);
 }
 
@@ -53,6 +56,7 @@ export async function deleteNotificationAction(formData: FormData) {
   if (!user) return;
 
   await supabase.from("notifications").delete().eq("id", id).eq("user_id", user.id);
+  invalidateUnreadNotificationCount(user.id);
   revalidatePath(`/${locale}/notifications`);
 }
 
@@ -73,6 +77,7 @@ export async function openNotificationAction(formData: FormData) {
 
   if (id) {
     await supabase.from("notifications").update({ is_read: true }).eq("id", id).eq("user_id", user.id);
+    invalidateUnreadNotificationCount(user.id);
     revalidatePath(`/${locale}/notifications`);
   }
 

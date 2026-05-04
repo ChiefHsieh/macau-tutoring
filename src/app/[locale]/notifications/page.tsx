@@ -6,7 +6,6 @@ import { getNotificationHref } from "@/lib/notification-links";
 import { PageSection } from "@/components/page-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { openNotificationAction } from "./actions";
-import { SubmitButton } from "@/components/submit-button";
 
 type NotificationsPageProps = {
   params: Promise<{ locale: string }>;
@@ -16,7 +15,6 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
   const { locale } = await params;
   await requireProfile(locale);
   const t = await getTranslations("Notifications");
-  const tCommon = await getTranslations("Common");
   const supabase = await createClient();
   const {
     data: { user },
@@ -107,29 +105,38 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
             const finalLink = isSupportMessage ? `/${locale}/support` : link;
 
             return (
-              <form key={n.id} action={openNotificationAction}>
+              <form
+                key={n.id}
+                action={openNotificationAction}
+                className="group relative block w-full focus-within:ring-2 focus-within:ring-[#E6C699]/50 focus-within:ring-offset-2 focus-within:ring-offset-[#000225]"
+              >
                 <input type="hidden" name="id" value={n.id} />
                 <input type="hidden" name="locale" value={locale} />
                 <input type="hidden" name="href" value={finalLink ?? ""} />
-                <SubmitButton
-                  type="submit"
-                  variant="ghost"
-                  className="h-auto w-full text-left font-normal !text-inherit"
-                  pendingLabel={tCommon("loading")}
+                {/* Block-level Card must not be nested inside <button> (invalid HTML → broken DOM / overlapping layout). */}
+                <Card
+                  className={`pointer-events-none hover:translate-y-0 ${
+                    n.is_read ? "border-[#1A2456] bg-[#0A0F35]" : "border-[#E6C699]/30 bg-[#101742]"
+                  }`}
                 >
-                  <Card className={n.is_read ? "border-[#1A2456] bg-[#0A0F35]" : "border-[#E6C699]/30 bg-[#101742]"}>
-                    <CardContent className="space-y-3 pt-5">
-                      <div className={n.is_read ? "text-sm text-[#E2E8F0]" : "text-sm font-semibold text-white"}>
-                        <p className="text-xs uppercase tracking-wide text-[#94A3B8]">{n.type}</p>
-                        <p className="mt-1">{n.title}</p>
-                        <p className="mt-1 font-normal text-[#E2E8F0]">{n.content}</p>
-                        <p className="mt-2 text-xs text-[#94A3B8]">
-                          {new Date(n.created_at).toLocaleString(locale === "en" ? "en-GB" : "zh-HK")}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </SubmitButton>
+                  <CardContent className="space-y-3 pt-5">
+                    <div className={n.is_read ? "text-sm text-[#E2E8F0]" : "text-sm font-semibold text-white"}>
+                      <p className="text-xs uppercase tracking-wide text-[#94A3B8]">{n.type}</p>
+                      <p className="mt-1">{n.title}</p>
+                      <p className="mt-1 font-normal text-[#E2E8F0]">{n.content}</p>
+                      <p className="mt-2 text-xs text-[#94A3B8]">
+                        {new Date(n.created_at).toLocaleString(locale === "en" ? "en-GB" : "zh-HK")}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <button
+                  type="submit"
+                  className="absolute inset-0 z-10 cursor-pointer rounded-xl border-0 bg-transparent p-0 text-left outline-none"
+                  aria-label={n.title}
+                >
+                  <span className="sr-only">{n.title}</span>
+                </button>
               </form>
             );
           })

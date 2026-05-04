@@ -25,11 +25,17 @@ export async function sendMessageAction(formData: FormData) {
     return { error: "Cannot message yourself." };
   }
 
+  const insertStart = Date.now();
   const { error } = await supabase.from("messages").insert({
     sender_id: user.id,
     receiver_id: receiverId,
     booking_id: bookingId,
     content,
+  });
+  console.info("[perf][messages-thread][send-insert-ms]", Date.now() - insertStart, {
+    locale,
+    receiverId,
+    hasError: !!error,
   });
 
   if (error) {
@@ -49,10 +55,18 @@ export async function markThreadReadAction(peerId: string) {
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  await supabase
+  const markReadStart = Date.now();
+  const { data, error } = await supabase
     .from("messages")
     .update({ is_read: true })
     .eq("receiver_id", user.id)
     .eq("sender_id", peerId)
-    .eq("is_read", false);
+    .eq("is_read", false)
+    .select("id");
+
+  console.info("[perf][messages-thread][mark-read-ms]", Date.now() - markReadStart, {
+    peerId,
+    updatedCount: data?.length ?? 0,
+    hasError: !!error,
+  });
 }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessageAction } from "@/app/[locale]/messages/actions";
+import { markThreadReadAction } from "@/app/[locale]/messages/actions";
 import { useTranslations } from "next-intl";
 import { SubmitButton } from "@/components/submit-button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,18 +21,24 @@ export type ThreadMessage = {
 type MessageThreadClientProps = {
   locale: string;
   peerId: string;
+  currentUserId: string;
   initialMessages: ThreadMessage[];
   labels: {
     placeholder: string;
     send: string;
+    selfName: string;
+    peerName: string;
   };
+  markReadOnMount?: boolean;
 };
 
 export function MessageThreadClient({
   locale,
   peerId,
+  currentUserId,
   initialMessages,
   labels,
+  markReadOnMount = false,
 }: MessageThreadClientProps) {
   const tCommon = useTranslations("Common");
   const router = useRouter();
@@ -82,6 +89,11 @@ export function MessageThreadClient({
     };
   }, [peerId]);
 
+  useEffect(() => {
+    if (!markReadOnMount) return;
+    void markThreadReadAction(peerId);
+  }, [markReadOnMount, peerId]);
+
   return (
     <div className="space-y-4">
       <div className="space-y-3 rounded-xl border border-[#1A2456] bg-[#0A0F35] p-4">
@@ -91,6 +103,7 @@ export function MessageThreadClient({
           <ul className="space-y-3">
             {sorted.map((m) => {
               const mine = me && m.sender_id === me;
+              const senderName = m.sender_id === currentUserId ? labels.selfName : labels.peerName;
               return (
                 <li
                   key={m.id}
@@ -103,6 +116,9 @@ export function MessageThreadClient({
                         : "border border-[#1A2456] bg-[#0D143D] text-[#E2E8F0]"
                     }`}
                   >
+                    <p className={`mb-1 text-[11px] font-semibold ${mine ? "text-white/80" : "text-[#94A3B8]"}`}>
+                      {senderName}
+                    </p>
                     <p className="whitespace-pre-wrap break-words">{m.content}</p>
                     <p className={`mt-1 text-[10px] ${mine ? "text-white/80" : "text-[#94A3B8]"}`}>
                       {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

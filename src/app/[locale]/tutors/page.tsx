@@ -41,10 +41,6 @@ type TutorRow = {
   profile_photo: string | null;
   created_at: string;
 };
-type ReviewRatingRow = {
-  tutor_id: string;
-  rating: number;
-};
 
 export default async function TutorsDirectoryPage({ params, searchParams }: TutorsPageProps) {
   const { locale } = await params;
@@ -88,6 +84,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   let subjectQueryErrorMessage: string | null = null;
 
   if (subjects.length > 0 || grade) {
+    const subjectFilterStart = Date.now();
     const [{ data: subjectMatches, error: subjectError }, { data: gradeMatches, error: gradeError }] =
       await Promise.all([
         subjects.length > 0
@@ -97,6 +94,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
           ? supabase.from("tutor_subjects").select("tutor_id").eq("grade_level", grade)
           : Promise.resolve({ data: null, error: null }),
       ]);
+    console.info("[perf][tutors-directory][subject-filter-query-ms]", Date.now() - subjectFilterStart);
 
     if (subjectError || gradeError) {
       subjectQueryErrorMessage = subjectError?.message ?? gradeError?.message ?? "Subject filter query failed.";
@@ -123,6 +121,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   } else if (tutorIdsFilter !== null && tutorIdsFilter.length === 0) {
     tutors = [];
   } else {
+    const tutorsQueryStart = Date.now();
     let tutorsQuery = supabase
       .from("tutor_profiles")
       .select(
@@ -154,15 +153,13 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     }
 
     const { data, error } = await tutorsQuery;
+    console.info("[perf][tutors-directory][tutor-profiles-query-ms]", Date.now() - tutorsQueryStart);
     tutors = data as TutorRow[] | null;
     tutorsError = error;
   }
 
   const tutorIds = (tutors ?? []).map((item) => item.id);
-  const { data: reviewRatingRows } =
-    tutorIds.length > 0
-      ? await supabase.from("reviews").select("tutor_id, rating").in("tutor_id", tutorIds)
-      : { data: [] as ReviewRatingRow[] };
+  const subjectRowsStart = Date.now();
   const { data: subjectRows } =
     tutorIds.length > 0
       ? await supabase
@@ -170,9 +167,9 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
           .select("tutor_id, subject, grade_level")
           .in("tutor_id", tutorIds)
       : { data: [] as { tutor_id: string; subject: string; grade_level: string }[] };
+  console.info("[perf][tutors-directory][subjects-query-ms]", Date.now() - subjectRowsStart);
 
   const subjectMap = new Map<string, string[]>();
-  const reviewStatsMap = new Map<string, { total: number; avg: number }>();
   (subjectRows ?? []).forEach((row) => {
     const label = row.subject?.trim() ?? "";
     if (!label) return;
@@ -181,12 +178,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
       list.push(label);
     }
     subjectMap.set(row.tutor_id, list);
-  });
-  (reviewRatingRows ?? []).forEach((row) => {
-    const current = reviewStatsMap.get(row.tutor_id) ?? { total: 0, avg: 0 };
-    const nextTotal = current.total + 1;
-    const nextAvg = (current.avg * current.total + Number(row.rating ?? 0)) / nextTotal;
-    reviewStatsMap.set(row.tutor_id, { total: nextTotal, avg: nextAvg });
   });
 
   const sortedTutors = [...(tutors ?? [])].sort((a, b) => {
@@ -205,14 +196,12 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     }
 
     if (sort === "rating") {
-      const aRealtime = reviewStatsMap.get(a.id);
-      const bRealtime = reviewStatsMap.get(b.id);
-      const aRating = aRealtime ? aRealtime.avg : Number(a.average_rating ?? 0);
-      const bRating = bRealtime ? bRealtime.avg : Number(b.average_rating ?? 0);
+      const aRating = Number(a.average_rating ?? 0);
+      const bRating = Number(b.average_rating ?? 0);
       if (bRating !== aRating) return bRating - aRating;
 
-      const aReviews = aRealtime ? aRealtime.total : Number(a.total_reviews ?? 0);
-      const bReviews = bRealtime ? bRealtime.total : Number(b.total_reviews ?? 0);
+      const aReviews = Number(a.total_reviews ?? 0);
+      const bReviews = Number(b.total_reviews ?? 0);
       if (bReviews !== aReviews) return bReviews - aReviews;
 
       return a.display_name.localeCompare(b.display_name);
@@ -294,9 +283,8 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
           </Card>
           <section className="grid gap-4 md:grid-cols-2">
             {sortedTutors.map((tutor) => {
-              const realtime = reviewStatsMap.get(tutor.id);
-              const displayRating = realtime ? realtime.avg : Number(tutor.average_rating ?? 0);
-              const displayReviews = realtime ? realtime.total : Number(tutor.total_reviews ?? 0);
+              const displayRating = Number(tutor.average_rating ?? 0);
+              const displayReviews = Number(tutor.total_reviews ?? 0);
               const serviceAreas = parseServiceAreasFromDb(tutor.exact_location, tutor.district);
               const shownAreas = serviceAreas.slice(0, 3);
               const remainingAreas = Math.max(0, serviceAreas.length - shownAreas.length);

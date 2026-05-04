@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useLinkStatus } from "next/link";
-import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +25,12 @@ function LinkPendingBody({
   pendingLabel?: ReactNode;
 }) {
   const { pending } = useLinkStatus();
-  const t = useTranslations("Common");
   if (pending) {
-    return <span className="inline-flex items-center justify-center gap-2">{pendingLabel ?? t("loading")}</span>;
+    return (
+      <span className="inline-flex items-center justify-center gap-2">
+        {pendingLabel ?? <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />}
+      </span>
+    );
   }
   return <>{children}</>;
 }

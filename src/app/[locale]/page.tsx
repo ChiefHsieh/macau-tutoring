@@ -10,9 +10,6 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { hasSupabaseEnv } from "@/lib/supabase/config";
-import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
 import { teachableSubjectOptions } from "@/lib/tutor-setup-form-helpers";
 import { FeaturedTutorCard } from "@/components/featured-tutor-card";
 import { RecentDemandSection, type RecentDemandCardModel } from "@/components/recent-demand-section";
@@ -20,6 +17,7 @@ import { LandingSiteFooter } from "@/components/landing-site-footer";
 import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent } from "@/components/ui/card";
+import { getCachedLandingHomeData } from "@/lib/landing-home-cache";
 
 type LandingPageProps = {
   params: Promise<{ locale: string }>;
@@ -31,143 +29,18 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const tHome = await getTranslations("Home");
   const tCommon = await getTranslations("Common");
 
-  let tutorCount = 0;
-  let subjectCount = teachableSubjectOptions.length;
-  let studentCount = 0;
-  let reviewActivityCount = 0;
-  let verifiedTutorCount = 0;
-  let activeLeadCount = 0;
-  let bookingMatchCount = 0;
-
-  const featured: Array<{
-    id: string;
-    display_name: string;
-    district: string;
-    hourly_rate: number;
-    service_type: string;
-    is_verified: boolean;
-    average_rating: number;
-    total_reviews: number;
-    education_background: string;
-    profile_photo: string | null;
-    subjectSummary: string;
-  }> = [];
-
-  type FeedRow = {
-    lead_id: string;
-    child_grade: string;
-    subject: string;
-    district: string | null;
-    budget_max: number | null;
-    created_at: string;
-  };
-  let demandFeedRows: FeedRow[] = [];
-  let demandsFromLiveFeed = false;
-
-  if (hasSupabaseEnv()) {
-    const supabase = await createClient();
-    const since = new Date();
-    since.setDate(since.getDate() - 30);
-    const sinceIso = since.toISOString();
-
-    const [
-      { count: tutorCountResult },
-      { count: studentCountResult },
-      { count: reviewActivityCountResult },
-      { count: verifiedTutorCountResult },
-      { count: bookingMatchCountResult },
-      { count: activeLeadCountResult },
-      { data: featuredRows },
-    ] = await Promise.all([
-      supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }),
-      supabase.from("users").select("id", { head: true, count: "exact" }).eq("role", "student"),
-      supabase.from("reviews").select("id", { head: true, count: "exact" }),
-      supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }).eq("is_verified", true),
-      supabase.from("bookings").select("id", { head: true, count: "exact" }),
-      supabase.from("bookings").select("id", { head: true, count: "exact" }).gte("created_at", sinceIso),
-      supabase
-        .from("tutor_profiles")
-        .select(
-          "id, display_name, district, hourly_rate, service_type, is_verified, average_rating, total_reviews, education_background, profile_photo",
-        )
-        .neq("display_name", "")
-        .order("created_at", { ascending: false })
-        .limit(9),
-    ]);
-
-    tutorCount = tutorCountResult ?? 0;
-    studentCount = studentCountResult ?? 0;
-    reviewActivityCount = reviewActivityCountResult ?? 0;
-    verifiedTutorCount = verifiedTutorCountResult ?? 0;
-    bookingMatchCount = bookingMatchCountResult ?? 0;
-    activeLeadCount = activeLeadCountResult ?? 0;
-    featured.push(
-      ...(featuredRows ?? []).map((row) => ({
-        ...row,
-        subjectSummary: "",
-      })),
-    );
-
-    const featuredIds = featured.map((item) => item.id);
-    if (featuredIds.length > 0) {
-      const [{ data: subjectLines }, { data: reviewLines }] = await Promise.all([
-        supabase
-          .from("tutor_subjects")
-          .select("tutor_id, subject, grade_level")
-          .in("tutor_id", featuredIds),
-        supabase
-          .from("reviews")
-          .select("tutor_id, rating")
-          .in("tutor_id", featuredIds),
-      ]);
-
-      const map = new Map<string, string[]>();
-      const reviewStatsMap = new Map<string, { total: number; avg: number }>();
-      (subjectLines ?? []).forEach((row) => {
-        const label = row.subject?.trim() ?? "";
-        if (!label) return;
-        const list = map.get(row.tutor_id) ?? [];
-        if (!list.includes(label)) {
-          list.push(label);
-        }
-        map.set(row.tutor_id, list);
-      });
-      (reviewLines ?? []).forEach((row) => {
-        const current = reviewStatsMap.get(row.tutor_id) ?? { total: 0, avg: 0 };
-        const nextTotal = current.total + 1;
-        const nextAvg = (current.avg * current.total + Number(row.rating ?? 0)) / nextTotal;
-        reviewStatsMap.set(row.tutor_id, { total: nextTotal, avg: nextAvg });
-      });
-
-      featured.forEach((row) => {
-        row.subjectSummary = (map.get(row.id) ?? []).slice(0, 3).join(" · ");
-        const realtime = reviewStatsMap.get(row.id);
-        if (realtime) {
-          row.average_rating = realtime.avg;
-          row.total_reviews = realtime.total;
-        }
-      });
-    }
-
-    const { data: feedData, error: feedError } = await supabase
-      .from("parent_lead_public_feed")
-      .select("lead_id, child_grade, subject, district, budget_max, created_at")
-      .order("created_at", { ascending: false })
-      .limit(8);
-
-    if (feedError) {
-      console.warn("[Landing] parent_lead_public_feed:", feedError.message);
-    }
-
-    if (!feedError && feedData && feedData.length > 0) {
-      demandFeedRows = feedData as FeedRow[];
-      demandsFromLiveFeed = true;
-    }
-  }
-
-  if (!demandsFromLiveFeed) {
-    demandFeedRows = getDemoRecentLeadRows(locale);
-  }
+  const subjectCount = teachableSubjectOptions.length;
+  const {
+    tutorCount,
+    studentCount,
+    reviewActivityCount,
+    verifiedTutorCount,
+    activeLeadCount,
+    bookingMatchCount,
+    featured,
+    demandFeedRows,
+    demandsFromLiveFeed,
+  } = await getCachedLandingHomeData(locale);
 
   const dateLocale = locale === "en" ? "en-GB" : "zh-HK";
   const recentDemandItems: RecentDemandCardModel[] = demandFeedRows.map((row) => ({
@@ -309,6 +182,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
                 online: t("tagOnline"),
                 inPerson: t("tagInPerson"),
                 both: t("tagBoth"),
+                loading: tCommon("loading"),
               }}
             />
           ))}

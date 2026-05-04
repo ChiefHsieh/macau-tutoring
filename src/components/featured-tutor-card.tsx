@@ -27,6 +27,8 @@ export type FeaturedTutorCardProps = {
     online: string;
     inPerson: string;
     both: string;
+    /** Shown while `ButtonLink` navigation is pending (avoids client `useTranslations` in `LinkPendingBody`). */
+    loading: string;
   };
 };
 
@@ -104,6 +106,7 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
             variant="outline"
             size="sm"
             className="h-11 w-full shrink-0 text-sm sm:h-10 sm:min-h-0 sm:min-w-0 sm:flex-1 sm:text-xs"
+            pendingLabel={labels.loading}
           >
             {labels.viewProfile}
           </ButtonLink>
@@ -111,6 +114,7 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
             href={`/${locale}/booking/new?tutorId=${tutor.id}`}
             size="sm"
             className="h-11 w-full shrink-0 text-sm sm:h-10 sm:min-h-0 sm:min-w-0 sm:flex-1 sm:text-xs"
+            pendingLabel={labels.loading}
           >
             {labels.book}
           </ButtonLink>

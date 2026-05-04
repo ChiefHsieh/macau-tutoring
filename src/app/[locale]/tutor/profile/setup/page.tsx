@@ -1,14 +1,19 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { TutorProfileSetupForm, type ClientFormInput } from "@/components/tutor-profile-setup-form";
+import type { ClientFormInput } from "@/components/tutor-profile-setup-form";
 import {
   groupSubjectsFromDb,
   inferRegionFromAreas,
   parseServiceAreasFromDb,
   parseEducationForForm,
 } from "@/lib/tutor-setup-form-helpers";
+
+const TutorProfileSetupForm = dynamic(
+  () => import("@/components/tutor-profile-setup-form").then((m) => m.TutorProfileSetupForm)
+);
 
 type TutorProfileSetupPageProps = {
   params: Promise<{ locale: string }>;

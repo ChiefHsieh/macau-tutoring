@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AuthNav } from "@/components/auth-nav";
 import { AppToaster } from "@/components/app-toaster";
 import { NavigationTopLoader } from "@/components/navigation-top-loader";
+import { pickClientMessages } from "@/lib/i18n-client-messages";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -23,10 +24,11 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  const clientMessages = pickClientMessages(messages as Record<string, unknown>);
   const t = await getTranslations("Nav");
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={clientMessages}>
       <NavigationTopLoader />
       <div className="min-h-screen w-full bg-[#000225]">
         <div className="mobile-page-shell mx-auto flex w-full max-w-[1200px] flex-col gap-8 bg-[#000225] p-4 md:p-6">

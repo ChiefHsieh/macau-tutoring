@@ -1,15 +1,19 @@
 ﻿import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
 import type { EventInput } from "@fullcalendar/core";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { TutorAvailabilityCalendar } from "@/components/tutor-availability-calendar";
 import {
   deleteOneOffAvailabilityAction,
   deleteRecurringAvailabilityAction,
 } from "./actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubmitButton } from "@/components/submit-button";
+
+const TutorAvailabilityCalendar = dynamic(
+  () => import("@/components/tutor-availability-calendar").then((m) => m.TutorAvailabilityCalendar)
+);
 
 type TutorAvailabilityPageProps = {
   params: Promise<{ locale: string }>;

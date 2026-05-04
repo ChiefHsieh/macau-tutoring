@@ -16,10 +16,62 @@ type MessageRow = {
   id: string;
   sender_id: string;
   receiver_id: string;
+  booking_id: string | null;
   content: string;
   created_at: string;
   is_read: boolean;
 };
+
+function resolveDisplayName({
+  preferredName,
+  fullName,
+  displayName,
+  email,
+  fallbackId,
+  unknownLabel,
+}: {
+  preferredName?: string | null;
+  fullName?: string | null;
+  displayName?: string | null;
+  email?: string | null;
+  fallbackId: string;
+  unknownLabel: string;
+}) {
+  const preferred = preferredName?.trim();
+  if (preferred) return preferred;
+  const full = fullName?.trim();
+  if (full) return full;
+  const tutor = displayName?.trim();
+  if (tutor) return tutor;
+  const emailPrefix = email?.trim().split("@")[0];
+  if (emailPrefix) return emailPrefix;
+  const shortId = fallbackId.slice(0, 8);
+  return shortId ? `${unknownLabel} (${shortId})` : unknownLabel;
+}
+
+function parseNameFromNotificationContent(type: string, content: string): string | null {
+  const text = content.trim();
+  if (!text) return null;
+
+  if (type === "new_message") {
+    const idx = text.indexOf(":");
+    if (idx > 0) {
+      const name = text.slice(0, idx).trim();
+      return name || null;
+    }
+  }
+
+  if (type === "booking_request") {
+    const marker = " requested ";
+    const idx = text.indexOf(marker);
+    if (idx > 0) {
+      const name = text.slice(0, idx).trim();
+      return name || null;
+    }
+  }
+
+  return null;
+}
 
 export default async function MessagesInboxPage({ params, searchParams }: MessagesInboxPageProps) {
   const { locale } = await params;
@@ -35,7 +87,7 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
 
   const { data: rows } = await supabase
     .from("messages")
-    .select("id, sender_id, receiver_id, content, created_at, is_read")
+    .select("id, sender_id, receiver_id, booking_id, content, created_at, is_read")
     .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
     .order("created_at", { ascending: false })
     .limit(400);
@@ -52,10 +104,18 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
   }
 
   const threadLast = new Map<string, MessageRow>();
+  const messageIdToPeer = new Map<string, string>();
+  const bookingIdToPeer = new Map<string, string>();
   for (const r of rows ?? []) {
     const peer = r.sender_id === user.id ? r.receiver_id : r.sender_id;
     if (!threadLast.has(peer)) {
       threadLast.set(peer, r);
+    }
+    if (r.sender_id !== user.id) {
+      messageIdToPeer.set(r.id, r.sender_id);
+    }
+    if (r.booking_id) {
+      bookingIdToPeer.set(r.booking_id, peer);
     }
   }
 
@@ -63,13 +123,43 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
   const [{ data: peers }, { data: peerTutorProfiles }] =
     peerIds.length > 0
       ? await Promise.all([
-          supabase.from("users").select("id, full_name").in("id", peerIds),
+          supabase.from("users").select("id, full_name, email").in("id", peerIds),
           supabase.from("tutor_profiles").select("id, display_name").in("id", peerIds),
         ])
-      : [{ data: [] as { id: string; full_name: string }[] }, { data: [] as { id: string; display_name: string }[] }];
+      : [
+          { data: [] as { id: string; full_name: string | null; email: string | null }[] },
+          { data: [] as { id: string; display_name: string | null }[] },
+        ];
 
   const userNameById = new Map((peers ?? []).map((p) => [p.id, p.full_name?.trim() || ""]));
+  const userEmailById = new Map((peers ?? []).map((p) => [p.id, p.email?.trim() || ""]));
   const tutorNameById = new Map((peerTutorProfiles ?? []).map((p) => [p.id, p.display_name?.trim() || ""]));
+  const notificationNameByPeer = new Map<string, string>();
+
+  const unresolvedPeerIds = peerIds.filter((id) => {
+    return !userNameById.get(id) && !tutorNameById.get(id) && !userEmailById.get(id);
+  });
+  if (unresolvedPeerIds.length > 0) {
+    const { data: noticeRows } = await supabase
+      .from("notifications")
+      .select("type, content, related_id, created_at")
+      .eq("user_id", user.id)
+      .in("type", ["new_message", "booking_request"])
+      .order("created_at", { ascending: false })
+      .limit(300);
+
+    for (const n of noticeRows ?? []) {
+      let peerId: string | undefined;
+      if (n.type === "new_message" && n.related_id) {
+        peerId = messageIdToPeer.get(n.related_id);
+      } else if (n.type === "booking_request" && n.related_id) {
+        peerId = bookingIdToPeer.get(n.related_id);
+      }
+      if (!peerId || !unresolvedPeerIds.includes(peerId) || notificationNameByPeer.has(peerId)) continue;
+      const parsed = parseNameFromNotificationContent(n.type, n.content ?? "");
+      if (parsed) notificationNameByPeer.set(peerId, parsed);
+    }
+  }
 
   return (
     <main className="space-y-6">
@@ -93,7 +183,14 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
           {peerIds.map((peerId) => {
             const last = threadLast.get(peerId)!;
             const unread = unreadByPeer.get(peerId) ?? 0;
-            const peerName = userNameById.get(peerId) || tutorNameById.get(peerId) || t("unknownUser");
+            const peerName = resolveDisplayName({
+              preferredName: notificationNameByPeer.get(peerId),
+              fullName: userNameById.get(peerId),
+              displayName: tutorNameById.get(peerId),
+              email: userEmailById.get(peerId),
+              fallbackId: peerId,
+              unknownLabel: t("unknownUser"),
+            });
             return (
               <li key={peerId}>
                 <Link href={`/${locale}/messages/${peerId}`}>
