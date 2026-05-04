@@ -30,12 +30,34 @@ export async function signUpAction(formData: FormData) {
   }
 
   const supabase = await createClient();
-  // 若项目仍开启「Confirm email」，此处通常无 session，跳转 onboarding 可能再被拦回登录。
-  // 请在 Supabase 控制台关闭邮箱确认（见仓库根目录 .env.example 说明）。
-  const { error } = await supabase.auth.signUp({ email, password });
+  // 若开启「Confirm email」，通常无 session：只能回登录页提示去邮箱验证（见 .env.example）。
+  const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) redirect(`/${locale}/auth?error=${encodeURIComponent(error.message)}`);
 
-  redirect(`/${locale}/onboarding`);
+  const user = data.user;
+  const session = data.session;
+
+  if (user && session) {
+    const displayName = (user.email?.split("@")[0] ?? "User").trim() || "User";
+    const { error: profileError } = await supabase.from("users").upsert(
+      {
+        id: user.id,
+        role: "student",
+        full_name: displayName,
+        phone: "-",
+        email: user.email ?? email,
+      },
+      { onConflict: "id" },
+    );
+
+    if (profileError) {
+      redirect(`/${locale}/onboarding?error=${encodeURIComponent(profileError.message)}`);
+    }
+
+    redirect(`/${locale}/dashboard`);
+  }
+
+  redirect(`/${locale}/auth?registered=1`);
 }
 
 export async function signOutAction(formData: FormData) {

@@ -12,6 +12,7 @@ type AuthPageProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{
     error?: string;
+    registered?: string;
   }>;
 };
 
@@ -47,6 +48,9 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
             <p className="ui-alert ui-alert-error mb-3">
               {decodeURIComponent(query.error)}
             </p>
+          ) : null}
+          {query.registered === "1" ? (
+            <p className="ui-alert ui-alert-success mb-3">{t("signUpCheckEmail")}</p>
           ) : null}
           {!supabaseReady ? (
             <p className="ui-alert ui-alert-warning mb-3">
