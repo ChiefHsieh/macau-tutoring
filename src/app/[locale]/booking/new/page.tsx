@@ -105,7 +105,10 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
       <Card>
         <CardHeader className="pb-4">
           <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("subtitle")}</CardDescription>
+          <CardDescription className="space-y-2">
+            <span className="block">{t("subtitle")}</span>
+            <span className="block text-xs text-zinc-500">{t("studentsOnlyBookingNote")}</span>
+          </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
         {query.success ? (

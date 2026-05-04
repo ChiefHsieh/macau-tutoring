@@ -9,8 +9,12 @@ export async function completeOnboardingAction(formData: FormData) {
   const phone = String(formData.get("phone") ?? "");
   const role = String(formData.get("role") ?? "student");
 
-  if (!["tutor", "student", "admin"].includes(role)) {
-    redirect(`/${locale}/onboarding?error=Invalid role`);
+  /* Manager/admin accounts are not self-service; assign only via Supabase / SQL. */
+  if (role === "admin") {
+    redirect(`/${locale}/onboarding?error=admin_forbidden`);
+  }
+  if (!["tutor", "student"].includes(role)) {
+    redirect(`/${locale}/onboarding?error=invalid_role`);
   }
 
   const supabase = await createClient();

@@ -112,7 +112,8 @@
     "whatsapp": "WhatsApp (optional)",
     "student": "Parent/Student",
     "tutor": "Tutor",
-    "admin": "Admin",
+    "adminRoleNotAllowed": "Administrator accounts cannot be created here. Only student and tutor roles are available for registration.",
+    "invalidRole": "Please choose a valid role (student or tutor).",
     "email": "Login email",
     "submit": "Save and continue",
     "envMissing": "Supabase is not configured yet. Please set up .env.local first."
@@ -369,7 +370,8 @@
     "noSubject": "This tutor has no configured subjects yet, booking unavailable.",
     "bookNow": "Confirm booking",
     "noTutor": "No tutors available for booking.",
-    "back": "Back to student dashboard"
+    "back": "Back to student dashboard",
+    "studentsOnlyBookingNote": "Only student accounts can book tutors. Registered tutor accounts cannot book other tutors."
   },
   "TutorPublic": {
     "back": "Back to directory",
@@ -401,6 +403,11 @@
     "heroValue2": "Full transparency: education, experience, and ratings at a glance",
     "heroValue3": "Self-service booking: choose the right tutor and send booking requests directly",
     "heroIllustrationCaption": "Clarity, trust, and a smoother booking flow for families and tutors.",
+    "developerPostLabel": "Note from the developer",
+    "developerPostTitle": "Booking reminders & upcoming app",
+    "developerPostP1": "Please remember to come back to this website from time to time to check your booking status and any updates.",
+    "developerPostP2": "We are also developing a mobile app to improve notifications — thank you for your patience.",
+    "developerPostSignature": "Kind regards,\nWebsite Developer — Chief",
     "ctaBrowse": "Browse tutors",
     "ctaAuth": "Sign in / Sign up",
     "ctaRoadmap": "View roadmap",

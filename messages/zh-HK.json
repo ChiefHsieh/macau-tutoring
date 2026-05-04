@@ -112,7 +112,8 @@
     "whatsapp": "WhatsApp（可選）",
     "student": "家長/學生",
     "tutor": "導師",
-    "admin": "管理員",
+    "adminRoleNotAllowed": "無法在此自助註冊管理員帳號，請選擇學生或導師。已有管理員由平台另行開通。",
+    "invalidRole": "請選擇有效身份（學生或導師）。",
     "email": "登入電郵",
     "submit": "保存並進入我的家教中心",
     "envMissing": "當前未配置 Supabase，暫時無法完成初始化。請先配置 .env.local 後重試。"
@@ -369,7 +370,8 @@
     "noSubject": "該導師尚未配置學科，當前無法預約。",
     "bookNow": "確認預約",
     "noTutor": "暫無導師資料可預約。",
-    "back": "返回我的家教中心"
+    "back": "返回我的家教中心",
+    "studentsOnlyBookingNote": "僅限學生帳號可預約導師；已註冊的導師帳號不能預約其他導師。"
   },
   "TutorPublic": {
     "back": "返回導師目錄",
@@ -401,6 +403,11 @@
     "heroValue2": "公開透明：完整學歷、經驗與評價一覽無遺",
     "heroValue3": "自主預約：選擇合適導師，直接發起課程預約",
     "heroIllustrationCaption": "更清晰、更可信賴的補習匹配與預約體驗。",
+    "developerPostLabel": "站長留言",
+    "developerPostTitle": "預約提醒與手機應用",
+    "developerPostP1": "請記得不時返回本站查看預約狀態與相關更新。",
+    "developerPostP2": "我們亦正在開發手機應用程式，以提升通知體驗，敬請期待。",
+    "developerPostSignature": "此致敬禮\n網站開發者 Chief",
     "ctaBrowse": "瀏覽導師目錄",
     "ctaAuth": "登入 / 註冊",
     "ctaRoadmap": "查看產品路線圖",

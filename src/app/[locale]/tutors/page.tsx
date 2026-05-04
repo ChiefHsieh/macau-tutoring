@@ -51,6 +51,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   const { locale } = await params;
   const query = await searchParams;
   const t = await getTranslations("Directory");
+  const tBooking = await getTranslations("Booking");
 
   const supabase = await createClient();
 
@@ -239,6 +240,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
           </>
         }
       >
+        <p className="mb-4 text-sm leading-relaxed text-[#94A3B8]">{tBooking("studentsOnlyBookingNote")}</p>
         {tutorsError ? (
           <p className="ui-alert ui-alert-error">{tutorsError.message}</p>
         ) : null}

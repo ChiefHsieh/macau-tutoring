@@ -1,6 +1,16 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Activity, BookOpen, CalendarCheck2, GraduationCap, Search, ShieldCheck, Star, Users } from "lucide-react";
+import {
+  Activity,
+  BookOpen,
+  CalendarCheck2,
+  GraduationCap,
+  Megaphone,
+  Search,
+  ShieldCheck,
+  Star,
+  Users,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
@@ -82,7 +92,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
         )
         .neq("display_name", "")
         .order("created_at", { ascending: false })
-        .limit(8),
+        .limit(9),
     ]);
 
     tutorCount = tutorCountResult ?? 0;
@@ -235,6 +245,29 @@ export default async function LandingPage({ params }: LandingPageProps) {
           </div>
 
         </div>
+      </Card>
+
+      <Card className="overflow-hidden border border-[#E6C699]/35 bg-[linear-gradient(135deg,rgba(15,44,89,0.92)_0%,rgba(10,15,53,0.96)_100%)] shadow-md shadow-black/25">
+        <CardContent className="space-y-4 p-5 md:p-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E6C699]/40 bg-[#101742] text-[#E6C699]">
+              <Megaphone className="h-5 w-5" aria-hidden />
+            </span>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#DAC0A3]">
+                {t("developerPostLabel")}
+              </p>
+              <h2 className="mt-0.5 text-lg font-semibold leading-snug text-[#F8F9FA] md:text-xl">
+                {t("developerPostTitle")}
+              </h2>
+            </div>
+          </div>
+          <div className="space-y-3 border-l-2 border-[#E6C699]/50 pl-4 text-sm leading-relaxed text-[#E2E8F0] md:text-base">
+            <p>{t("developerPostP1")}</p>
+            <p>{t("developerPostP2")}</p>
+          </div>
+          <p className="whitespace-pre-line text-sm italic leading-relaxed text-[#94A3B8]">{t("developerPostSignature")}</p>
+        </CardContent>
       </Card>
 
       <PageSection

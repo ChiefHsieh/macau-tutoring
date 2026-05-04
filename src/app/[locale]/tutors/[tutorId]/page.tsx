@@ -34,6 +34,7 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
   const { locale, tutorId } = await params;
   const query = (await searchParams) ?? {};
   const t = await getTranslations("TutorPublic");
+  const tBooking = await getTranslations("Booking");
 
   const supabase = await createClient();
   const viewer = await getCurrentProfile();
@@ -134,6 +135,7 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
               <Button asChild className="w-full">
                 <Link href={`/${locale}/booking/new?tutorId=${tutor.id}`}>{t("book")}</Link>
               </Button>
+              <p className="text-xs leading-relaxed text-zinc-500">{tBooking("studentsOnlyBookingNote")}</p>
               {viewer?.role === "student" && viewer.id !== tutor.id ? (
                 <Button asChild variant="outline" className="w-full">
                   <Link href={`/${locale}/messages/${tutor.id}`}>{t("messageTutor")}</Link>
