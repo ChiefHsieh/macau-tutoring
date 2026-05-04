@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu } from "lucide-react";
-import { signOutAction } from "@/app/[locale]/auth/actions";
+import { useTranslations } from "next-intl";
 import { markAllNotificationsReadAction } from "@/app/[locale]/notifications/actions";
+import { SubmitButton } from "@/components/submit-button";
+import { SignOutForm } from "@/components/sign-out-form";
 
 /** Must sit above all in-page layers (cards, loaders ~9990). Portal breaks header stacking limits. */
 const Z_OVERLAY = 2147483646;
@@ -21,6 +23,7 @@ export type MobileNavPortalLabels = {
   messages?: string;
   dashboard?: string;
   logout?: string;
+  loggingOut?: string;
 };
 
 type MobileNavPortalProps = {
@@ -30,6 +33,7 @@ type MobileNavPortalProps = {
 };
 
 export function MobileNavPortal({ locale, variant, labels }: MobileNavPortalProps) {
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -124,12 +128,13 @@ export function MobileNavPortal({ locale, variant, labels }: MobileNavPortalProp
                     </Link>
                     <form action={markAllNotificationsReadAction}>
                       <input type="hidden" name="locale" value={locale} />
-                      <button
+                      <SubmitButton
                         type="submit"
-                        className="mobile-nav-link w-full cursor-pointer text-left"
+                        className="mobile-nav-link h-auto w-full cursor-pointer py-3 text-left font-normal"
+                        pendingLabel={tCommon("loading")}
                       >
                         {labels.notificationsAria ?? ""}
-                      </button>
+                      </SubmitButton>
                     </form>
                     <Link
                       href={`/${locale}/support`}
@@ -154,15 +159,12 @@ export function MobileNavPortal({ locale, variant, labels }: MobileNavPortalProp
                     >
                       {labels.dashboard ?? ""}
                     </Link>
-                    <form action={signOutAction}>
-                      <input type="hidden" name="locale" value={locale} />
-                      <button
-                        type="submit"
-                        className="w-full rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-3 text-base text-[#0F2C59]"
-                      >
-                        {labels.logout ?? ""}
-                      </button>
-                    </form>
+                    <SignOutForm
+                      locale={locale}
+                      logoutLabel={labels.logout ?? ""}
+                      pendingLabel={labels.loggingOut ?? tCommon("loggingOut")}
+                      className="w-full rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-3 text-base text-[#0F2C59]"
+                    />
                   </div>
                 </>
               )}

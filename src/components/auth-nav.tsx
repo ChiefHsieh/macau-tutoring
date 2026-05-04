@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getCurrentProfile } from "@/lib/auth";
-import { signOutAction } from "@/app/[locale]/auth/actions";
 import { NotificationNavLink } from "@/components/notification-nav-link";
 import { MobileNavPortal } from "@/components/mobile-nav-portal";
+import { SignOutForm } from "@/components/sign-out-form";
 
 type AuthNavProps = {
   locale: string;
@@ -11,6 +11,7 @@ type AuthNavProps = {
 
 export async function AuthNav({ locale }: AuthNavProps) {
   const t = await getTranslations("Nav");
+  const tCommon = await getTranslations("Common");
   const profile = await getCurrentProfile();
 
   if (!profile) {
@@ -47,10 +48,7 @@ export async function AuthNav({ locale }: AuthNavProps) {
         <Link href={`/${locale}/dashboard`} className="rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-2 text-base text-[#0F2C59]">
           {t("dashboard")}
         </Link>
-        <form action={signOutAction}>
-          <input type="hidden" name="locale" value={locale} />
-          <button className="rounded-md border border-[#0F2C59] bg-[#DAC0A3] px-4 py-2 text-base text-[#0F2C59]">{t("logout")}</button>
-        </form>
+        <SignOutForm locale={locale} logoutLabel={t("logout")} pendingLabel={tCommon("loggingOut")} />
       </div>
 
       <MobileNavPortal
@@ -64,6 +62,7 @@ export async function AuthNav({ locale }: AuthNavProps) {
           messages: t("messages"),
           dashboard: t("dashboard"),
           logout: t("logout"),
+          loggingOut: tCommon("loggingOut"),
         }}
       />
     </>

@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TutorFiltersMobileDrawer } from "@/components/tutor-filters-mobile-drawer";
 import { PageSection } from "@/components/page-section";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent } from "@/components/ui/card";
 import { TutorDirectoryFilterForm } from "@/components/tutor-directory-filter-form";
 import { parseServiceAreasFromDb } from "@/lib/tutor-setup-form-helpers";
@@ -52,6 +51,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
   const query = await searchParams;
   const t = await getTranslations("Directory");
   const tBooking = await getTranslations("Booking");
+  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
 
@@ -231,12 +231,12 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
         description={t("subtitle")}
         action={
           <>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/${locale}`}>{t("home")}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href={`/${locale}/booking/new`}>{t("book")}</Link>
-            </Button>
+            <ButtonLink href={`/${locale}`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+              {t("home")}
+            </ButtonLink>
+            <ButtonLink href={`/${locale}/booking/new`} size="sm" pendingLabel={tCommon("loading")}>
+              {t("book")}
+            </ButtonLink>
           </>
         }
       >
@@ -338,12 +338,12 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
                     </p>
                   ) : null}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/${locale}/tutors/${tutor.id}`}>{t("viewProfile")}</Link>
-                    </Button>
-                    <Button asChild size="sm">
-                      <Link href={`/${locale}/booking/new?tutorId=${tutor.id}`}>{t("bookThis")}</Link>
-                    </Button>
+                    <ButtonLink href={`/${locale}/tutors/${tutor.id}`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+                      {t("viewProfile")}
+                    </ButtonLink>
+                    <ButtonLink href={`/${locale}/booking/new?tutorId=${tutor.id}`} size="sm" pendingLabel={tCommon("loading")}>
+                      {t("bookThis")}
+                    </ButtonLink>
                   </div>
                 </CardContent>
               </Card>

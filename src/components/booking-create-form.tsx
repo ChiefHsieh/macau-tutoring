@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createBookingAction } from "@/app/[locale]/booking/actions";
 import { trackEvent } from "@/lib/analytics";
 import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
+import { useTranslations } from "next-intl";
 
 type Slot = { start_time: string; end_time: string };
 type TutorSubject = { subject: string; grade_level: string };
@@ -53,6 +54,7 @@ export function BookingCreateForm({
   subjects,
   labels,
 }: BookingCreateFormProps) {
+  const tCommon = useTranslations("Common");
   const subjectOptions = useMemo(() => uniqueSubjectsInOrder(subjects), [subjects]);
 
   const [subject, setSubject] = useState(subjectOptions[0] ?? "");
@@ -118,7 +120,7 @@ export function BookingCreateForm({
       <input type="hidden" name="start_time" value={start ?? ""} />
       <input type="hidden" name="end_time" value={end ?? ""} />
 
-      <Button>{labels.bookNow}</Button>
+      <SubmitButton pendingLabel={tCommon("loading")}>{labels.bookNow}</SubmitButton>
     </form>
   );
 }

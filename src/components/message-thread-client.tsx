@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessageAction } from "@/app/[locale]/messages/actions";
-import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+import { SubmitButton } from "@/components/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -32,6 +33,7 @@ export function MessageThreadClient({
   initialMessages,
   labels,
 }: MessageThreadClientProps) {
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [rows, setRows] = useState<ThreadMessage[]>(initialMessages);
   const [me, setMe] = useState<string | null>(null);
@@ -127,7 +129,9 @@ export function MessageThreadClient({
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="receiver_id" value={peerId} />
         <Textarea name="content" required minLength={1} maxLength={4000} rows={3} placeholder={labels.placeholder} />
-        <Button type="submit">{labels.send}</Button>
+        <SubmitButton type="submit" pendingLabel={tCommon("loading")}>
+          {labels.send}
+        </SubmitButton>
       </form>
     </div>
   );

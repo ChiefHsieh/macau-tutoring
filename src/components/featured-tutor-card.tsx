@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { displayMacauRegion } from "@/lib/macau-location-display";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent } from "@/components/ui/card";
 
 export type FeaturedTutorCardProps = {
@@ -100,12 +99,21 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
         <p className="text-sm leading-relaxed text-zinc-600">{tutor.subjectSummary || labels.noSubjects}</p>
 
         <div className="mt-auto flex flex-col gap-2.5 pt-1 sm:flex-row sm:flex-wrap sm:gap-2">
-          <Button asChild variant="outline" size="sm" className="h-11 w-full shrink-0 text-sm sm:h-10 sm:min-h-0 sm:min-w-0 sm:flex-1 sm:text-xs">
-            <Link href={`/${locale}/tutors/${tutor.id}`}>{labels.viewProfile}</Link>
-          </Button>
-          <Button asChild size="sm" className="h-11 w-full shrink-0 text-sm sm:h-10 sm:min-h-0 sm:min-w-0 sm:flex-1 sm:text-xs">
-            <Link href={`/${locale}/booking/new?tutorId=${tutor.id}`}>{labels.book}</Link>
-          </Button>
+          <ButtonLink
+            href={`/${locale}/tutors/${tutor.id}`}
+            variant="outline"
+            size="sm"
+            className="h-11 w-full shrink-0 text-sm sm:h-10 sm:min-h-0 sm:min-w-0 sm:flex-1 sm:text-xs"
+          >
+            {labels.viewProfile}
+          </ButtonLink>
+          <ButtonLink
+            href={`/${locale}/booking/new?tutorId=${tutor.id}`}
+            size="sm"
+            className="h-11 w-full shrink-0 text-sm sm:h-10 sm:min-h-0 sm:min-w-0 sm:flex-1 sm:text-xs"
+          >
+            {labels.book}
+          </ButtonLink>
         </div>
       </CardContent>
     </Card>

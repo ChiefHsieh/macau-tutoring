@@ -9,7 +9,7 @@ import {
   deleteRecurringAvailabilityAction,
 } from "./actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 
 type TutorAvailabilityPageProps = {
   params: Promise<{ locale: string }>;
@@ -24,6 +24,7 @@ export default async function TutorAvailabilityPage({
   const query = await searchParams;
   const { user, profile } = await requireProfile(locale);
   const t = await getTranslations("Availability");
+  const tCommon = await getTranslations("Common");
 
   if (profile.role !== "tutor") redirect(`/${locale}/dashboard`);
 
@@ -130,6 +131,7 @@ export default async function TutorAvailabilityPage({
           modeOneOff: t("slotModeOneOff"),
           modeCancel: t("slotModeCancel"),
           invalidRange: t("invalidRangeHint"),
+          actionLoading: t("actionLoading"),
         }}
       />
 
@@ -154,9 +156,9 @@ export default async function TutorAvailabilityPage({
                     <form action={deleteRecurringAvailabilityAction}>
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="id" value={item.id} />
-                      <Button variant="outline" size="sm">
+                      <SubmitButton variant="outline" size="sm" type="submit" pendingLabel={tCommon("loading")}>
                         {t("delete")}
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </li>
                 ))
@@ -178,9 +180,9 @@ export default async function TutorAvailabilityPage({
                     <form action={deleteOneOffAvailabilityAction}>
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="id" value={item.id} />
-                      <Button variant="outline" size="sm">
+                      <SubmitButton variant="outline" size="sm" type="submit" pendingLabel={tCommon("loading")}>
                         {t("delete")}
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </li>
                 ))

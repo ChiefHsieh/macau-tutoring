@@ -1,10 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
+import { SubmitButton } from "@/components/submit-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { acceptBookingAction, rejectBookingAction } from "./actions";
 
@@ -22,6 +22,7 @@ export default async function TutorDashboard({
   const { profile, user } = await requireProfile(locale);
   if (profile.role !== "tutor") redirect(`/${locale}/dashboard`);
   const t = await getTranslations("Dashboard");
+  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
@@ -134,18 +135,14 @@ export default async function TutorDashboard({
             {myProfile?.is_verified ? t("tutorVerifiedStatus") : t("tutorPendingStatus")}
           </p>
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/${locale}/notifications`}>
-                {t("notificationsCta")}
-                {notifBadge > 0 ? ` (${notifBadge > 99 ? "99+" : notifBadge})` : ""}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/${locale}/messages`}>
-                {t("messagesCta")}
-                {msgBadge > 0 ? ` (${msgBadge > 99 ? "99+" : msgBadge})` : ""}
-              </Link>
-            </Button>
+            <ButtonLink href={`/${locale}/notifications`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+              {t("notificationsCta")}
+              {notifBadge > 0 ? ` (${notifBadge > 99 ? "99+" : notifBadge})` : ""}
+            </ButtonLink>
+            <ButtonLink href={`/${locale}/messages`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+              {t("messagesCta")}
+              {msgBadge > 0 ? ` (${msgBadge > 99 ? "99+" : msgBadge})` : ""}
+            </ButtonLink>
           </div>
           <ul className="list-disc space-y-2 pl-5 text-sm text-zinc-700">
             <li>{t("tutorTodo1")}</li>
@@ -153,12 +150,12 @@ export default async function TutorDashboard({
             <li>{t("tutorTodo3")}</li>
           </ul>
           <div className="flex flex-wrap gap-3 pt-1">
-            <Button asChild>
-              <Link href={`/${locale}/tutor/profile/setup`}>{t("tutorSetupCta")}</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`/${locale}/tutor/availability`}>{t("availabilityCta")}</Link>
-            </Button>
+            <ButtonLink href={`/${locale}/tutor/profile/setup`} pendingLabel={tCommon("loading")}>
+              {t("tutorSetupCta")}
+            </ButtonLink>
+            <ButtonLink href={`/${locale}/tutor/availability`} variant="outline" pendingLabel={tCommon("loading")}>
+              {t("availabilityCta")}
+            </ButtonLink>
           </div>
           <Card className="border-[#1A2456] bg-[#0A0F35]">
             <CardContent className="space-y-3 pt-5">
@@ -172,12 +169,12 @@ export default async function TutorDashboard({
                 })}
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button asChild>
-                  <Link href={`/${locale}/tutor/profile/setup`}>{t("portfolioSectionCta")}</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href={`/${locale}/tutor/availability`}>{t("availabilityCta")}</Link>
-                </Button>
+                <ButtonLink href={`/${locale}/tutor/profile/setup`} pendingLabel={tCommon("loading")}>
+                  {t("portfolioSectionCta")}
+                </ButtonLink>
+                <ButtonLink href={`/${locale}/tutor/availability`} variant="outline" pendingLabel={tCommon("loading")}>
+                  {t("availabilityCta")}
+                </ButtonLink>
               </div>
             </CardContent>
           </Card>
@@ -213,22 +210,33 @@ export default async function TutorDashboard({
                         <form action={acceptBookingAction}>
                           <input type="hidden" name="locale" value={locale} />
                           <input type="hidden" name="booking_id" value={b.id} />
-                          <Button type="submit" size="sm">
+                          <SubmitButton type="submit" size="sm" pendingLabel={tCommon("loading")}>
                             {t("acceptBooking")}
-                          </Button>
+                          </SubmitButton>
                         </form>
                         <form action={rejectBookingAction}>
                           <input type="hidden" name="locale" value={locale} />
                           <input type="hidden" name="booking_id" value={b.id} />
-                          <Button type="submit" size="sm" variant="outline" className="text-red-700">
+                          <SubmitButton
+                            type="submit"
+                            size="sm"
+                            variant="outline"
+                            className="text-red-700"
+                            pendingLabel={tCommon("loading")}
+                          >
                             {t("rejectBooking")}
-                          </Button>
+                          </SubmitButton>
                         </form>
                       </>
                     ) : null}
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/${locale}/messages/${b.student_id}`}>{t("messageStudent")}</Link>
-                    </Button>
+                    <ButtonLink
+                      href={`/${locale}/messages/${b.student_id}`}
+                      variant="outline"
+                      size="sm"
+                      pendingLabel={tCommon("loading")}
+                    >
+                      {t("messageStudent")}
+                    </ButtonLink>
                   </div>
                 </li>
               ))}

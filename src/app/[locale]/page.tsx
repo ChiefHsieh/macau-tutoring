@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
   Activity,
@@ -19,7 +18,7 @@ import { FeaturedTutorCard } from "@/components/featured-tutor-card";
 import { RecentDemandSection, type RecentDemandCardModel } from "@/components/recent-demand-section";
 import { LandingSiteFooter } from "@/components/landing-site-footer";
 import { PageSection } from "@/components/page-section";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent } from "@/components/ui/card";
 
 type LandingPageProps = {
@@ -30,6 +29,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const { locale } = await params;
   const t = await getTranslations("Landing");
   const tHome = await getTranslations("Home");
+  const tCommon = await getTranslations("Common");
 
   let tutorCount = 0;
   let subjectCount = teachableSubjectOptions.length;
@@ -204,12 +204,22 @@ export default async function LandingPage({ params }: LandingPageProps) {
         <div className="grid gap-8 lg:grid-cols-9 lg:items-center">
           <div className="space-y-4 lg:col-span-5">
             <div className="flex gap-2">
-              <Button asChild variant={locale === "zh-HK" ? "default" : "outline"} size="sm">
-                <Link href="/zh-HK">{tHome("langZh")}</Link>
-              </Button>
-              <Button asChild variant={locale === "en" ? "default" : "outline"} size="sm">
-                <Link href="/en">{tHome("langEn")}</Link>
-              </Button>
+              <ButtonLink
+                href="/zh-HK"
+                variant={locale === "zh-HK" ? "default" : "outline"}
+                size="sm"
+                pendingLabel={tCommon("loading")}
+              >
+                {tHome("langZh")}
+              </ButtonLink>
+              <ButtonLink
+                href="/en"
+                variant={locale === "en" ? "default" : "outline"}
+                size="sm"
+                pendingLabel={tCommon("loading")}
+              >
+                {tHome("langEn")}
+              </ButtonLink>
             </div>
             <h1
               className="ui-hero-brand ui-hero-brand-aurora font-extrabold leading-tight tracking-tight text-[#F8F9FA]"
@@ -225,12 +235,12 @@ export default async function LandingPage({ params }: LandingPageProps) {
               <li>{t("heroValue3")}</li>
             </ul>
             <div className="flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href={`/${locale}/tutors`}>{t("ctaBrowse")}</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href={`/${locale}/auth`}>{t("ctaAuth")}</Link>
-              </Button>
+              <ButtonLink href={`/${locale}/tutors`} pendingLabel={tCommon("loading")}>
+                {t("ctaBrowse")}
+              </ButtonLink>
+              <ButtonLink href={`/${locale}/auth`} variant="outline" pendingLabel={tCommon("loading")}>
+                {t("ctaAuth")}
+              </ButtonLink>
             </div>
           </div>
 
@@ -273,14 +283,15 @@ export default async function LandingPage({ params }: LandingPageProps) {
       <PageSection
         title={t("featuredTitle")}
         action={
-          <Button
-            asChild
+          <ButtonLink
+            href={`/${locale}/tutors`}
             variant="ghost"
             size="sm"
             className="h-auto px-0 font-medium text-white underline decoration-white/70 underline-offset-2 hover:text-[#E6C699] hover:decoration-[#E6C699]"
+            pendingLabel={tCommon("loading")}
           >
-            <Link href={`/${locale}/tutors`}>{t("featuredAll")}</Link>
-          </Button>
+            {t("featuredAll")}
+          </ButtonLink>
         }
       >
         <div className="grid gap-5 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
@@ -435,12 +446,13 @@ export default async function LandingPage({ params }: LandingPageProps) {
         <CardContent className="space-y-4 p-6 pt-6 md:p-8">
           <h2 className="text-3xl font-bold text-white">{t("ctaSectionTitle")}</h2>
           <p className="max-w-2xl text-sm text-white/90 md:text-base">{t("ctaSectionBody")}</p>
-          <Button
-            asChild
+          <ButtonLink
+            href={`/${locale}/tutors`}
             className="border border-[#DAC0A3] bg-[#DAC0A3] font-semibold text-[#0F2C59] hover:bg-[#E5D2BC]"
+            pendingLabel={tCommon("loading")}
           >
-            <Link href={`/${locale}/tutors`}>{t("ctaSectionButton")}</Link>
-          </Button>
+            {t("ctaSectionButton")}
+          </ButtonLink>
         </CardContent>
       </Card>
 

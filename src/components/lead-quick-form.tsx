@@ -2,7 +2,8 @@
 
 import { submitParentLeadAction } from "@/app/[locale]/leads/actions";
 import { trackEvent } from "@/lib/analytics";
-import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 
 type LeadQuickFormLabels = {
@@ -20,6 +21,7 @@ type LeadQuickFormProps = {
 };
 
 export function LeadQuickForm({ locale, labels }: LeadQuickFormProps) {
+  const tCommon = useTranslations("Common");
   return (
     <form
       action={async (formData) => {
@@ -43,7 +45,9 @@ export function LeadQuickForm({ locale, labels }: LeadQuickFormProps) {
         autoComplete="off"
       />
       <Input name="phone" required placeholder={labels.phone} autoComplete="tel" />
-      <Button type="submit">{labels.submit}</Button>
+      <SubmitButton type="submit" pendingLabel={tCommon("loading")}>
+        {labels.submit}
+      </SubmitButton>
     </form>
   );
 }

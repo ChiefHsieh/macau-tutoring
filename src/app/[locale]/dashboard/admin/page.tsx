@@ -1,13 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { displayMacauRegion } from "@/lib/macau-location-display";
 import { PageSection } from "@/components/page-section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
+import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { verifyTutorDocumentAction } from "./actions";
 
@@ -22,6 +22,7 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
   const { profile } = await requireProfile(locale);
   if (profile.role !== "admin") redirect(`/${locale}/dashboard`);
   const t = await getTranslations("Dashboard");
+  const tCommon = await getTranslations("Common");
   const supabase = await createClient();
 
   const [{ data: tutors }, { data: docs }] = await Promise.all([
@@ -110,20 +111,24 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {item.latestDoc?.verification_document ? (
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={item.latestDoc.verification_document} target="_blank">
-                            {t("adminViewDoc")}
-                          </Link>
-                        </Button>
+                        <ButtonLink
+                          href={item.latestDoc.verification_document}
+                          target="_blank"
+                          variant="outline"
+                          size="sm"
+                          pendingLabel={tCommon("loading")}
+                        >
+                          {t("adminViewDoc")}
+                        </ButtonLink>
                       ) : null}
 
                       <form action={verifyTutorDocumentAction}>
                         <input type="hidden" name="locale" value={locale} />
                         <input type="hidden" name="tutor_id" value={item.id} />
                         <input type="hidden" name="decision" value="valid" />
-                        <Button type="submit" size="sm">
+                        <SubmitButton type="submit" size="sm" pendingLabel={tCommon("loading")}>
                           {t("adminMarkValid")}
-                        </Button>
+                        </SubmitButton>
                       </form>
 
                       <form action={verifyTutorDocumentAction} className="flex flex-wrap items-center gap-2">
@@ -137,9 +142,15 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                           minLength={5}
                           className="h-8 w-[260px]"
                         />
-                        <Button type="submit" size="sm" variant="outline" className="text-red-700">
+                        <SubmitButton
+                          type="submit"
+                          size="sm"
+                          variant="outline"
+                          className="text-red-700"
+                          pendingLabel={tCommon("loading")}
+                        >
                           {t("adminMarkInvalid")}
-                        </Button>
+                        </SubmitButton>
                       </form>
                     </div>
                   </div>

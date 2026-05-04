@@ -31,6 +31,7 @@ export type TutorAvailabilityCalendarLabels = {
   modeOneOff: string;
   modeCancel: string;
   invalidRange: string;
+  actionLoading: string;
 };
 
 type PendingSlot = {
@@ -193,10 +194,10 @@ export function TutorAvailabilityCalendar({
             <p className="ui-readable-light-slab mt-3 rounded-md px-3 py-2 font-mono text-sm">{choice.summaryLine}</p>
             <div className="mt-5 flex flex-col gap-2">
               <Button type="button" className="w-full" disabled={pending} onClick={saveRecurring}>
-                {labels.modeRecurring}
+                {pending ? labels.actionLoading : labels.modeRecurring}
               </Button>
               <Button type="button" variant="outline" className="w-full" disabled={pending} onClick={saveOneOff}>
-                {labels.modeOneOff}
+                {pending ? labels.actionLoading : labels.modeOneOff}
               </Button>
               <Button type="button" variant="ghost" className="w-full" disabled={pending} onClick={closeChoice}>
                 {labels.modeCancel}

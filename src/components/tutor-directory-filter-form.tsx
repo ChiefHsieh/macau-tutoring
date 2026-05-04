@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Select } from "@/components/ui/select";
 import {
   DIRECTORY_RATE_MAX,
@@ -105,9 +105,11 @@ function DualRangeBudget({
 
 export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDirectoryFilterFormProps) {
   const t = useTranslations("Directory");
+  const tCommon = useTranslations("Common");
   const tSubjects = useTranslations("Directory.subjectOptions");
   const tGrades = useTranslations("Directory.gradeOptions");
   const router = useRouter();
+  const [isFilterNavigating, startFilterTransition] = useTransition();
   const formAction = `/${locale}/tutors`;
 
   const [low, setLow] = useState(defaults.min);
@@ -146,7 +148,9 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
       className="grid min-w-0 max-w-full gap-4 overflow-x-hidden"
       onSubmit={(e) => {
         e.preventDefault();
-        applyFiltersAndNavigate();
+        startFilterTransition(() => {
+          applyFiltersAndNavigate();
+        });
       }}
     >
       <fieldset className="min-w-0 space-y-2 border-0 p-0">
@@ -281,12 +285,19 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
         <option value="rating">{t("sortRating")}</option>
       </Select>
 
-      <Button type="submit">{t("apply")}</Button>
-      <Button asChild variant="ghost" size="sm" className="h-auto justify-center px-0 text-[#4E5969]">
-        <Link href={formAction} onClick={() => onApply?.()}>
-          {t("clearFilters")}
-        </Link>
+      <Button type="submit" disabled={isFilterNavigating}>
+        {isFilterNavigating ? tCommon("loading") : t("apply")}
       </Button>
+      <ButtonLink
+        href={formAction}
+        variant="ghost"
+        size="sm"
+        className="h-auto justify-center px-0 text-[#4E5969]"
+        onClick={() => onApply?.()}
+        pendingLabel={tCommon("loading")}
+      >
+        {t("clearFilters")}
+      </ButtonLink>
     </form>
   );
 }

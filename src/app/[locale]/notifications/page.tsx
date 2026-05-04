@@ -6,6 +6,7 @@ import { getNotificationHref } from "@/lib/notification-links";
 import { PageSection } from "@/components/page-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { openNotificationAction } from "./actions";
+import { SubmitButton } from "@/components/submit-button";
 
 type NotificationsPageProps = {
   params: Promise<{ locale: string }>;
@@ -15,6 +16,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
   const { locale } = await params;
   await requireProfile(locale);
   const t = await getTranslations("Notifications");
+  const tCommon = await getTranslations("Common");
   const supabase = await createClient();
   const {
     data: { user },
@@ -109,7 +111,12 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
                 <input type="hidden" name="id" value={n.id} />
                 <input type="hidden" name="locale" value={locale} />
                 <input type="hidden" name="href" value={finalLink ?? ""} />
-                <button type="submit" className="w-full text-left">
+                <SubmitButton
+                  type="submit"
+                  variant="ghost"
+                  className="h-auto w-full text-left font-normal !text-inherit"
+                  pendingLabel={tCommon("loading")}
+                >
                   <Card className={n.is_read ? "border-[#1A2456] bg-[#0A0F35]" : "border-[#E6C699]/30 bg-[#101742]"}>
                     <CardContent className="space-y-3 pt-5">
                       <div className={n.is_read ? "text-sm text-[#E2E8F0]" : "text-sm font-semibold text-white"}>
@@ -122,7 +129,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
                       </div>
                     </CardContent>
                   </Card>
-                </button>
+                </SubmitButton>
               </form>
             );
           })

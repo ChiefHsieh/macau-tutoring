@@ -1,4 +1,10 @@
 {
+  "Common": {
+    "loading": "處理中…",
+    "signingIn": "登入中…",
+    "signingUp": "註冊中…",
+    "loggingOut": "登出中…"
+  },
   "Home": {
     "title": "澳門補習平台（MVP）開發看板",
     "subtitle": "你提供的 PDF 已轉為可執行階段計劃。當前項目已完成初始化 + 雙語基礎 + 首版路線展示頁。",
@@ -75,6 +81,7 @@
     "faq": "常見問題",
     "login": "登入",
     "dashboard": "我的家教中心",
+    "loggingOut": "登出中…",
     "logout": "退出",
     "messages": "訊息",
     "supportCenter": "客服中心",
@@ -346,6 +353,7 @@
     "slotModeOneOff": "僅此一次（僅所選日期當天）",
     "slotModeCancel": "取消",
     "invalidRangeHint": "請在單日內拖曳（不可跨越多天），且結束須晚於開始。",
+    "actionLoading": "保存中…",
     "slotsSummaryTitle": "已設時段列表",
     "slotsSummaryBody": "亦可在此用按鈕刪除；與日曆中點擊色塊刪除效果相同。",
     "recurringListTitle": "每週重複",

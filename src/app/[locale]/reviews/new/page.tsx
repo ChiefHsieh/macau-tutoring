@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
+import { SubmitButton } from "@/components/submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +23,7 @@ export default async function ReviewNewPage({ params, searchParams }: ReviewNewP
   if (profile.role !== "student") redirect(`/${locale}/dashboard`);
 
   const t = await getTranslations("Reviews");
+  const tCommon = await getTranslations("Common");
   const supabase = await createClient();
   const { data: booking } = await supabase
     .from("bookings")
@@ -55,9 +56,9 @@ export default async function ReviewNewPage({ params, searchParams }: ReviewNewP
         title={t("title")}
         description={t("subtitle")}
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/${locale}/dashboard/student`}>{t("back")}</Link>
-          </Button>
+          <ButtonLink href={`/${locale}/dashboard/student`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+            {t("back")}
+          </ButtonLink>
         }
       >
         <Card>
@@ -90,7 +91,9 @@ export default async function ReviewNewPage({ params, searchParams }: ReviewNewP
                 <Textarea name="comment" rows={5} maxLength={1000} placeholder={t("commentPlaceholder")} />
               </div>
 
-              <Button type="submit">{t("submit")}</Button>
+              <SubmitButton type="submit" pendingLabel={tCommon("loading")}>
+                {t("submit")}
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>

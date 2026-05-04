@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -6,7 +5,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { parseServiceAreasFromDb } from "@/lib/tutor-setup-form-helpers";
 import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type TutorPublicPageProps = {
@@ -35,6 +34,7 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
   const query = (await searchParams) ?? {};
   const t = await getTranslations("TutorPublic");
   const tBooking = await getTranslations("Booking");
+  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
   const viewer = await getCurrentProfile();
@@ -84,9 +84,9 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
   return (
     <main className="space-y-8">
       <div className="flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/${locale}/tutors`}>{t("back")}</Link>
-        </Button>
+        <ButtonLink href={`/${locale}/tutors`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+          {t("back")}
+        </ButtonLink>
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -132,14 +132,19 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
                 <p className="text-sm text-zinc-700">{serviceTypeLabel(tutor.service_type, t)}</p>
               </div>
 
-              <Button asChild className="w-full">
-                <Link href={`/${locale}/booking/new?tutorId=${tutor.id}`}>{t("book")}</Link>
-              </Button>
+              <ButtonLink href={`/${locale}/booking/new?tutorId=${tutor.id}`} className="w-full" pendingLabel={tCommon("loading")}>
+                {t("book")}
+              </ButtonLink>
               <p className="text-xs leading-relaxed text-zinc-500">{tBooking("studentsOnlyBookingNote")}</p>
               {viewer?.role === "student" && viewer.id !== tutor.id ? (
-                <Button asChild variant="outline" className="w-full">
-                  <Link href={`/${locale}/messages/${tutor.id}`}>{t("messageTutor")}</Link>
-                </Button>
+                <ButtonLink
+                  href={`/${locale}/messages/${tutor.id}`}
+                  variant="outline"
+                  className="w-full"
+                  pendingLabel={tCommon("loading")}
+                >
+                  {t("messageTutor")}
+                </ButtonLink>
               ) : null}
             </CardContent>
           </Card>

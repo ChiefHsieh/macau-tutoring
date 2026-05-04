@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageThreadClient } from "@/components/message-thread-client";
@@ -21,6 +20,7 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
   await requireProfile(locale);
 
   const t = await getTranslations("Messages");
+  const tCommon = await getTranslations("Common");
   const supabase = await createClient();
   const {
     data: { user },
@@ -70,9 +70,9 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
         title={isSupportThread ? t("supportThreadTitle") : t("threadTitle", { name: peerName })}
         description={isSupportThread ? t("supportThreadSubtitle") : t("threadSubtitle")}
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/${locale}/messages`}>{t("backToInbox")}</Link>
-          </Button>
+          <ButtonLink href={`/${locale}/messages`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+            {t("backToInbox")}
+          </ButtonLink>
         }
       >
         <Card>

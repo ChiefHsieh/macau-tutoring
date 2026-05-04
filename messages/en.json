@@ -1,4 +1,10 @@
 {
+  "Common": {
+    "loading": "Processing…",
+    "signingIn": "Signing in…",
+    "signingUp": "Creating account…",
+    "loggingOut": "Signing out…"
+  },
   "Home": {
     "title": "Macau Tutoring Marketplace MVP Roadmap",
     "subtitle": "Your PDF is converted into an actionable plan. This repo now has project bootstrap + i18n + initial roadmap page.",
@@ -75,6 +81,7 @@
     "faq": "FAQ",
     "login": "Login",
     "dashboard": "Dashboard",
+    "loggingOut": "Signing out…",
     "logout": "Logout",
     "messages": "Messages",
     "supportCenter": "Support Center",
@@ -346,6 +353,7 @@
     "slotModeOneOff": "One-time (this date only)",
     "slotModeCancel": "Cancel",
     "invalidRangeHint": "Drag within a single day (not across midnight into another day) and keep end after start.",
+    "actionLoading": "Saving…",
     "slotsSummaryTitle": "Configured slots",
     "slotsSummaryBody": "You can delete here as well; same as clicking a block on the calendar.",
     "recurringListTitle": "Weekly recurring",

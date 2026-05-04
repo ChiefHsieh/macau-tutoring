@@ -9,7 +9,7 @@ import { BookingCreateForm } from "@/components/booking-create-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 
 type BookingNewPageProps = {
   params: Promise<{ locale: string }>;
@@ -31,6 +31,7 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
   const { profile } = await requireProfile(locale);
   if (profile.role !== "student") redirect(`/${locale}/dashboard`);
   const t = await getTranslations("Booking");
+  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
@@ -152,7 +153,7 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
             </Select>
           )}
           <Input type="date" name="date" defaultValue={selectedDate} />
-          <Button>{t("load")}</Button>
+          <SubmitButton pendingLabel={tCommon("loading")}>{t("load")}</SubmitButton>
         </form>
         </CardContent>
       </Card>

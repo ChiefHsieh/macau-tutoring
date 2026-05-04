@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { TutorSubmittedToast } from "@/components/tutor-submitted-toast";
 import { PageSection } from "@/components/page-section";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -12,6 +11,7 @@ type PageProps = {
 export default async function TutorProfileSubmittedPage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations("TutorSubmitted");
+  const tCommon = await getTranslations("Common");
 
   return (
     <main>
@@ -20,12 +20,12 @@ export default async function TutorProfileSubmittedPage({ params }: PageProps) {
       </Suspense>
       <PageSection title={t("title")} description={t("description")}>
         <div className="flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href={`/${locale}/dashboard/tutor`}>{t("toDashboard")}</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={`/${locale}/tutor/profile/setup`}>{t("editProfile")}</Link>
-          </Button>
+          <ButtonLink href={`/${locale}/dashboard/tutor`} pendingLabel={tCommon("loading")}>
+            {t("toDashboard")}
+          </ButtonLink>
+          <ButtonLink href={`/${locale}/tutor/profile/setup`} variant="outline" pendingLabel={tCommon("loading")}>
+            {t("editProfile")}
+          </ButtonLink>
         </div>
       </PageSection>
     </main>

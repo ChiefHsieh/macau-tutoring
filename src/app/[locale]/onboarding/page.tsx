@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { completeOnboardingAction } from "./actions";
+import { SubmitButton } from "@/components/submit-button";
 
 type OnboardingPageProps = {
   params: Promise<{ locale: string }>;
@@ -16,6 +17,7 @@ export default async function OnboardingPage({
   const { locale } = await params;
   const query = await searchParams;
   const t = await getTranslations("Onboarding");
+  const tCommon = await getTranslations("Common");
 
   if (!hasSupabaseEnv()) {
     return (
@@ -77,9 +79,12 @@ export default async function OnboardingPage({
             {user.email}
           </span>
         </div>
-        <button className="w-full rounded-md bg-black px-4 py-2 text-white">
+        <SubmitButton
+          className="w-full rounded-md !bg-black !text-white hover:!bg-zinc-900"
+          pendingLabel={tCommon("loading")}
+        >
           {t("submit")}
-        </button>
+        </SubmitButton>
       </form>
     </main>
   );

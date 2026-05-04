@@ -232,6 +232,7 @@ function toServerPayload(values: ClientFormInput): TutorProfilePayload {
 
 export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSetupFormProps) {
   const t = useTranslations("TutorSetup");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -249,6 +250,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
   /** Shown next to file input (native “No file chosen” hidden via CSS). */
   const [avatarPickLine, setAvatarPickLine] = useState("");
   const [pdfPickLine, setPdfPickLine] = useState("");
+  const [isAdvancingStep, setIsAdvancingStep] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -323,12 +325,17 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
   };
 
   const nextStep = async () => {
-    setSubmitError(null);
-    const ok = await trigger(stepFields[step] as never);
-    if (!ok) return;
-    // Avoid showing step-5 required error before user reaches/submits step 5.
-    if (step < 4) clearErrors("verification_document");
-    setStep((prev) => Math.min(prev + 1, 4));
+    setIsAdvancingStep(true);
+    try {
+      setSubmitError(null);
+      const ok = await trigger(stepFields[step] as never);
+      if (!ok) return;
+      // Avoid showing step-5 required error before user reaches/submits step 5.
+      if (step < 4) clearErrors("verification_document");
+      setStep((prev) => Math.min(prev + 1, 4));
+    } finally {
+      setIsAdvancingStep(false);
+    }
   };
 
   const prevStep = () => {
@@ -1035,8 +1042,8 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
         </Button>
 
         {step < 4 ? (
-          <Button type="button" onClick={nextStep} disabled={isSaving} className="w-[48%] md:w-auto">
-            {t("next")}
+          <Button type="button" onClick={nextStep} disabled={isSaving || isAdvancingStep} className="w-[48%] md:w-auto">
+            {isAdvancingStep ? tCommon("loading") : t("next")}
           </Button>
         ) : (
           <Button type="submit" disabled={isSaving} className="w-[48%] md:w-auto">

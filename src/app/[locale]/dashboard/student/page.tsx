@@ -1,10 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type StudentDashboardProps = {
@@ -18,6 +17,7 @@ export default async function StudentDashboard({ params, searchParams }: Student
   const { profile, user } = await requireProfile(locale);
   if (profile.role !== "student") redirect(`/${locale}/dashboard`);
   const t = await getTranslations("Dashboard");
+  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
@@ -87,18 +87,14 @@ export default async function StudentDashboard({ params, searchParams }: Student
             <p className="ui-alert ui-alert-error">{decodeURIComponent(query.error)}</p>
           ) : null}
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/${locale}/notifications`}>
-                {t("notificationsCta")}
-                {notifBadge > 0 ? ` (${notifBadge > 99 ? "99+" : notifBadge})` : ""}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/${locale}/messages`}>
-                {t("messagesCta")}
-                {msgBadge > 0 ? ` (${msgBadge > 99 ? "99+" : msgBadge})` : ""}
-              </Link>
-            </Button>
+            <ButtonLink href={`/${locale}/notifications`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+              {t("notificationsCta")}
+              {notifBadge > 0 ? ` (${notifBadge > 99 ? "99+" : notifBadge})` : ""}
+            </ButtonLink>
+            <ButtonLink href={`/${locale}/messages`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+              {t("messagesCta")}
+              {msgBadge > 0 ? ` (${msgBadge > 99 ? "99+" : msgBadge})` : ""}
+            </ButtonLink>
           </div>
           <ul className="list-disc space-y-2 pl-5 text-sm text-zinc-700">
             <li>{t("studentTodo1")}</li>
@@ -106,12 +102,12 @@ export default async function StudentDashboard({ params, searchParams }: Student
             <li>{t("studentTodo3")}</li>
           </ul>
           <div className="flex flex-wrap gap-3 pt-1">
-            <Button asChild>
-              <Link href={`/${locale}/tutors`}>{t("studentBookCta")}</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`/${locale}/tutors`}>{t("studentDirectoryCta")}</Link>
-            </Button>
+            <ButtonLink href={`/${locale}/tutors`} pendingLabel={tCommon("loading")}>
+              {t("studentBookCta")}
+            </ButtonLink>
+            <ButtonLink href={`/${locale}/tutors`} variant="outline" pendingLabel={tCommon("loading")}>
+              {t("studentDirectoryCta")}
+            </ButtonLink>
           </div>
         </div>
       </PageSection>
@@ -139,9 +135,14 @@ export default async function StudentDashboard({ params, searchParams }: Student
                       {b.tutor_decision === "accepted" ? t("decisionAccepted") : t("decisionPending")}
                     </p>
                   </div>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/${locale}/messages/${b.tutor_id}`}>{t("messageTutor")}</Link>
-                  </Button>
+                  <ButtonLink
+                    href={`/${locale}/messages/${b.tutor_id}`}
+                    variant="outline"
+                    size="sm"
+                    pendingLabel={tCommon("loading")}
+                  >
+                    {t("messageTutor")}
+                  </ButtonLink>
                 </li>
               ))}
             </ul>
@@ -169,9 +170,9 @@ export default async function StudentDashboard({ params, searchParams }: Student
                     </p>
                     <p className="text-xs text-zinc-600">{nameById.get(b.tutor_id) ?? t("unknownTutor")}</p>
                   </div>
-                  <Button asChild size="sm">
-                    <Link href={`/${locale}/reviews/new?bookingId=${b.id}`}>{t("reviewTutor")}</Link>
-                  </Button>
+                  <ButtonLink href={`/${locale}/reviews/new?bookingId=${b.id}`} size="sm" pendingLabel={tCommon("loading")}>
+                    {t("reviewTutor")}
+                  </ButtonLink>
                 </li>
               ))}
             </ul>

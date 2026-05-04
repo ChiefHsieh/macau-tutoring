@@ -6,7 +6,7 @@ import {
 } from "./actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 
 type AuthPageProps = {
   params: Promise<{ locale: string }>;
@@ -21,6 +21,7 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
   const query = await searchParams;
   const t = await getTranslations("Auth");
   const tNav = await getTranslations("Nav");
+  const tCommon = await getTranslations("Common");
   const supabaseReady = hasSupabaseEnv();
 
   return (
@@ -72,12 +73,13 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
               required
               placeholder={t("password")}
             />
-            <Button
+            <SubmitButton
               disabled={!supabaseReady}
               className="w-full disabled:cursor-not-allowed"
+              pendingLabel={tCommon("signingIn")}
             >
               {t("signIn")}
-            </Button>
+            </SubmitButton>
           </form>
           </CardContent>
         </Card>
@@ -103,12 +105,13 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
               minLength={8}
               placeholder={t("passwordRule")}
             />
-            <Button
+            <SubmitButton
               disabled={!supabaseReady}
               className="w-full disabled:cursor-not-allowed"
+              pendingLabel={tCommon("signingUp")}
             >
               {t("signUp")}
-            </Button>
+            </SubmitButton>
           </form>
           </CardContent>
         </Card>
