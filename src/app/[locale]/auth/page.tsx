@@ -98,7 +98,6 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
         <Card>
           <CardHeader className="pb-4">
             <CardTitle>{t("signUpTitle")}</CardTitle>
-            <CardDescription>{t("signUpDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
           <form action={signUpAction} className="space-y-3">
@@ -127,7 +126,6 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
                   </span>
                 </label>
               </div>
-              <p className="text-xs text-[#94A3B8]">{t("accountTypeHint")}</p>
             </fieldset>
             <Input
               name="email"

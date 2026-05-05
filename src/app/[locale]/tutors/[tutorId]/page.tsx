@@ -105,13 +105,13 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
         <aside className="h-fit lg:sticky lg:top-4">
           <Card>
             <CardContent className="space-y-4 pt-5">
-              <div className="relative mx-auto h-44 w-44 overflow-hidden rounded-full bg-[#F7F9FC]">
+              <div className="tutor-public-avatar relative mx-auto h-44 w-44 overflow-hidden rounded-full bg-[#F7F9FC]">
                 {tutor.profile_photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={tutor.profile_photo}
                     alt=""
-                    className="h-full w-full object-cover"
+                    className="block h-full w-full object-cover"
                     loading="lazy"
                     referrerPolicy="no-referrer"
                   />

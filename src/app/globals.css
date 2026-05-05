@@ -565,5 +565,14 @@ section {
     max-height: none;
     object-fit: cover;
   }
+
+  /* Tutor public profile avatar: keep circle fully filled on mobile. */
+  .tutor-public-avatar img {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none;
+    object-fit: cover;
+  }
 }
 
