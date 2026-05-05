@@ -91,7 +91,16 @@
     "signInTitle": "登入賬號",
     "signInDesc": "已註冊用戶可直接登入進入我的家教中心。",
     "signUpTitle": "註冊新賬號",
-    "signUpDesc": "註冊成功後將直接登入並進入我的家教中心。若要成為導師或補全姓名與手機，可從頁尾「賬號初始化」或家教中心內相關入口繼續填寫。",
+    "signUpDesc": "請先於下方選擇帳戶類型。註冊成功後會直接登入對應中心；姓名與手機仍可於「賬號初始化」補全。",
+    "accountTypeLabel": "帳戶類型",
+    "roleStudent": "家長 / 學生",
+    "roleTutor": "導師",
+    "roleStudentHint": "預約導師並管理課程相關事宜。",
+    "roleTutorHint": "發布檔案並接收預約。",
+    "accountTypeHint": "此處僅可選擇學生或導師；其餘資料可稍後於賬號初始化完成。",
+    "signUpFullName": "姓名（正式名稱）",
+    "signUpPhone": "聯絡電話",
+    "adminSelfSignupBlocked": "管理員帳戶不可透過自助註冊開通。請選擇學生或導師，或聯絡平台人員。",
     "signUpCheckEmail": "帳號已建立。請到電郵信箱點擊驗證連結，完成後再登入即可進入我的家教中心。",
     "email": "電郵",
     "password": "密碼",
@@ -245,6 +254,7 @@
     "serviceAreas": "細分服務區域（可多選）",
     "serviceAreasRequired": "至少選取一個地點",
     "hourlyRate": "時薪（MOP）",
+    "hourlyRateMinRule": "時薪必須大於 0。",
     "workingStart": "可授課起始日期",
     "workingEnd": "可授課結束日期",
     "serviceType": "授課形式",
@@ -322,6 +332,7 @@
     "verificationSampleNote": "可接受樣例：官方成績單 PDF（含姓名與課程）、錄取信、在讀證明。請避免截圖拼貼、僅封面頁或模糊不清的掃描件。",
     "uploadLinkedBadge": "已保存文件連結",
     "serviceAreasRegionRule": "請只選擇所屬於當前一級區域的細分區。",
+    "availabilitySetupRequiredError": "請先完成導師資料設置，之後才可設定可用時段。",
     "subjectRequired": "至少選一科"
   },
   "TutorSubmitted": {
@@ -371,7 +382,8 @@
     "blockTitle": "屏蔽特定日期時段",
     "reason": "原因（可選）",
     "addBlock": "新增屏蔽時段",
-    "delete": "刪除"
+    "delete": "刪除",
+    "setupRequiredError": "請先完成導師資料設置，之後才可設定可用時段。"
   },
   "Booking": {
     "title": "創建預約",

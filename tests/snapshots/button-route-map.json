@@ -1,0 +1,426 @@
+{
+  "generatedAt": "static-for-snapshot",
+  "total": 84,
+  "items": [
+    {
+      "kind": "form.action.expr",
+      "value": "signInAction",
+      "file": "src/app/[locale]/auth/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "signUpAction",
+      "file": "src/app/[locale]/auth/page.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/booking/new/page.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/booking/new/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "item.latestDoc.verification_document",
+      "file": "src/app/[locale]/dashboard/admin/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "verifyTutorDocumentAction",
+      "file": "src/app/[locale]/dashboard/admin/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "verifyTutorDocumentAction",
+      "file": "src/app/[locale]/dashboard/admin/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/student/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/student/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/student/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/student/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/student/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/student/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "acceptBookingAction",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "rejectBookingAction",
+      "file": "src/app/[locale]/dashboard/tutor/page.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/faq/page.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/layout.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/layout.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/layout.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/messages/[peerId]/page.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/messages/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "openNotificationAction",
+      "file": "src/app/[locale]/notifications/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "completeOnboardingAction",
+      "file": "src/app/[locale]/onboarding/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.literal",
+      "value": "/en",
+      "file": "src/app/[locale]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.literal",
+      "value": "/zh-HK",
+      "file": "src/app/[locale]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/reviews/new/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "submitReviewAction",
+      "file": "src/app/[locale]/reviews/new/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "deleteOneOffAvailabilityAction",
+      "file": "src/app/[locale]/tutor/availability/page.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "deleteRecurringAvailabilityAction",
+      "file": "src/app/[locale]/tutor/availability/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutor/profile/submitted/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutor/profile/submitted/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/[tutorId]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/[tutorId]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/[tutorId]/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/page.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/app/[locale]/tutors/page.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/auth-nav.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/auth-nav.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/auth-nav.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/auth-nav.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "async (formData) => {\r\n        trackEvent(\"match_created\", { tutor_id: tutorId",
+      "file": "src/components/booking-create-form.tsx"
+    },
+    {
+      "kind": "router.nav.expr",
+      "value": "qs ? `${basePath}?${qs}` : basePath",
+      "file": "src/components/booking-filters-auto-load.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "href",
+      "file": "src/components/button-link.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/featured-tutor-card.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/featured-tutor-card.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/landing-site-footer.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "async (formData) => {\r\n        trackEvent(\"lead_submit\", {\r\n          lead_source: String(formData.get(\"lead_source\") ?? \"\"),",
+      "file": "src/components/lead-quick-form.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "async (formData) => {\n          const res = await sendMessageAction(formData);\n          if (res.error) {\n            window.alert(res.error);\n            return;",
+      "file": "src/components/message-thread-client.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "markAllNotificationsReadAction",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "Link.href.expr",
+      "value": "`/${locale",
+      "file": "src/components/mobile-nav-portal.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "markAllNotificationsReadAction",
+      "file": "src/components/notification-bell-form.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "signOutAction",
+      "file": "src/components/sign-out-form.tsx"
+    },
+    {
+      "kind": "ButtonLink.href.expr",
+      "value": "formAction",
+      "file": "src/components/tutor-directory-filter-form.tsx"
+    },
+    {
+      "kind": "form.action.expr",
+      "value": "formAction",
+      "file": "src/components/tutor-directory-filter-form.tsx"
+    },
+    {
+      "kind": "router.nav.expr",
+      "value": "`${formAction}${qs ? `?${qs}` : \"\"}`",
+      "file": "src/components/tutor-directory-filter-form.tsx"
+    },
+    {
+      "kind": "router.nav.expr",
+      "value": "`/${locale}/tutor/profile/submitted?saved=1`",
+      "file": "src/components/tutor-profile-setup-form.tsx"
+    }
+  ]
+}

@@ -6,10 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { computeAvailableSlots } from "@/lib/availability";
 import { displayMacauRegion } from "@/lib/macau-location-display";
 import { BookingCreateForm } from "@/components/booking-create-form";
+import { BookingFiltersAutoLoad } from "@/components/booking-filters-auto-load";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { SubmitButton } from "@/components/submit-button";
 
 type BookingNewPageProps = {
   params: Promise<{ locale: string }>;
@@ -31,7 +29,6 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
   const { profile } = await requireProfile(locale);
   if (profile.role !== "student") redirect(`/${locale}/dashboard`);
   const t = await getTranslations("Booking");
-  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
@@ -135,26 +132,25 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
 
       <Card>
         <CardContent className="p-4 md:p-5">
-        <form className="grid gap-3 md:grid-cols-3" method="get">
-          {isTutorLocked && selectedTutor ? (
-            <>
-              <input type="hidden" name="tutorId" value={selectedTutor.id} />
-              <div className="flex h-10 items-center rounded-md border border-[#D1FAE5] bg-white/95 px-3 text-sm text-[#064E3B]">
-                {selectedTutor.display_name} · {displayMacauRegion(locale, selectedTutor.district)} · MOP{selectedTutor.hourly_rate}
-              </div>
-            </>
-          ) : (
-            <Select name="tutorId" defaultValue={selectedTutorId}>
-              {(tutors ?? []).map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.display_name} · {displayMacauRegion(locale, item.district)} · MOP{item.hourly_rate}
-                </option>
-              ))}
-            </Select>
-          )}
-          <Input type="date" name="date" defaultValue={selectedDate} />
-          <SubmitButton pendingLabel={tCommon("loading")}>{t("load")}</SubmitButton>
-        </form>
+          <BookingFiltersAutoLoad
+            locale={locale}
+            tutors={
+              (tutors ?? []).map((item) => ({
+                id: item.id,
+                display_name: item.display_name,
+                district: displayMacauRegion(locale, item.district),
+                hourly_rate: item.hourly_rate,
+              }))
+            }
+            selectedTutorId={selectedTutorId}
+            selectedDate={selectedDate}
+            isTutorLocked={isTutorLocked}
+            lockedTutorLabel={
+              selectedTutor
+                ? `${selectedTutor.display_name} · ${displayMacauRegion(locale, selectedTutor.district)} · MOP${selectedTutor.hourly_rate}`
+                : undefined
+            }
+          />
         </CardContent>
       </Card>
 

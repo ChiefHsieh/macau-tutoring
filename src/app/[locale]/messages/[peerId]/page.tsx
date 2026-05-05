@@ -144,7 +144,7 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
   }
 
   const peerName = resolveDisplayName({
-    preferredName: notificationFallbackName,
+    preferredName: isSupportThread ? t("supportThreadTitle") : notificationFallbackName,
     fullName: peerUser?.full_name,
     displayName: peerTutorProfile?.display_name,
     email: peerUser?.email,

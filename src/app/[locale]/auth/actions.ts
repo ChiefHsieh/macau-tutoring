@@ -23,10 +23,25 @@ export async function signInAction(formData: FormData) {
 export async function signUpAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const fullName = String(formData.get("full_name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const locale = String(formData.get("locale") ?? "zh-HK");
+  const roleRaw = String(formData.get("role") ?? "student").trim();
+  if (roleRaw === "admin") {
+    redirect(`/${locale}/auth?error=admin_self_signup`);
+  }
+  const role = roleRaw === "tutor" ? "tutor" : "student";
 
   if (!hasSupabaseEnv()) {
     redirect(`/${locale}/auth?error=${encodeURIComponent("Supabase is not configured yet.")}`);
+  }
+
+  if (fullName.length < 2) {
+    redirect(`/${locale}/auth?error=${encodeURIComponent("Please enter your full name.")}`);
+  }
+
+  if (phone.length < 6) {
+    redirect(`/${locale}/auth?error=${encodeURIComponent("Please enter a valid contact number.")}`);
   }
 
   const supabase = await createClient();
@@ -38,13 +53,12 @@ export async function signUpAction(formData: FormData) {
   const session = data.session;
 
   if (user && session) {
-    const displayName = (user.email?.split("@")[0] ?? "User").trim() || "User";
     const { error: profileError } = await supabase.from("users").upsert(
       {
         id: user.id,
-        role: "student",
-        full_name: displayName,
-        phone: "-",
+        role,
+        full_name: fullName,
+        phone,
         email: user.email ?? email,
       },
       { onConflict: "id" },

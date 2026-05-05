@@ -17,6 +17,7 @@ const TutorProfileSetupForm = dynamic(
 
 type TutorProfileSetupPageProps = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ error?: string }>;
 };
 
 function parseTeachingExperienceMonths(raw: string | null | undefined) {
@@ -32,10 +33,24 @@ function parseTeachingExperienceMonths(raw: string | null | undefined) {
 
 export default async function TutorProfileSetupPage({
   params,
+  searchParams,
 }: TutorProfileSetupPageProps) {
   const { locale } = await params;
+  const query = await searchParams;
   const { user, profile } = await requireProfile(locale);
   const t = await getTranslations("TutorSetup");
+  const setupError = (() => {
+    if (!query.error) return "";
+    const decoded = (() => {
+      try {
+        return decodeURIComponent(query.error);
+      } catch {
+        return query.error;
+      }
+    })();
+    if (decoded === "availability_setup_required") return t("availabilitySetupRequiredError");
+    return decoded;
+  })();
 
   if (profile.role !== "tutor") redirect(`/${locale}/dashboard`);
 
@@ -86,6 +101,9 @@ export default async function TutorProfileSetupPage({
     <main className="mx-auto w-full max-w-3xl rounded-xl border bg-white p-4 shadow-sm md:p-5">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
       <p className="mt-2 text-sm text-zinc-600">{t("subtitle")}</p>
+      {setupError ? (
+        <p className="ui-alert ui-alert-warning mt-3">{setupError}</p>
+      ) : null}
       <div className="mt-6">
         <TutorProfileSetupForm locale={locale} initialValues={initialValues} />
       </div>

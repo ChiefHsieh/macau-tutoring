@@ -20,7 +20,7 @@ const gradeLevelValues = [
 export const tutorProfilePayloadSchema = z
   .object({
     district: z.enum(districtValues),
-    hourly_rate: z.number().int().min(0),
+    hourly_rate: z.number().int().gt(0, { message: "Hourly rate must be greater than 0." }),
     working_period_start: z.string().min(1),
     working_period_end: z.string().min(1),
     service_type: z.enum(serviceTypeValues),

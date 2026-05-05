@@ -20,6 +20,19 @@ type TutorAvailabilityPageProps = {
   searchParams: Promise<{ error?: string; saved?: string }>;
 };
 
+function formatAvailabilityError(raw: string | undefined, t: Awaited<ReturnType<typeof getTranslations>>) {
+  if (!raw) return "";
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  })();
+  if (decoded === "availability_setup_required") return t("setupRequiredError");
+  return decoded;
+}
+
 export default async function TutorAvailabilityPage({
   params,
   searchParams,
@@ -33,6 +46,17 @@ export default async function TutorAvailabilityPage({
   if (profile.role !== "tutor") redirect(`/${locale}/dashboard`);
 
   const supabase = await createClient();
+  const { data: tutorProfile, error: tutorProfileError } = await supabase
+    .from("tutor_profiles")
+    .select("id")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (tutorProfileError) {
+    redirect(`/${locale}/dashboard/tutor?error=${encodeURIComponent(tutorProfileError.message)}`);
+  }
+  if (!tutorProfile) {
+    redirect(`/${locale}/tutor/profile/setup?error=availability_setup_required`);
+  }
   const today = new Date().toISOString().slice(0, 10);
 
   const [{ data: recurringSlots }, { data: bookedSlots }] = await Promise.all([
@@ -111,7 +135,7 @@ export default async function TutorAvailabilityPage({
           ) : null}
           {query.error ? (
             <p className="ui-alert ui-alert-error mt-3">
-              {decodeURIComponent(query.error)}
+              {formatAvailabilityError(query.error, t)}
             </p>
           ) : null}
         </CardContent>
@@ -136,6 +160,7 @@ export default async function TutorAvailabilityPage({
           modeCancel: t("slotModeCancel"),
           invalidRange: t("invalidRangeHint"),
           actionLoading: t("actionLoading"),
+          setupRequiredError: t("setupRequiredError"),
         }}
       />
 

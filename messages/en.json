@@ -91,7 +91,16 @@
     "signInTitle": "Sign in",
     "signInDesc": "Existing users can directly access the dashboard.",
     "signUpTitle": "Create account",
-    "signUpDesc": "After signup you are signed in and taken to your dashboard. To switch to tutor or add name/phone, open “Account onboarding” from the footer or your dashboard.",
+    "signUpDesc": "Select an account type below first. After signup you are signed in to the matching dashboard; you can still complete name and phone in account onboarding.",
+    "accountTypeLabel": "Account type",
+    "roleStudent": "Parent / student",
+    "roleTutor": "Tutor",
+    "roleStudentHint": "Book tutors and manage your sessions.",
+    "roleTutorHint": "Publish your profile and accept bookings.",
+    "accountTypeHint": "Only student or tutor can be chosen here. You can still complete name and phone from account onboarding.",
+    "signUpFullName": "Full name (formal name)",
+    "signUpPhone": "Contact number",
+    "adminSelfSignupBlocked": "Manager / administrator accounts cannot be created through self-registration. Please choose student or tutor, or contact the platform team.",
     "signUpCheckEmail": "Account created. Confirm the link in your email, then sign in to open your dashboard.",
     "email": "Email",
     "password": "Password",
@@ -245,6 +254,7 @@
     "serviceAreas": "Detailed service areas (multi-select)",
     "serviceAreasRequired": "Select at least one location.",
     "hourlyRate": "Hourly rate (MOP)",
+    "hourlyRateMinRule": "Hourly rate must be greater than 0.",
     "workingStart": "Working period start",
     "workingEnd": "Working period end",
     "serviceType": "Service type",
@@ -322,6 +332,7 @@
     "verificationSampleNote": "Good examples: official transcript PDF (name + courses), offer letter, or enrolment letter. Avoid blurry scans, cover-only pages, or stitched screenshots.",
     "uploadLinkedBadge": "File link saved",
     "serviceAreasRegionRule": "Please select subareas within the selected district.",
+    "availabilitySetupRequiredError": "Please complete tutor profile setup before configuring availability.",
     "subjectRequired": "Select at least one subject."
   },
   "TutorSubmitted": {
@@ -371,7 +382,8 @@
     "blockTitle": "Block specific date/time",
     "reason": "Reason (optional)",
     "addBlock": "Add blocked slot",
-    "delete": "Delete"
+    "delete": "Delete",
+    "setupRequiredError": "Please complete tutor profile setup before configuring availability."
   },
   "Booking": {
     "title": "Create Booking",

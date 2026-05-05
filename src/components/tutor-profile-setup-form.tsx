@@ -130,7 +130,7 @@ function buildClientFormSchema(t: (key: string) => string) {
     .object({
       district: z.enum(macauRegionValues),
       service_areas: z.array(z.string().min(1)).min(1, { message: t("serviceAreasRequired") }),
-      hourly_rate: z.coerce.number().int().min(0),
+      hourly_rate: z.coerce.number().int().gt(0, { message: t("hourlyRateMinRule") }),
       working_period_start: z.string().min(1),
       working_period_end: z.string().min(1),
       service_type: z.enum(serviceTypeValues),
@@ -351,6 +351,11 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
     setStep(pickStepFromClientErrors(formErrors));
   };
 
+  const mapServerSubmitError = (raw: string) => {
+    if (raw === "tutor_hourly_rate_positive") return t("hourlyRateMinRule");
+    return raw;
+  };
+
   const onSubmit = (values: ClientFormInput) => {
     setSubmitError(null);
     setIsSaving(true);
@@ -384,7 +389,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
         trackEvent("tutor_setup_submit", { locale });
         const result = await saveTutorProfileAction({ locale, payload: parsed.data });
         if (!result.ok) {
-          setSubmitError(result.error ?? "Save failed.");
+          setSubmitError(mapServerSubmitError(result.error ?? "Save failed."));
           return;
         }
 
@@ -651,7 +656,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
               {t("hourlyRate")}
               <Input
                 type="number"
-                min={0}
+                min={1}
                 {...register("hourly_rate")}
                 className="mt-1 w-full"
               />

@@ -6,6 +6,7 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export type AvailabilitySlotResult = { ok: true } | { ok: false; error: string };
+const ERR_SETUP_REQUIRED = "availability_setup_required";
 
 const recurringSchema = z
   .object({
@@ -38,6 +39,16 @@ const oneOffSchema = z
     message: "End time must be later than start time.",
   });
 
+async function ensureTutorProfileExistsForAvailability(userId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tutor_profiles")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+  return { supabase, exists: Boolean(data?.id), error };
+}
+
 export async function addRecurringAvailabilityAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "zh-HK");
   const parsed = recurringSchema.safeParse({
@@ -53,7 +64,13 @@ export async function addRecurringAvailabilityAction(formData: FormData) {
   const { user, profile } = await requireProfile(locale);
   if (profile.role !== "tutor") redirect(`/${locale}/dashboard`);
 
-  const supabase = await createClient();
+  const { supabase, exists, error: tutorProfileError } = await ensureTutorProfileExistsForAvailability(user.id);
+  if (tutorProfileError) {
+    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(tutorProfileError.message)}`);
+  }
+  if (!exists) {
+    redirect(`/${locale}/tutor/profile/setup?error=${ERR_SETUP_REQUIRED}`);
+  }
   const { error } = await supabase.from("tutor_availability").insert({
     tutor_id: user.id,
     ...parsed.data,
@@ -107,7 +124,13 @@ export async function saveRecurringSlotFromCalendarAction(
     return { ok: false, error: "Not a tutor account." };
   }
 
-  const supabase = await createClient();
+  const { supabase, exists, error: tutorProfileError } = await ensureTutorProfileExistsForAvailability(user.id);
+  if (tutorProfileError) {
+    return { ok: false, error: tutorProfileError.message };
+  }
+  if (!exists) {
+    return { ok: false, error: ERR_SETUP_REQUIRED };
+  }
   const { error } = await supabase.from("tutor_availability").insert({
     tutor_id: user.id,
     ...parsed.data,
@@ -161,7 +184,13 @@ export async function saveOneOffSlotFromCalendarAction(
     return { ok: false, error: "Not a tutor account." };
   }
 
-  const supabase = await createClient();
+  const { supabase, exists, error: tutorProfileError } = await ensureTutorProfileExistsForAvailability(user.id);
+  if (tutorProfileError) {
+    return { ok: false, error: tutorProfileError.message };
+  }
+  if (!exists) {
+    return { ok: false, error: ERR_SETUP_REQUIRED };
+  }
   const { error } = await supabase.from("tutor_availability_one_off").insert({
     tutor_id: user.id,
     session_date: parsed.data.session_date,
@@ -238,7 +267,13 @@ export async function addBlockedSlotAction(formData: FormData) {
   const { user, profile } = await requireProfile(locale);
   if (profile.role !== "tutor") redirect(`/${locale}/dashboard`);
 
-  const supabase = await createClient();
+  const { supabase, exists, error: tutorProfileError } = await ensureTutorProfileExistsForAvailability(user.id);
+  if (tutorProfileError) {
+    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(tutorProfileError.message)}`);
+  }
+  if (!exists) {
+    redirect(`/${locale}/tutor/profile/setup?error=${ERR_SETUP_REQUIRED}`);
+  }
   const { error } = await supabase.from("tutor_unavailability_blocks").insert({
     tutor_id: user.id,
     ...parsed.data,

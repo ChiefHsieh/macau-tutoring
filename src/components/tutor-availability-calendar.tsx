@@ -32,6 +32,7 @@ export type TutorAvailabilityCalendarLabels = {
   modeCancel: string;
   invalidRange: string;
   actionLoading: string;
+  setupRequiredError: string;
 };
 
 type PendingSlot = {
@@ -56,6 +57,11 @@ export function TutorAvailabilityCalendar({
   weekdayNames,
   labels,
 }: TutorAvailabilityCalendarProps) {
+  const resolveActionError = (raw: string) => {
+    if (raw === "availability_setup_required") return labels.setupRequiredError;
+    return raw;
+  };
+
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [choice, setChoice] = useState<PendingSlot | null>(null);
@@ -96,7 +102,7 @@ export function TutorAvailabilityCalendar({
       calendarApi.unselect();
       setChoice(null);
       if (!res.ok) {
-        toast.error(res.error);
+        toast.error(resolveActionError(res.error));
         return;
       }
       toast.success(labels.slotSaved);
@@ -112,7 +118,7 @@ export function TutorAvailabilityCalendar({
       calendarApi.unselect();
       setChoice(null);
       if (!res.ok) {
-        toast.error(res.error);
+        toast.error(resolveActionError(res.error));
         return;
       }
       toast.success(labels.slotSavedOneOff);
@@ -131,7 +137,7 @@ export function TutorAvailabilityCalendar({
       startTransition(async () => {
         const res = await deleteRecurringSlotFromCalendarAction(locale, rowId);
         if (!res.ok) {
-          toast.error(res.error);
+          toast.error(resolveActionError(res.error));
           return;
         }
         toast.success(labels.slotDeleted);
@@ -148,7 +154,7 @@ export function TutorAvailabilityCalendar({
       startTransition(async () => {
         const res = await deleteOneOffSlotFromCalendarAction(locale, rowId);
         if (!res.ok) {
-          toast.error(res.error);
+          toast.error(resolveActionError(res.error));
           return;
         }
         toast.success(labels.slotDeleted);

@@ -120,19 +120,22 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
   }
 
   const peerIds = [...threadLast.keys()];
+  const supportManagerId =
+    process.env.SUPPORT_MANAGER_USER_ID?.trim() || process.env.NEXT_PUBLIC_SUPPORT_MANAGER_USER_ID?.trim() || "";
   const [{ data: peers }, { data: peerTutorProfiles }] =
     peerIds.length > 0
       ? await Promise.all([
-          supabase.from("users").select("id, full_name, email").in("id", peerIds),
+          supabase.from("users").select("id, full_name, email, role").in("id", peerIds),
           supabase.from("tutor_profiles").select("id, display_name").in("id", peerIds),
         ])
       : [
-          { data: [] as { id: string; full_name: string | null; email: string | null }[] },
+          { data: [] as { id: string; full_name: string | null; email: string | null; role: string | null }[] },
           { data: [] as { id: string; display_name: string | null }[] },
         ];
 
   const userNameById = new Map((peers ?? []).map((p) => [p.id, p.full_name?.trim() || ""]));
   const userEmailById = new Map((peers ?? []).map((p) => [p.id, p.email?.trim() || ""]));
+  const userRoleById = new Map((peers ?? []).map((p) => [p.id, p.role?.trim() || ""]));
   const tutorNameById = new Map((peerTutorProfiles ?? []).map((p) => [p.id, p.display_name?.trim() || ""]));
   const notificationNameByPeer = new Map<string, string>();
 
@@ -183,8 +186,10 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
           {peerIds.map((peerId) => {
             const last = threadLast.get(peerId)!;
             const unread = unreadByPeer.get(peerId) ?? 0;
+            const isSupportPeer =
+              userRoleById.get(peerId) === "admin" || (!!supportManagerId && peerId === supportManagerId);
             const peerName = resolveDisplayName({
-              preferredName: notificationNameByPeer.get(peerId),
+              preferredName: isSupportPeer ? t("supportThreadTitle") : notificationNameByPeer.get(peerId),
               fullName: userNameById.get(peerId),
               displayName: tutorNameById.get(peerId),
               email: userEmailById.get(peerId),

@@ -58,6 +58,9 @@ export async function saveTutorProfileAction(input: SaveTutorProfileInput) {
     profileError = fallback.error;
   }
 
+  if (profileError?.message.includes("tutor_profiles_hourly_rate_check")) {
+    return { ok: false, error: "tutor_hourly_rate_positive" };
+  }
   if (profileError) return { ok: false, error: profileError.message };
 
   const { error: deleteSubjectError } = await supabase
