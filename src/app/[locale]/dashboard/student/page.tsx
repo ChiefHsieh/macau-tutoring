@@ -4,11 +4,12 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
+import { DashboardNameForm } from "@/components/dashboard-name-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type StudentDashboardProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ reviewed?: string; error?: string }>;
+  searchParams: Promise<{ reviewed?: string; error?: string; nameUpdated?: string }>;
 };
 
 export default async function StudentDashboard({ params, searchParams }: StudentDashboardProps) {
@@ -84,8 +85,19 @@ export default async function StudentDashboard({ params, searchParams }: Student
             <p className="ui-alert ui-alert-success">{t("reviewSuccess")}</p>
           ) : null}
           {query.error ? (
-            <p className="ui-alert ui-alert-error">{decodeURIComponent(query.error)}</p>
+            <p className="ui-alert ui-alert-error">
+              {query.error === "name_invalid_length" ? t("nameInvalidLength") : decodeURIComponent(query.error)}
+            </p>
           ) : null}
+          {query.nameUpdated ? <p className="ui-alert ui-alert-success">{t("nameUpdated")}</p> : null}
+          <DashboardNameForm
+            locale={locale}
+            returnTo={`/${locale}/dashboard/student`}
+            currentName={profile.full_name ?? ""}
+            label={t("nameFieldLabel")}
+            submitText={t("nameSave")}
+            pendingText={tCommon("loading")}
+          />
           <div className="flex flex-wrap gap-2">
             <ButtonLink href={`/${locale}/notifications`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
               {t("notificationsCta")}

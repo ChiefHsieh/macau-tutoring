@@ -194,7 +194,11 @@
     "adminMarkValid": "標記有效並認證導師",
     "adminMarkInvalid": "標記無效",
     "adminRejectReasonPlaceholder": "必填駁回原因（例如：證件模糊、資料不一致、文件已過期）",
-    "adminReviewUpdated": "審核結果已更新。"
+    "adminReviewUpdated": "審核結果已更新。",
+    "nameFieldLabel": "你的顯示名稱",
+    "nameSave": "儲存名稱",
+    "nameUpdated": "你的名稱已更新。",
+    "nameInvalidLength": "名稱長度需為 2 至 80 個字元。"
   },
   "Reviews": {
     "title": "評價導師",

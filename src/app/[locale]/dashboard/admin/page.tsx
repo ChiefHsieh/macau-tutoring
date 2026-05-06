@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/button-link";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
+import { DashboardNameForm } from "@/components/dashboard-name-form";
 import { verifyTutorDocumentAction } from "./actions";
 
 type AdminDashboardProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ updated?: string; error?: string }>;
+  searchParams: Promise<{ updated?: string; error?: string; nameUpdated?: string }>;
 };
 
 export default async function AdminDashboard({ params, searchParams }: AdminDashboardProps) {
@@ -64,9 +65,18 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
         ) : null}
         {query.error ? (
           <p className="ui-alert ui-alert-error mb-3">
-            {decodeURIComponent(query.error)}
+            {query.error === "name_invalid_length" ? t("nameInvalidLength") : decodeURIComponent(query.error)}
           </p>
         ) : null}
+        {query.nameUpdated ? <p className="ui-alert ui-alert-success mb-3">{t("nameUpdated")}</p> : null}
+        <DashboardNameForm
+          locale={locale}
+          returnTo={`/${locale}/dashboard/admin`}
+          currentName={profile.full_name ?? ""}
+          label={t("nameFieldLabel")}
+          submitText={t("nameSave")}
+          pendingText={tCommon("loading")}
+        />
         <ul className="list-disc space-y-2 pl-5 text-sm text-zinc-700">
           <li>{t("adminTodo1")}</li>
           <li>{t("adminTodo2")}</li>

@@ -92,7 +92,7 @@ export async function LandingSiteFooter({
         </div>
         <div className="space-y-3 text-sm">
           <h3 className="font-semibold">{t("footerContactTitle")}</h3>
-          <p className="text-zinc-700">{contactWeChat || t("contactMissing")}</p>
+          <p className="text-zinc-700">{contactWeChat ? `WeChat ID: ${contactWeChat}` : t("contactMissing")}</p>
           <p className="text-zinc-700">{contactPhone || t("contactMissing")}</p>
           <p className="text-zinc-700">{contactHours || t("contactHoursMissing")}</p>
           <div>

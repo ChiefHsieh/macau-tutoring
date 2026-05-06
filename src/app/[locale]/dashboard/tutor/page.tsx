@@ -5,12 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
 import { SubmitButton } from "@/components/submit-button";
+import { DashboardNameForm } from "@/components/dashboard-name-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { acceptBookingAction, rejectBookingAction } from "./actions";
 
 type TutorDashboardProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ setup?: string; accepted?: string; rejected?: string; error?: string }>;
+  searchParams: Promise<{ setup?: string; accepted?: string; rejected?: string; error?: string; nameUpdated?: string }>;
 };
 
 export default async function TutorDashboard({
@@ -123,8 +124,19 @@ export default async function TutorDashboard({
             <p className="ui-alert ui-alert-warning">{t("bookingRejectedToast")}</p>
           ) : null}
           {query.error ? (
-            <p className="ui-alert ui-alert-error">{decodeURIComponent(query.error)}</p>
+            <p className="ui-alert ui-alert-error">
+              {query.error === "name_invalid_length" ? t("nameInvalidLength") : decodeURIComponent(query.error)}
+            </p>
           ) : null}
+          {query.nameUpdated ? <p className="ui-alert ui-alert-success">{t("nameUpdated")}</p> : null}
+          <DashboardNameForm
+            locale={locale}
+            returnTo={`/${locale}/dashboard/tutor`}
+            currentName={profile.full_name ?? ""}
+            label={t("nameFieldLabel")}
+            submitText={t("nameSave")}
+            pendingText={tCommon("loading")}
+          />
           <p
             className={`ui-alert ${
               myProfile?.is_verified

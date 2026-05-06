@@ -61,7 +61,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
   }));
 
   const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE?.trim() ?? "";
-  const contactWeChat = process.env.NEXT_PUBLIC_CONTACT_WECHAT?.trim() ?? "";
+  const contactWeChat = process.env.NEXT_PUBLIC_CONTACT_WECHAT?.trim() || "Chief552211";
   const contactHours = process.env.NEXT_PUBLIC_CONTACT_HOURS?.trim() ?? "";
 
   /** Public stat floor: never show below 43 once we surface this metric. */

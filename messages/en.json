@@ -194,7 +194,11 @@
     "adminMarkValid": "Mark valid + verify tutor",
     "adminMarkInvalid": "Mark invalid",
     "adminRejectReasonPlaceholder": "Required rejection reason (e.g. blurry ID, mismatch, expired)",
-    "adminReviewUpdated": "Verification decision updated successfully."
+    "adminReviewUpdated": "Verification decision updated successfully.",
+    "nameFieldLabel": "Your display name",
+    "nameSave": "Save name",
+    "nameUpdated": "Your name has been updated.",
+    "nameInvalidLength": "Name must be between 2 and 80 characters."
   },
   "Reviews": {
     "title": "Review tutor",
