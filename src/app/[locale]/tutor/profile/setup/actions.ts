@@ -24,6 +24,10 @@ export async function saveTutorProfileAction(input: SaveTutorProfileInput) {
 
   const supabase = await createClient();
   const data = parsed.data;
+  const verificationDocument = String(data.verification_document ?? "").trim();
+  if (verificationDocument.length > 0 && verificationDocument.length < 5) {
+    return { ok: false, error: "Invalid verification document link." };
+  }
 
   const profileUpsertBase = {
     id: user.id,
@@ -78,19 +82,21 @@ export async function saveTutorProfileAction(input: SaveTutorProfileInput) {
   );
   if (insertSubjectError) return { ok: false, error: insertSubjectError.message };
 
-  const { error: deleteVerificationError } = await supabase
-    .from("tutor_verification_documents")
-    .delete()
-    .eq("tutor_id", user.id);
-  if (deleteVerificationError) return { ok: false, error: deleteVerificationError.message };
+  if (verificationDocument.length >= 5) {
+    const { error: deleteVerificationError } = await supabase
+      .from("tutor_verification_documents")
+      .delete()
+      .eq("tutor_id", user.id);
+    if (deleteVerificationError) return { ok: false, error: deleteVerificationError.message };
 
-  const { error: insertVerificationError } = await supabase
-    .from("tutor_verification_documents")
-    .insert({
-      tutor_id: user.id,
-      verification_document: data.verification_document,
-    });
-  if (insertVerificationError) return { ok: false, error: insertVerificationError.message };
+    const { error: insertVerificationError } = await supabase
+      .from("tutor_verification_documents")
+      .insert({
+        tutor_id: user.id,
+        verification_document: verificationDocument,
+      });
+    if (insertVerificationError) return { ok: false, error: insertVerificationError.message };
+  }
 
   return { ok: true };
 }

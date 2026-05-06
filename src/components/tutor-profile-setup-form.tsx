@@ -146,7 +146,7 @@ function buildClientFormSchema(t: (key: string) => string) {
       teaching_experience_months: z.coerce.number().int().min(0).max(EXPERIENCE_MAX_MONTHS),
       bio: z.string().optional(),
       profile_photo: z.string().optional(),
-      verification_document: z.string().min(5),
+      verification_document: z.string().optional(),
     })
     .refine(
       (value) => {
@@ -197,7 +197,7 @@ export type ClientFormInput = {
   teaching_experience_months: number;
   bio?: string;
   profile_photo?: string;
-  verification_document: string;
+  verification_document?: string;
 };
 
 type TutorProfileSetupFormProps = {
@@ -226,7 +226,7 @@ function toServerPayload(values: ClientFormInput): TutorProfilePayload {
     teaching_experience: teachingExperience,
     bio: values.bio,
     profile_photo: values.profile_photo,
-    verification_document: values.verification_document,
+    verification_document: values.verification_document?.trim() || undefined,
   };
 }
 
