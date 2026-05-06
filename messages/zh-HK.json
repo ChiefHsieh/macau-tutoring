@@ -226,7 +226,13 @@
     "markRead": "標記已讀",
     "delete": "刪除",
     "openLink": "前往",
-    "schemaHint": "若為首次使用，請在 Supabase SQL Editor 執行專案內的 supabase/notifications-messages.sql。"
+    "schemaHint": "若為首次使用，請在 Supabase SQL Editor 執行專案內的 supabase/notifications-messages.sql。",
+    "adminVerificationSubmittedTitle": "導師已提交認證文件",
+    "adminVerificationSubmittedContent": "{name} 已上傳或補交認證文件，請前往管理員中心審核。",
+    "verificationApprovedTitle": "認證已通過",
+    "verificationApprovedContent": "你的導師檔案已通過認證，現會顯示 Verified 標記。",
+    "verificationRejectedTitle": "認證未通過",
+    "verificationRejectedContent": "你的認證文件被標記為無效。原因：{reason}。請重新上傳有效文件。"
   },
   "Messages": {
     "inboxTitle": "訊息",

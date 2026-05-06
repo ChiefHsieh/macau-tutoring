@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -9,6 +10,7 @@ export async function verifyTutorDocumentAction(formData: FormData) {
   const tutorId = String(formData.get("tutor_id") ?? "");
   const decision = String(formData.get("decision") ?? "");
   const rejectReason = String(formData.get("reject_reason") ?? "").trim();
+  const tNotifications = await getTranslations({ locale, namespace: "Notifications" });
 
   if (!tutorId || (decision !== "valid" && decision !== "invalid")) {
     redirect(`/${locale}/dashboard/admin?error=${encodeURIComponent("Invalid verification request.")}`);
@@ -49,10 +51,12 @@ export async function verifyTutorDocumentAction(formData: FormData) {
     }
   }
 
-  const noticeTitle = isVerified ? "Verification approved" : "Verification rejected";
+  const noticeTitle = isVerified
+    ? tNotifications("verificationApprovedTitle")
+    : tNotifications("verificationRejectedTitle");
   const noticeBody = isVerified
-    ? "Your tutor profile has been verified and now shows a verified badge."
-    : `Your verification document was marked invalid. Reason: ${rejectReason}. Please re-upload a valid document.`;
+    ? tNotifications("verificationApprovedContent")
+    : tNotifications("verificationRejectedContent", { reason: rejectReason });
 
   const { error: notifyError } = await supabase.from("notifications").insert({
     user_id: tutorId,

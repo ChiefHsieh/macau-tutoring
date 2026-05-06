@@ -29,6 +29,10 @@ export function getNotificationHref(args: {
     return `/${locale}/messages/${messagePeerId}`;
   }
 
+  if (type === "tutor_verification_submitted" && role === "admin") {
+    return `/${locale}/dashboard/admin`;
+  }
+
   if (type === "system") {
     return `/${locale}/notifications`;
   }

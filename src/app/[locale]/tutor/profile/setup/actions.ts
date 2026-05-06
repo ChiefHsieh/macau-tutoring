@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { tutorProfilePayloadSchema } from "@/lib/tutor-profile-schema";
@@ -12,6 +13,7 @@ type SaveTutorProfileInput = {
 export async function saveTutorProfileAction(input: SaveTutorProfileInput) {
   const { locale, payload } = input;
   const { user, profile } = await requireProfile(locale);
+  const tNotifications = await getTranslations({ locale, namespace: "Notifications" });
 
   if (profile.role !== "tutor") {
     return { ok: false, error: "Only tutor accounts can submit tutor profile." };
@@ -96,6 +98,32 @@ export async function saveTutorProfileAction(input: SaveTutorProfileInput) {
         verification_document: verificationDocument,
       });
     if (insertVerificationError) return { ok: false, error: insertVerificationError.message };
+
+    // Any fresh or re-submitted verification document should go back to admin review.
+    const { error: resetVerifyError } = await supabase
+      .from("tutor_profiles")
+      .update({ is_verified: false })
+      .eq("id", user.id);
+    if (resetVerifyError) return { ok: false, error: resetVerifyError.message };
+
+    const { data: admins, error: adminFetchError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("role", "admin");
+    if (adminFetchError) return { ok: false, error: adminFetchError.message };
+
+    if ((admins ?? []).length > 0) {
+      const { error: adminNotifyError } = await supabase.from("notifications").insert(
+        (admins ?? []).map((admin) => ({
+          user_id: admin.id,
+          type: "tutor_verification_submitted",
+          title: tNotifications("adminVerificationSubmittedTitle"),
+          content: tNotifications("adminVerificationSubmittedContent", { name: profile.full_name }),
+          related_id: user.id,
+        })),
+      );
+      if (adminNotifyError) return { ok: false, error: adminNotifyError.message };
+    }
   }
 
   return { ok: true };

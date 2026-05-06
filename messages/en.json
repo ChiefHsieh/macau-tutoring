@@ -226,7 +226,13 @@
     "markRead": "Mark read",
     "delete": "Delete",
     "openLink": "Open",
-    "schemaHint": "If this is the first time, run supabase/notifications-messages.sql in the SQL editor."
+    "schemaHint": "If this is the first time, run supabase/notifications-messages.sql in the SQL editor.",
+    "adminVerificationSubmittedTitle": "Tutor verification submitted",
+    "adminVerificationSubmittedContent": "{name} uploaded or re-submitted a verification document. Open the admin dashboard to review.",
+    "verificationApprovedTitle": "Verification approved",
+    "verificationApprovedContent": "Your tutor profile has been verified and now shows a verified badge.",
+    "verificationRejectedTitle": "Verification rejected",
+    "verificationRejectedContent": "Your verification document was marked invalid. Reason: {reason}. Please re-upload a valid document."
   },
   "Messages": {
     "inboxTitle": "Messages",
