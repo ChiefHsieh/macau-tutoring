@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
@@ -66,6 +67,31 @@ export async function signUpAction(formData: FormData) {
 
     if (profileError) {
       redirect(`/${locale}/onboarding?error=${encodeURIComponent(profileError.message)}`);
+    }
+
+    if (role === "tutor") {
+      const tNotifications = await getTranslations({ locale, namespace: "Notifications" });
+      const { data: admins, error: adminFetchError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("role", "admin");
+      if (adminFetchError) {
+        redirect(`/${locale}/onboarding?error=${encodeURIComponent(adminFetchError.message)}`);
+      }
+      if ((admins ?? []).length > 0) {
+        const { error: adminNotifyError } = await supabase.from("notifications").insert(
+          (admins ?? []).map((admin) => ({
+            user_id: admin.id,
+            type: "tutor_verification_submitted",
+            title: tNotifications("adminNewTutorRegisteredTitle"),
+            content: tNotifications("adminNewTutorRegisteredContent", { name: fullName }),
+            related_id: user.id,
+          })),
+        );
+        if (adminNotifyError) {
+          redirect(`/${locale}/onboarding?error=${encodeURIComponent(adminNotifyError.message)}`);
+        }
+      }
     }
 
     redirect(`/${locale}/dashboard`);

@@ -26,12 +26,18 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
   const tCommon = await getTranslations("Common");
   const supabase = await createClient();
 
-  const [{ data: tutors }, { data: docs }] = await Promise.all([
+  const [{ data: tutorUsers }, { data: tutorProfiles }, { data: docs }] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, full_name, created_at")
+      .eq("role", "tutor")
+      .order("created_at", { ascending: false })
+      .limit(120),
     supabase
       .from("tutor_profiles")
       .select("id, display_name, district, hourly_rate, is_verified, created_at")
       .order("created_at", { ascending: false })
-      .limit(80),
+      .limit(120),
     supabase
       .from("tutor_verification_documents")
       .select("tutor_id, verification_document, created_at")
@@ -48,11 +54,29 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
     }
   });
 
-  const queue = (tutors ?? []).map((tutor) => ({
-    ...tutor,
-    latestDoc: docByTutorId.get(tutor.id) ?? null,
-  }));
-  const pendingQueue = queue.filter((item) => item.latestDoc && !item.is_verified);
+  const profileByTutorId = new Map(
+    (tutorProfiles ?? []).map((row) => [row.id, row] as const),
+  );
+  const queue = (tutorUsers ?? []).map((tutorUser) => {
+    const profileRow = profileByTutorId.get(tutorUser.id);
+    const latestDoc = docByTutorId.get(tutorUser.id) ?? null;
+    const lastActionTs = Math.max(
+      new Date(String(tutorUser.created_at ?? "")).getTime() || 0,
+      new Date(String(latestDoc?.created_at ?? "")).getTime() || 0,
+    );
+    return {
+      id: tutorUser.id,
+      display_name: profileRow?.display_name ?? tutorUser.full_name ?? t("unknownTutor"),
+      district: profileRow?.district ?? null,
+      hourly_rate: profileRow?.hourly_rate ?? null,
+      is_verified: Boolean(profileRow?.is_verified),
+      latestDoc,
+      lastActionTs,
+    };
+  });
+  const pendingQueue = queue
+    .filter((item) => !item.is_verified)
+    .sort((a, b) => b.lastActionTs - a.lastActionTs);
   const pendingCount = pendingQueue.length;
 
   return (
@@ -105,7 +129,12 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                     <div>
                       <p className="font-medium text-[#1D2129]">{item.display_name}</p>
                       <p className="text-xs text-zinc-600">
-                        {displayMacauRegion(locale, item.district)} · MOP{item.hourly_rate}/hr
+                        {[
+                          item.district ? displayMacauRegion(locale, item.district) : null,
+                          item.hourly_rate ? `MOP${item.hourly_rate}/hr` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ") || t("adminProfilePending")}
                       </p>
                     </div>
                     <Badge variant={item.is_verified ? "success" : "warning"}>
@@ -121,6 +150,7 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {item.latestDoc?.verification_document ? (
+                        <>
                         <ButtonLink
                           href={item.latestDoc.verification_document}
                           target="_blank"
@@ -130,38 +160,40 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                         >
                           {t("adminViewDoc")}
                         </ButtonLink>
-                      ) : null}
+                        <form action={verifyTutorDocumentAction}>
+                          <input type="hidden" name="locale" value={locale} />
+                          <input type="hidden" name="tutor_id" value={item.id} />
+                          <input type="hidden" name="decision" value="valid" />
+                          <SubmitButton type="submit" size="sm" pendingLabel={tCommon("loading")}>
+                            {t("adminMarkValid")}
+                          </SubmitButton>
+                        </form>
 
-                      <form action={verifyTutorDocumentAction}>
-                        <input type="hidden" name="locale" value={locale} />
-                        <input type="hidden" name="tutor_id" value={item.id} />
-                        <input type="hidden" name="decision" value="valid" />
-                        <SubmitButton type="submit" size="sm" pendingLabel={tCommon("loading")}>
-                          {t("adminMarkValid")}
-                        </SubmitButton>
-                      </form>
-
-                      <form action={verifyTutorDocumentAction} className="flex flex-wrap items-center gap-2">
-                        <input type="hidden" name="locale" value={locale} />
-                        <input type="hidden" name="tutor_id" value={item.id} />
-                        <input type="hidden" name="decision" value="invalid" />
-                        <Input
-                          name="reject_reason"
-                          placeholder={t("adminRejectReasonPlaceholder")}
-                          required
-                          minLength={5}
-                          className="h-8 w-[260px]"
-                        />
-                        <SubmitButton
-                          type="submit"
-                          size="sm"
-                          variant="outline"
-                          className="text-red-700"
-                          pendingLabel={tCommon("loading")}
-                        >
-                          {t("adminMarkInvalid")}
-                        </SubmitButton>
-                      </form>
+                        <form action={verifyTutorDocumentAction} className="flex flex-wrap items-center gap-2">
+                          <input type="hidden" name="locale" value={locale} />
+                          <input type="hidden" name="tutor_id" value={item.id} />
+                          <input type="hidden" name="decision" value="invalid" />
+                          <Input
+                            name="reject_reason"
+                            placeholder={t("adminRejectReasonPlaceholder")}
+                            required
+                            minLength={5}
+                            className="h-8 w-[260px]"
+                          />
+                          <SubmitButton
+                            type="submit"
+                            size="sm"
+                            variant="outline"
+                            className="text-red-700"
+                            pendingLabel={tCommon("loading")}
+                          >
+                            {t("adminMarkInvalid")}
+                          </SubmitButton>
+                        </form>
+                        </>
+                      ) : (
+                        <p className="text-xs text-zinc-500">{t("adminAwaitingTutorUpload")}</p>
+                      )}
                     </div>
                   </div>
                 </li>
