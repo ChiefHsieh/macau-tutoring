@@ -1,6 +1,7 @@
 import { type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
+import { getSupabaseCookieOptions } from "@/lib/supabase/cookie-options";
 import { routing } from "@/i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
@@ -15,6 +16,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const supabase = createServerClient(url, anonKey, {
+    cookieOptions: getSupabaseCookieOptions(),
     cookies: {
       getAll() {
         return request.cookies.getAll();

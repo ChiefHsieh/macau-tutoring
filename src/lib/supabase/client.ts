@@ -1,6 +1,7 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseCookieOptions } from "./cookie-options";
 import { getSupabaseEnvOrThrow } from "./config";
 
 export function createClient() {
@@ -9,5 +10,8 @@ export function createClient() {
   return createBrowserClient(
     url,
     anonKey,
+    {
+      cookieOptions: getSupabaseCookieOptions(),
+    },
   );
 }
