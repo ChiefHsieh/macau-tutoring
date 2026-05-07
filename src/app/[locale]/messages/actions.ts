@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendNewMessagePushNotification } from "@/lib/push-notifications";
 
 export async function sendMessageAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "zh-HK");
@@ -41,6 +42,19 @@ export async function sendMessageAction(formData: FormData) {
   if (error) {
     return { error: error.message };
   }
+
+  const { data: senderProfile } = await supabase
+    .from("users")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+  await sendNewMessagePushNotification({
+    receiverId,
+    senderName: String(senderProfile?.full_name ?? "New message"),
+    contentPreview: content,
+    locale,
+    peerId: user.id,
+  });
 
   revalidatePath(`/${locale}/messages`);
   revalidatePath(`/${locale}/messages/${receiverId}`);

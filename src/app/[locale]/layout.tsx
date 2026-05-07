@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AuthNav } from "@/components/auth-nav";
 import { AppToaster } from "@/components/app-toaster";
 import { NavigationTopLoader } from "@/components/navigation-top-loader";
+import { NativePushBootstrap } from "@/components/native-push-bootstrap";
 import { pickClientMessages } from "@/lib/i18n-client-messages";
 
 type LocaleLayoutProps = {
@@ -29,6 +30,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={clientMessages}>
+      <NativePushBootstrap locale={locale} />
       <NavigationTopLoader />
       <div className="min-h-screen w-full bg-[#000225]">
         <div className="mobile-page-shell mx-auto flex w-full max-w-[1200px] flex-col gap-8 bg-[#000225] p-4 md:p-6">
