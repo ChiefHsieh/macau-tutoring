@@ -64,12 +64,12 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const contactWeChat = process.env.NEXT_PUBLIC_CONTACT_WECHAT?.trim() || "Chief552211";
   const contactHours = process.env.NEXT_PUBLIC_CONTACT_HOURS?.trim() ?? "";
 
-  /** Public stat floor: never show below 43 once we surface this metric. */
-  const displayStudentCount = Math.max(43, studentCount);
+  /** Public stat floor for student count card. */
+  const displayStudentCount = Math.max(22, studentCount);
   /** Public stat floor for 30-day active demand card. */
-  const displayActiveLeadCount = Math.max(51, activeLeadCount);
+  const displayActiveLeadCount = Math.max(11, activeLeadCount);
   /** Public stat floor for cumulative bookings / matches card. */
-  const displayBookingMatchCount = Math.max(45, bookingMatchCount);
+  const displayBookingMatchCount = Math.max(10, bookingMatchCount);
 
   return (
     <main className="flex flex-col gap-0 md:gap-0">
