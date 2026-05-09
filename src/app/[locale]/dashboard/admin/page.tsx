@@ -148,9 +148,11 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                         ? t("adminDocUploadedAt", { date: item.latestDoc.created_at.slice(0, 10) })
                         : t("adminNoDoc")}
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    {!item.latestDoc?.verification_document ? (
+                      <p className="text-xs text-amber-800">{t("adminVerifyWithoutDocHint")}</p>
+                    ) : null}
+                    <div className="flex flex-wrap items-center gap-2">
                       {item.latestDoc?.verification_document ? (
-                        <>
                         <ButtonLink
                           href={item.latestDoc.verification_document}
                           target="_blank"
@@ -160,40 +162,37 @@ export default async function AdminDashboard({ params, searchParams }: AdminDash
                         >
                           {t("adminViewDoc")}
                         </ButtonLink>
-                        <form action={verifyTutorDocumentAction}>
-                          <input type="hidden" name="locale" value={locale} />
-                          <input type="hidden" name="tutor_id" value={item.id} />
-                          <input type="hidden" name="decision" value="valid" />
-                          <SubmitButton type="submit" size="sm" pendingLabel={tCommon("loading")}>
-                            {t("adminMarkValid")}
-                          </SubmitButton>
-                        </form>
+                      ) : null}
+                      <form action={verifyTutorDocumentAction}>
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="tutor_id" value={item.id} />
+                        <input type="hidden" name="decision" value="valid" />
+                        <SubmitButton type="submit" size="sm" pendingLabel={tCommon("loading")}>
+                          {t("adminMarkValid")}
+                        </SubmitButton>
+                      </form>
 
-                        <form action={verifyTutorDocumentAction} className="flex flex-wrap items-center gap-2">
-                          <input type="hidden" name="locale" value={locale} />
-                          <input type="hidden" name="tutor_id" value={item.id} />
-                          <input type="hidden" name="decision" value="invalid" />
-                          <Input
-                            name="reject_reason"
-                            placeholder={t("adminRejectReasonPlaceholder")}
-                            required
-                            minLength={5}
-                            className="h-8 w-[260px]"
-                          />
-                          <SubmitButton
-                            type="submit"
-                            size="sm"
-                            variant="outline"
-                            className="text-red-700"
-                            pendingLabel={tCommon("loading")}
-                          >
-                            {t("adminMarkInvalid")}
-                          </SubmitButton>
-                        </form>
-                        </>
-                      ) : (
-                        <p className="text-xs text-zinc-500">{t("adminAwaitingTutorUpload")}</p>
-                      )}
+                      <form action={verifyTutorDocumentAction} className="flex flex-wrap items-center gap-2">
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="tutor_id" value={item.id} />
+                        <input type="hidden" name="decision" value="invalid" />
+                        <Input
+                          name="reject_reason"
+                          placeholder={t("adminRejectReasonPlaceholder")}
+                          required
+                          minLength={5}
+                          className="h-8 w-[260px]"
+                        />
+                        <SubmitButton
+                          type="submit"
+                          size="sm"
+                          variant="outline"
+                          className="text-red-700"
+                          pendingLabel={tCommon("loading")}
+                        >
+                          {t("adminMarkInvalid")}
+                        </SubmitButton>
+                      </form>
                     </div>
                   </div>
                 </li>

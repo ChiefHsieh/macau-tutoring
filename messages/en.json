@@ -191,7 +191,7 @@
     "adminDocUploadedAt": "Latest document uploaded: {date}",
     "adminNoDoc": "No verification document uploaded yet.",
     "adminProfilePending": "Profile details pending setup",
-    "adminAwaitingTutorUpload": "Waiting for tutor to upload verification document.",
+    "adminVerifyWithoutDocHint": "No document yet—you can still approve or reject below.",
     "adminViewDoc": "View document",
     "adminMarkValid": "Mark valid + verify tutor",
     "adminMarkInvalid": "Mark invalid",

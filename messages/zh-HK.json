@@ -191,7 +191,7 @@
     "adminDocUploadedAt": "最新文件上傳日期：{date}",
     "adminNoDoc": "尚未上傳審核文件。",
     "adminProfilePending": "導師資料尚未完成設置",
-    "adminAwaitingTutorUpload": "等待導師上傳認證文件。",
+    "adminVerifyWithoutDocHint": "即使尚未上傳文件，你仍可於下方核准或駁回。",
     "adminViewDoc": "查看文件",
     "adminMarkValid": "標記有效並認證導師",
     "adminMarkInvalid": "標記無效",
