@@ -45,6 +45,11 @@ export async function signUpAction(formData: FormData) {
     redirect(`/${locale}/auth?error=${encodeURIComponent("Please enter a valid contact number.")}`);
   }
 
+  const acceptTerms = formData.get("accept_terms");
+  if (acceptTerms !== "on") {
+    redirect(`/${locale}/auth?error=${encodeURIComponent("terms_not_accepted")}`);
+  }
+
   const supabase = await createClient();
   // 若开启「Confirm email」，通常无 session：只能回登录页提示去邮箱验证（见 .env.example）。
   const { data, error } = await supabase.auth.signUp({ email, password });

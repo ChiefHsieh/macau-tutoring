@@ -7,6 +7,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
+import { getTermsPageUrl } from "@/lib/public-urls";
 
 type AuthPageProps = {
   params: Promise<{ locale: string }>;
@@ -26,6 +27,7 @@ function formatAuthErrorMessage(raw: string | undefined, t: Awaited<ReturnType<t
     }
   })();
   if (decoded === "admin_self_signup") return t("adminSelfSignupBlocked");
+  if (decoded === "terms_not_accepted") return t("termsNotAccepted");
   return decoded;
 }
 
@@ -36,6 +38,7 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
   const tNav = await getTranslations("Nav");
   const tCommon = await getTranslations("Common");
   const supabaseReady = hasSupabaseEnv();
+  const termsUrl = getTermsPageUrl();
 
   return (
     <main className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
@@ -156,6 +159,28 @@ export default async function AuthPage({ params, searchParams }: AuthPageProps) 
               minLength={8}
               placeholder={t("passwordRule")}
             />
+            <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-[#2D4263] bg-[#101742] p-3 text-sm text-[#E2E8F0]">
+              <input
+                type="checkbox"
+                name="accept_terms"
+                required
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#E6C699]"
+              />
+              <span className="min-w-0 leading-snug">
+                {t.rich("termsAccept", {
+                  terms: (chunks) => (
+                    <a
+                      href={termsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-[#E6C699] underline underline-offset-2 hover:text-[#DAC0A3]"
+                    >
+                      {chunks}
+                    </a>
+                  ),
+                })}
+              </span>
+            </label>
             <SubmitButton
               disabled={!supabaseReady}
               className="w-full disabled:cursor-not-allowed"

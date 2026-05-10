@@ -100,6 +100,8 @@
     "accountTypeHint": "此處僅可選擇學生或導師；其餘資料可稍後於賬號初始化完成。",
     "signUpFullName": "姓名（正式名稱）",
     "signUpPhone": "聯絡電話",
+    "termsAccept": "我已閱讀並同意<terms>《服務條款與隱私政策》</terms>。",
+    "termsNotAccepted": "請勾選並同意《服務條款與隱私政策》後再註冊。",
     "adminSelfSignupBlocked": "管理員帳戶不可透過自助註冊開通。請選擇學生或導師，或聯絡平台人員。",
     "signUpCheckEmail": "帳號已建立。請到電郵信箱點擊驗證連結，完成後再登入即可進入我的家教中心。",
     "email": "電郵",

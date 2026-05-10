@@ -100,6 +100,8 @@
     "accountTypeHint": "Only student or tutor can be chosen here. You can still complete name and phone from account onboarding.",
     "signUpFullName": "Full name (formal name)",
     "signUpPhone": "Contact number",
+    "termsAccept": "I have read and agree to the <terms>Terms of Service and Privacy Policy</terms>.",
+    "termsNotAccepted": "Please agree to the Terms of Service and Privacy Policy before registering.",
     "adminSelfSignupBlocked": "Manager / administrator accounts cannot be created through self-registration. Please choose student or tutor, or contact the platform team.",
     "signUpCheckEmail": "Account created. Confirm the link in your email, then sign in to open your dashboard.",
     "email": "Email",
