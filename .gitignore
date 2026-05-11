@@ -36,6 +36,12 @@ yarn-error.log*
 android/app/google-services.json
 test-results/
 
+# Capacitor iOS — do not commit CocoaPods artifacts (commit ios/App native project)
+ios/App/Pods/
+ios/App/build/
+ios/**/DerivedData/
+**/ios/**/*.xcuserstate
+
 # vercel
 .vercel
 

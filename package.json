@@ -10,12 +10,15 @@
     "lint": "eslint",
     "snapshot:routes:update": "node scripts/generate-button-route-map.mjs --write",
     "test:routes": "node --test tests/routes-buttons.snapshot.test.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "cap:add:ios": "npx cap add ios",
+    "cap:sync:ios": "npx cap sync ios"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
+    "@capacitor/ios": "^8.3.3",
     "@capacitor/local-notifications": "^8.0.2",
     "@capacitor/push-notifications": "^8.0.3",
     "@fullcalendar/daygrid": "^6.1.20",

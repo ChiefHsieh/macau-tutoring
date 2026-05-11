@@ -1,0 +1,69 @@
+# iOS 工程在 macOS Runner 上生成并做模拟器编译（无需本机 Mac）。
+# Windows 开发：推送代码后，在 GitHub Actions 手动运行本 workflow 即可验证 iOS 壳能否构建。
+name: iOS Smoke (Capacitor)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "capacitor.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/ios-smoke.yml"
+
+concurrency:
+  group: ios-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios-simulator-build:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Add iOS platform (first run only)
+        run: |
+          if [ ! -f ios/App/Podfile ]; then
+            npx cap add ios
+          fi
+
+      - name: Capacitor sync iOS
+        run: npx cap sync ios
+
+      - name: CocoaPods install
+        working-directory: ios/App
+        run: pod install --repo-update
+
+      - name: Xcode build (iOS Simulator, no distribution signing)
+        working-directory: ios/App
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Upload ios/ snapshot (optional: commit once to repo to speed up CI)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-project-after-sync
+          path: ios
+          if-no-files-found: warn
