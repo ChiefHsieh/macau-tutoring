@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sendNewMessagePushNotification } from "@/lib/push-notifications";
 
+function trimPreview(content: string) {
+  const text = content.trim().replace(/\s+/g, " ");
+  if (text.length <= 200) return text;
+  return `${text.slice(0, 200)}…`;
+}
+
 export async function sendMessageAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "zh-HK");
   const receiverId = String(formData.get("receiver_id") ?? "");
@@ -27,12 +33,16 @@ export async function sendMessageAction(formData: FormData) {
   }
 
   const insertStart = Date.now();
-  const { error } = await supabase.from("messages").insert({
-    sender_id: user.id,
-    receiver_id: receiverId,
-    booking_id: bookingId,
-    content,
-  });
+  const { data: inserted, error } = await supabase
+    .from("messages")
+    .insert({
+      sender_id: user.id,
+      receiver_id: receiverId,
+      booking_id: bookingId,
+      content,
+    })
+    .select("id")
+    .maybeSingle();
   console.info("[perf][messages-thread][send-insert-ms]", Date.now() - insertStart, {
     locale,
     receiverId,
@@ -45,12 +55,31 @@ export async function sendMessageAction(formData: FormData) {
 
   const { data: senderProfile } = await supabase
     .from("users")
-    .select("full_name")
+    .select("full_name, role")
     .eq("id", user.id)
     .maybeSingle();
+
+  const isZhLocale = locale.startsWith("zh");
+  const supportSenderLabel = isZhLocale ? "客服中心" : "Support Center";
+  const pushSenderName =
+    senderProfile?.role === "admin" ? supportSenderLabel : String(senderProfile?.full_name ?? "New message");
+
+  if (senderProfile?.role === "admin") {
+    try {
+      await supabase.from("admin_message_audit").insert({
+        admin_id: user.id,
+        tutor_id: receiverId,
+        message_id: inserted?.id ?? null,
+        content_preview: trimPreview(content),
+      });
+    } catch (auditErr) {
+      console.warn("[messages] admin_message_audit insert skipped:", auditErr);
+    }
+  }
+
   await sendNewMessagePushNotification({
     receiverId,
-    senderName: String(senderProfile?.full_name ?? "New message"),
+    senderName: pushSenderName,
     contentPreview: content,
     locale,
     peerId: user.id,

@@ -85,7 +85,23 @@
     "logout": "Logout",
     "messages": "Messages",
     "supportCenter": "Support Center",
-    "notificationsAria": "Notifications"
+    "notificationsAria": "Notifications",
+    "contactTutors": "Contact tutors"
+  },
+  "AdminTutors": {
+    "pageTitle": "Tutor contact directory",
+    "pageSubtitle": "Search tutors and open a private chat; messages are sent as “Support Center” on the tutor side.",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Name, email, or subject…",
+    "totalCount": "{count} tutors total",
+    "empty": "No tutors match your filters.",
+    "subjectsLabel": "Subjects",
+    "registered": "Registered",
+    "lastOnline": "Last online",
+    "neverOnline": "No record",
+    "sendMessage": "Send message",
+    "prevPage": "Previous",
+    "nextPage": "Next"
   },
   "Auth": {
     "signInTitle": "Sign in",

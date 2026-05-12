@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SUPPORT_CENTER_BRAND_AVATAR_SRC } from "@/lib/support-brand";
 
 type MessagesInboxPageProps = {
   params: Promise<{ locale: string }>;
@@ -76,7 +77,7 @@ function parseNameFromNotificationContent(type: string, content: string): string
 export default async function MessagesInboxPage({ params, searchParams }: MessagesInboxPageProps) {
   const { locale } = await params;
   const query = await searchParams;
-  await requireProfile(locale);
+  const { profile } = await requireProfile(locale);
 
   const t = await getTranslations("Messages");
   const supabase = await createClient();
@@ -188,6 +189,7 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
             const unread = unreadByPeer.get(peerId) ?? 0;
             const isSupportPeer =
               userRoleById.get(peerId) === "admin" || (!!supportManagerId && peerId === supportManagerId);
+            const showSupportBrandInList = profile.role === "tutor" && isSupportPeer;
             const peerName = resolveDisplayName({
               preferredName: isSupportPeer ? t("supportThreadTitle") : notificationNameByPeer.get(peerId),
               fullName: userNameById.get(peerId),
@@ -201,12 +203,24 @@ export default async function MessagesInboxPage({ params, searchParams }: Messag
                 <Link href={`/${locale}/messages/${peerId}`}>
                   <Card className="transition-shadow hover:shadow-md">
                     <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
-                      <div>
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        {showSupportBrandInList ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={SUPPORT_CENTER_BRAND_AVATAR_SRC}
+                            alt=""
+                            width={44}
+                            height={44}
+                            className="mt-0.5 h-11 w-11 shrink-0 rounded-full border border-[#DAC0A3]/40 bg-[#000225] object-cover shadow-sm"
+                          />
+                        ) : null}
+                        <div className="min-w-0">
                         <p className="font-semibold text-[#1D2129]">{peerName}</p>
                         <p className="mt-1 line-clamp-2 text-sm text-zinc-600">{last.content}</p>
                         <p className="mt-1 text-xs text-zinc-500">
                           {new Date(last.created_at).toLocaleString(locale === "en" ? "en-GB" : "zh-HK")}
                         </p>
+                        </div>
                       </div>
                       {unread > 0 ? (
                         <Badge variant="default" className="shrink-0">

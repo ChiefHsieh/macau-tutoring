@@ -7,10 +7,11 @@ import { ButtonLink } from "@/components/button-link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageThreadClient } from "@/components/message-thread-client";
+import { SUPPORT_CENTER_BRAND_AVATAR_SRC } from "@/lib/support-brand";
 
 type MessageThreadPageProps = {
   params: Promise<{ locale: string; peerId: string }>;
-  searchParams: Promise<{ fromBooking?: string; support?: string }>;
+  searchParams: Promise<{ fromBooking?: string; support?: string; focus?: string }>;
 };
 
 function resolveDisplayName({
@@ -85,7 +86,7 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
     await Promise.all([
       supabase.from("users").select("id, full_name, role, email").eq("id", peerId).maybeSingle(),
       supabase.from("tutor_profiles").select("id, display_name").eq("id", peerId).maybeSingle(),
-      supabase.from("users").select("id, full_name, email").eq("id", user.id).maybeSingle(),
+      supabase.from("users").select("id, full_name, email, role").eq("id", user.id).maybeSingle(),
       supabase.from("tutor_profiles").select("id, display_name").eq("id", user.id).maybeSingle(),
     ]);
   const selfName = resolveDisplayName({
@@ -95,6 +96,9 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
     fallbackId: user.id,
     unknownLabel: t("unknownUser"),
   });
+  /** Admin → tutor: outgoing bubbles show 客服中心, not the admin's personal name. */
+  const selfNameInThread =
+    selfUser?.role === "admin" && peerUser?.role === "tutor" ? t("supportThreadTitle") : selfName;
   const supportManagerId =
     process.env.SUPPORT_MANAGER_USER_ID?.trim() || process.env.NEXT_PUBLIC_SUPPORT_MANAGER_USER_ID?.trim() || "";
   const isSupportThread =
@@ -152,10 +156,30 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
     unknownLabel: t("unknownUser"),
   });
 
+  const tutorFacingSupportUi = isSupportThread && selfUser?.role === "tutor";
+
   return (
     <main className="space-y-6">
       <PageSection
-        title={isSupportThread ? t("supportThreadTitle") : t("threadTitle", { name: peerName })}
+        title={
+          tutorFacingSupportUi ? (
+            <span className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={SUPPORT_CENTER_BRAND_AVATAR_SRC}
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-full border border-[#DAC0A3]/40 bg-[#000225] object-cover shadow-sm"
+              />
+              <span>{t("supportThreadTitle")}</span>
+            </span>
+          ) : isSupportThread ? (
+            t("supportThreadTitle")
+          ) : (
+            t("threadTitle", { name: peerName })
+          )
+        }
         description={isSupportThread ? t("supportThreadSubtitle") : t("threadSubtitle")}
         action={
           <ButtonLink href={`/${locale}/messages`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
@@ -181,10 +205,12 @@ export default async function MessageThreadPage({ params, searchParams }: Messag
               currentUserId={user.id}
               initialMessages={thread ?? []}
               markReadOnMount
+              focusComposer={query.focus === "1"}
+              supportIncomingAvatarSrc={tutorFacingSupportUi ? SUPPORT_CENTER_BRAND_AVATAR_SRC : null}
               labels={{
                 placeholder: t("composePlaceholder"),
                 send: t("send"),
-                selfName,
+                selfName: selfNameInThread,
                 peerName,
               }}
             />

@@ -30,6 +30,10 @@ type MessageThreadClientProps = {
     peerName: string;
   };
   markReadOnMount?: boolean;
+  /** Focus composer after navigation from admin tutor directory (`?focus=1`). */
+  focusComposer?: boolean;
+  /** Shown beside incoming bubbles when the peer is official support (tutor-facing UI). */
+  supportIncomingAvatarSrc?: string | null;
 };
 
 export function MessageThreadClient({
@@ -39,6 +43,8 @@ export function MessageThreadClient({
   initialMessages,
   labels,
   markReadOnMount = false,
+  focusComposer = false,
+  supportIncomingAvatarSrc = null,
 }: MessageThreadClientProps) {
   const tCommon = useTranslations("Common");
   const router = useRouter();
@@ -104,11 +110,28 @@ export function MessageThreadClient({
             {sorted.map((m) => {
               const mine = me && m.sender_id === me;
               const senderName = m.sender_id === currentUserId ? labels.selfName : labels.peerName;
+              const showIncomingBrand =
+                Boolean(supportIncomingAvatarSrc) && !mine;
               return (
                 <li
                   key={m.id}
-                  className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                  className={`flex gap-2 ${mine ? "justify-end" : "justify-start"}`}
                 >
+                  {showIncomingBrand ? (
+                    <div
+                      className="mt-1 h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#DAC0A3]/40 bg-[#000225] shadow-sm"
+                      aria-hidden
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={supportIncomingAvatarSrc!}
+                        alt=""
+                        width={36}
+                        height={36}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : null}
                   <div
                     className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                       mine
@@ -144,7 +167,15 @@ export function MessageThreadClient({
       >
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="receiver_id" value={peerId} />
-        <Textarea name="content" required minLength={1} maxLength={4000} rows={3} placeholder={labels.placeholder} />
+        <Textarea
+          name="content"
+          required
+          minLength={1}
+          maxLength={4000}
+          rows={3}
+          placeholder={labels.placeholder}
+          autoFocus={focusComposer}
+        />
         <SubmitButton type="submit" pendingLabel={tCommon("loading")}>
           {labels.send}
         </SubmitButton>

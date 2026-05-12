@@ -19,6 +19,8 @@ export type MobileNavPortalLabels = {
   /** Guest menu only */
   login?: string;
   notificationsAria?: string;
+  /** Admin menu only */
+  contactTutors?: string;
   supportCenter?: string;
   messages?: string;
   dashboard?: string;
@@ -136,6 +138,15 @@ export function MobileNavPortal({ locale, variant, labels }: MobileNavPortalProp
                         {labels.notificationsAria ?? ""}
                       </SubmitButton>
                     </form>
+                    {labels.contactTutors ? (
+                      <Link
+                        href={`/${locale}/admin/tutors`}
+                        className="mobile-nav-link"
+                        onClick={() => setOpen(false)}
+                      >
+                        {labels.contactTutors}
+                      </Link>
+                    ) : null}
                     <Link
                       href={`/${locale}/support`}
                       className="mobile-nav-link"

@@ -39,6 +39,14 @@ export async function AuthNav({ locale }: AuthNavProps) {
     <>
       <div className="hidden items-center gap-3 md:flex">
         <NotificationNavLink locale={locale} />
+        {profile.role === "admin" ? (
+          <Link
+            href={`/${locale}/admin/tutors`}
+            className="rounded-md border border-[#2D4263] px-4 py-2 text-base text-[#F8F9FA] hover:bg-[#2D4263]"
+          >
+            {t("contactTutors")}
+          </Link>
+        ) : null}
         <Link href={`/${locale}/support`} className="rounded-md border border-[#2D4263] px-4 py-2 text-base text-[#F8F9FA] hover:bg-[#2D4263]">
           {t("supportCenter")}
         </Link>
@@ -58,6 +66,7 @@ export async function AuthNav({ locale }: AuthNavProps) {
           tutors: t("tutors"),
           faq: t("faq"),
           notificationsAria: t("notificationsAria"),
+          contactTutors: profile.role === "admin" ? t("contactTutors") : undefined,
           supportCenter: t("supportCenter"),
           messages: t("messages"),
           dashboard: t("dashboard"),

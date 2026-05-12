@@ -85,7 +85,23 @@
     "logout": "退出",
     "messages": "訊息",
     "supportCenter": "客服中心",
-    "notificationsAria": "通知"
+    "notificationsAria": "通知",
+    "contactTutors": "聯絡導師"
+  },
+  "AdminTutors": {
+    "pageTitle": "導師聯絡目錄",
+    "pageSubtitle": "搜尋導師並開啟與「客服中心」身分發送的私密對話；導師端會顯示來自客服中心，而非你的個人帳號。",
+    "searchLabel": "搜尋",
+    "searchPlaceholder": "姓名、電郵或科目關鍵字…",
+    "totalCount": "共 {count} 位導師",
+    "empty": "暫無符合條件的導師。",
+    "subjectsLabel": "教授科目",
+    "registered": "註冊日期",
+    "lastOnline": "最後上線",
+    "neverOnline": "尚無紀錄",
+    "sendMessage": "發送訊息",
+    "prevPage": "上一頁",
+    "nextPage": "下一頁"
   },
   "Auth": {
     "signInTitle": "登入賬號",
