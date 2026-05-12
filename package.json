@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:e2e": "next dev -p 3000",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev",
+    "dev:e2e": "next dev --webpack -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

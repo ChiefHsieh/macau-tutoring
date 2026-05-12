@@ -17,7 +17,7 @@ const TutorProfileSetupForm = dynamic(
 
 type TutorProfileSetupPageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; step?: string }>;
 };
 
 function parseTeachingExperienceMonths(raw: string | null | undefined) {
@@ -56,6 +56,9 @@ export default async function TutorProfileSetupPage({
 
   const supabase = await createClient();
 
+  const rawStepParam = query.step ? Number(query.step) : 1;
+  const requestedStepNumber = Number.isFinite(rawStepParam) ? Math.min(6, Math.max(1, rawStepParam)) : 1;
+
   const [{ data: tutorProfile }, { data: tutorSubjects }, { data: verificationDoc }] =
     await Promise.all([
       supabase
@@ -78,6 +81,25 @@ export default async function TutorProfileSetupPage({
         .maybeSingle(),
     ]);
 
+  if (!tutorProfile && requestedStepNumber >= 6) {
+    redirect(`/${locale}/tutor/profile/setup`);
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const [{ data: recurringSlotRows }, oneOffFutureRes] = await Promise.all([
+    supabase
+      .from("tutor_availability")
+      .select("id, day_of_week, start_time, end_time")
+      .eq("tutor_id", user.id)
+      .order("day_of_week")
+      .order("start_time"),
+    supabase
+      .from("tutor_availability_one_off")
+      .select("id", { count: "exact", head: true })
+      .eq("tutor_id", user.id)
+      .gte("session_date", today),
+  ]);
+
   const initialAreas = parseServiceAreasFromDb(tutorProfile?.exact_location, tutorProfile?.district);
   const initialValues: ClientFormInput = {
     district: inferRegionFromAreas(initialAreas),
@@ -97,6 +119,8 @@ export default async function TutorProfileSetupPage({
     verification_document: verificationDoc?.verification_document ?? "",
   };
 
+  const initialStepIndex = requestedStepNumber - 1;
+
   return (
     <main className="mx-auto w-full max-w-3xl rounded-xl border bg-white p-4 shadow-sm md:p-5">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
@@ -105,7 +129,13 @@ export default async function TutorProfileSetupPage({
         <p className="ui-alert ui-alert-warning mt-3">{setupError}</p>
       ) : null}
       <div className="mt-6">
-        <TutorProfileSetupForm locale={locale} initialValues={initialValues} />
+        <TutorProfileSetupForm
+          locale={locale}
+          initialValues={initialValues}
+          initialStepIndex={initialStepIndex}
+          recurringSlots={recurringSlotRows ?? []}
+          futureOneOffCount={oneOffFutureRes.count ?? 0}
+        />
       </div>
     </main>
   );

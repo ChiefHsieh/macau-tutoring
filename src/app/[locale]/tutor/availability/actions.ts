@@ -8,13 +8,33 @@ import { createClient } from "@/lib/supabase/server";
 export type AvailabilitySlotResult = { ok: true } | { ok: false; error: string };
 const ERR_SETUP_REQUIRED = "availability_setup_required";
 
+/** Form field: when "1", redirect back to tutor profile wizard step 6 after mutation. */
+function redirectAfterAvailabilityForm(
+  locale: string,
+  formData: FormData,
+  queryWhenWizard: string,
+  pathWhenClassic: string,
+) {
+  const wizard = String(formData.get("wizard_return") ?? "") === "1";
+  if (wizard) {
+    redirect(`/${locale}/tutor/profile/setup?step=6&${queryWhenWizard}`);
+  }
+  redirect(pathWhenClassic);
+}
+
+/** HTML time inputs often send HH:MM; Postgres time columns accept HH:MM:SS. */
+function padTimeForPg(raw: string): string {
+  const s = raw.trim();
+  return /^\d{2}:\d{2}$/.test(s) ? `${s}:00` : s;
+}
+
 const recurringSchema = z
   .object({
     day_of_week: z.coerce.number().int().min(0).max(6),
     start_time: z.string().min(1),
     end_time: z.string().min(1),
   })
-  .refine((v) => v.start_time < v.end_time, {
+  .refine((v) => padTimeForPg(v.start_time) < padTimeForPg(v.end_time), {
     message: "End time must be later than start time.",
   });
 
@@ -58,7 +78,12 @@ export async function addRecurringAvailabilityAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input.")}`);
+    redirectAfterAvailabilityForm(
+      locale,
+      formData,
+      `error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input.")}`,
+      `/${locale}/tutor/availability?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input.")}`,
+    );
   }
 
   const { user, profile } = await requireProfile(locale);
@@ -66,21 +91,40 @@ export async function addRecurringAvailabilityAction(formData: FormData) {
 
   const { supabase, exists, error: tutorProfileError } = await ensureTutorProfileExistsForAvailability(user.id);
   if (tutorProfileError) {
-    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(tutorProfileError.message)}`);
+    redirectAfterAvailabilityForm(
+      locale,
+      formData,
+      `error=${encodeURIComponent(tutorProfileError.message)}`,
+      `/${locale}/tutor/availability?error=${encodeURIComponent(tutorProfileError.message)}`,
+    );
   }
   if (!exists) {
     redirect(`/${locale}/tutor/profile/setup?error=${ERR_SETUP_REQUIRED}`);
   }
+
+  const slot = parsed.data!;
   const { error } = await supabase.from("tutor_availability").insert({
     tutor_id: user.id,
-    ...parsed.data,
+    day_of_week: slot.day_of_week,
+    start_time: padTimeForPg(slot.start_time),
+    end_time: padTimeForPg(slot.end_time),
   });
 
   if (error) {
-    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(error.message)}`);
+    redirectAfterAvailabilityForm(
+      locale,
+      formData,
+      `error=${encodeURIComponent(error.message)}`,
+      `/${locale}/tutor/availability?error=${encodeURIComponent(error.message)}`,
+    );
   }
 
-  redirect(`/${locale}/tutor/availability?saved=recurring`);
+  redirectAfterAvailabilityForm(
+    locale,
+    formData,
+    "saved=recurring",
+    `/${locale}/tutor/availability?saved=recurring`,
+  );
 }
 
 export async function deleteRecurringAvailabilityAction(formData: FormData) {
@@ -98,10 +142,20 @@ export async function deleteRecurringAvailabilityAction(formData: FormData) {
     .eq("tutor_id", user.id);
 
   if (error) {
-    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(error.message)}`);
+    redirectAfterAvailabilityForm(
+      locale,
+      formData,
+      `error=${encodeURIComponent(error.message)}`,
+      `/${locale}/tutor/availability?error=${encodeURIComponent(error.message)}`,
+    );
   }
 
-  redirect(`/${locale}/tutor/availability?saved=deleted`);
+  redirectAfterAvailabilityForm(
+    locale,
+    formData,
+    "saved=deleted",
+    `/${locale}/tutor/availability?saved=deleted`,
+  );
 }
 
 export async function saveRecurringSlotFromCalendarAction(
@@ -245,10 +299,20 @@ export async function deleteOneOffAvailabilityAction(formData: FormData) {
     .eq("tutor_id", user.id);
 
   if (error) {
-    redirect(`/${locale}/tutor/availability?error=${encodeURIComponent(error.message)}`);
+    redirectAfterAvailabilityForm(
+      locale,
+      formData,
+      `error=${encodeURIComponent(error.message)}`,
+      `/${locale}/tutor/availability?error=${encodeURIComponent(error.message)}`,
+    );
   }
 
-  redirect(`/${locale}/tutor/availability?saved=deleted`);
+  redirectAfterAvailabilityForm(
+    locale,
+    formData,
+    "saved=deleted",
+    `/${locale}/tutor/availability?saved=deleted`,
+  );
 }
 
 export async function addBlockedSlotAction(formData: FormData) {

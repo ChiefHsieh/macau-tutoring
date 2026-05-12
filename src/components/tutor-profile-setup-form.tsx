@@ -7,16 +7,16 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useFieldArray,
-  useForm,
-  useWatch,
-  type FieldErrors,
-  type Resolver,
-} from "react-hook-form";
+import { useFieldArray, useForm, useWatch, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { Plus } from "lucide-react";
+import {
+  addRecurringAvailabilityAction,
+  deleteRecurringAvailabilityAction,
+} from "@/app/[locale]/tutor/availability/actions";
 import { saveTutorProfileAction } from "@/app/[locale]/tutor/profile/setup/actions";
+import { ButtonLink } from "@/components/button-link";
+import { SubmitButton } from "@/components/submit-button";
 import { trackEvent } from "@/lib/analytics";
 import {
   uploadTutorVerificationPdfAction,
@@ -52,8 +52,35 @@ const EXPERIENCE_MAX_MONTHS = 120;
 const AVATAR_CROP_WIDTH = 960;
 const AVATAR_CROP_HEIGHT = 540;
 
+const WEEK_DAY_KEYS = ["week0", "week1", "week2", "week3", "week4", "week5", "week6"] as const;
+
 function clampExperienceMonths(value: number) {
   return Math.max(0, Math.min(EXPERIENCE_MAX_MONTHS, Math.round(value)));
+}
+
+/** Map Zod issue path to 0-based wizard step index so we can jump to the failing screen. */
+function mapValidationPathToWizardStep(path: unknown): number {
+  const segments = Array.isArray(path) ? path : [];
+  const head = segments[0];
+  const key = typeof head === "string" || typeof head === "number" ? String(head) : "";
+  if (key === "district" || key === "service_areas") return 0;
+  if (
+    key === "hourly_rate" ||
+    key === "working_period_start" ||
+    key === "working_period_end" ||
+    key === "service_type"
+  )
+    return 1;
+  if (key === "subject_groups") return 2;
+  if (
+    key === "education_entries" ||
+    key === "teaching_experience_months" ||
+    key === "bio" ||
+    key === "profile_photo"
+  )
+    return 3;
+  if (key === "verification_document") return 4;
+  return 0;
 }
 
 function formatExperienceLabel(months: number, t: (key: string, values?: Record<string, string | number>) => string) {
@@ -160,31 +187,6 @@ function buildClientFormSchema(t: (key: string) => string) {
     );
 }
 
-function pickStepFromClientErrors(errs: FieldErrors<ClientFormInput>): number {
-  if (errs.district || errs.service_areas) return 0;
-  if (errs.hourly_rate || errs.working_period_start || errs.working_period_end || errs.service_type) {
-    return 1;
-  }
-  if (errs.subject_groups) return 2;
-  if (errs.education_entries || errs.teaching_experience_months || errs.bio || errs.profile_photo) return 3;
-  if (errs.verification_document) return 4;
-  return 0;
-}
-
-function firstNestedErrorMessage(errs: FieldErrors<ClientFormInput>): string | null {
-  for (const v of Object.values(errs)) {
-    if (v == null) continue;
-    if (typeof v === "object" && "message" in v && typeof (v as { message?: string }).message === "string") {
-      return (v as { message: string }).message;
-    }
-    if (typeof v === "object") {
-      const inner = firstNestedErrorMessage(v as FieldErrors<ClientFormInput>);
-      if (inner) return inner;
-    }
-  }
-  return null;
-}
-
 export type ClientFormInput = {
   district: MacauRegion;
   service_areas: string[];
@@ -200,9 +202,21 @@ export type ClientFormInput = {
   verification_document?: string;
 };
 
+export type TutorRecurringSlotRow = {
+  id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+};
+
 type TutorProfileSetupFormProps = {
   locale: string;
   initialValues: ClientFormInput;
+  /** 0-based wizard step index (0–5). Synced from URL `?step=1–6`. */
+  initialStepIndex?: number;
+  recurringSlots: TutorRecurringSlotRow[];
+  /** Future dated one-off slots (today onward); counts toward “has availability”. */
+  futureOneOffCount: number;
 };
 
 function toServerPayload(values: ClientFormInput): TutorProfilePayload {
@@ -230,11 +244,22 @@ function toServerPayload(values: ClientFormInput): TutorProfilePayload {
   };
 }
 
-export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSetupFormProps) {
+export function TutorProfileSetupForm({
+  locale,
+  initialValues,
+  initialStepIndex = 0,
+  recurringSlots,
+  futureOneOffCount,
+}: TutorProfileSetupFormProps) {
   const t = useTranslations("TutorSetup");
+  const tAvail = useTranslations("Availability");
   const tCommon = useTranslations("Common");
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => Math.min(5, Math.max(0, initialStepIndex)));
+
+  useEffect(() => {
+    setStep(Math.min(5, Math.max(0, initialStepIndex)));
+  }, [initialStepIndex]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [verificationDocType, setVerificationDocType] = useState<VerificationDocType | "">("");
@@ -259,7 +284,6 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
   const {
     register,
     control,
-    handleSubmit,
     trigger,
     getValues,
     setValue,
@@ -324,13 +348,58 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
     setValue("service_areas", next, { shouldDirty: true, shouldValidate: true });
   };
 
+  const saveProfileThroughVerificationStep = async () => {
+    setIsAdvancingStep(true);
+    setSubmitError(null);
+    try {
+      const values = getValues();
+      // Validate the full wizard with Zod directly so we never fail silently (step 4-only `trigger`
+      // can miss cross-step issues or hide errors behind untouched-field rules).
+      const clientParsed = clientFormSchema.safeParse(values);
+      if (!clientParsed.success) {
+        const issue = clientParsed.error.issues[0];
+        setStep(mapValidationPathToWizardStep(issue?.path));
+        setSubmitError(issue?.message ?? t("submitBlockedFixEarlierSteps"));
+        await trigger();
+        return;
+      }
+      const payload = toServerPayload(values);
+      const parsed = tutorProfilePayloadSchema.safeParse(payload);
+      if (!parsed.success) {
+        const issue = parsed.error.issues[0];
+        setStep(mapValidationPathToWizardStep(issue?.path));
+        setSubmitError(issue?.message ?? "Invalid input.");
+        return;
+      }
+      setIsSaving(true);
+      const result = await saveTutorProfileAction({ locale, payload: parsed.data });
+      if (!result.ok) {
+        setSubmitError(mapServerSubmitError(result.error ?? "Save failed."));
+        return;
+      }
+      trackEvent("tutor_setup_profile_saved_before_schedule", { locale });
+      // Advance UI immediately; same-page query navigation can lag behind RSC refresh.
+      setStep(5);
+      router.push(`/${locale}/tutor/profile/setup?step=6`);
+      router.refresh();
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Save failed.");
+    } finally {
+      setIsSaving(false);
+      setIsAdvancingStep(false);
+    }
+  };
+
   const nextStep = async () => {
+    if (step === 4) {
+      await saveProfileThroughVerificationStep();
+      return;
+    }
     setIsAdvancingStep(true);
     try {
       setSubmitError(null);
       const ok = await trigger(stepFields[step] as never);
       if (!ok) return;
-      // Avoid showing step-5 required error before user reaches/submits step 5.
       if (step < 4) clearErrors("verification_document");
       setStep((prev) => Math.min(prev + 1, 4));
     } finally {
@@ -343,64 +412,22 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
     setStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const onInvalid = (formErrors: FieldErrors<ClientFormInput>) => {
-    const detail = firstNestedErrorMessage(formErrors);
-    setSubmitError(
-      detail ? `${t("submitBlockedFixEarlierSteps")}（${detail}）` : t("submitBlockedFixEarlierSteps"),
-    );
-    setStep(pickStepFromClientErrors(formErrors));
-  };
-
   const mapServerSubmitError = (raw: string) => {
     if (raw === "tutor_hourly_rate_positive") return t("hourlyRateMinRule");
     return raw;
   };
 
-  const onSubmit = (values: ClientFormInput) => {
+  const totalAvailabilitySlots = recurringSlots.length + futureOneOffCount;
+
+  const handleFinishSetup = () => {
+    if (totalAvailabilitySlots < 1) {
+      setSubmitError(t("availabilityRequiredBeforeFinish"));
+      return;
+    }
     setSubmitError(null);
-    setIsSaving(true);
-    (async () => {
-      try {
-        const payload = toServerPayload(values);
-        const parsed = tutorProfilePayloadSchema.safeParse(payload);
-        if (!parsed.success) {
-          const msg = parsed.error.issues[0]?.message ?? "Invalid input.";
-          const path0 = parsed.error.issues[0]?.path[0];
-          if (path0 === "district" || path0 === "service_areas") {
-            setStep(0);
-          } else if (path0 === "working_period_start" || path0 === "working_period_end") {
-            setStep(1);
-          } else if (path0 === "subjects") {
-            setStep(2);
-          } else if (
-            path0 === "education_background" ||
-            path0 === "teaching_experience" ||
-            path0 === "bio" ||
-            path0 === "profile_photo"
-          ) {
-            setStep(3);
-          } else if (path0 === "verification_document") {
-            setStep(4);
-          }
-          setSubmitError(msg);
-          return;
-        }
-
-        trackEvent("tutor_setup_submit", { locale });
-        const result = await saveTutorProfileAction({ locale, payload: parsed.data });
-        if (!result.ok) {
-          setSubmitError(mapServerSubmitError(result.error ?? "Save failed."));
-          return;
-        }
-
-        router.push(`/${locale}/tutor/profile/submitted?saved=1`);
-        router.refresh();
-      } catch (e) {
-        setSubmitError(e instanceof Error ? e.message : "Save failed.");
-      } finally {
-        setIsSaving(false);
-      }
-    })();
+    trackEvent("tutor_setup_complete_with_schedule", { locale });
+    router.push(`/${locale}/tutor/profile/submitted?saved=1`);
+    router.refresh();
   };
 
   const handlePdfFileSelect = () => {
@@ -548,15 +575,15 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
+    <div className="space-y-6">
       <p className="text-sm text-[#E2E8F0]">{t(`step${step + 1}Instruction`)}</p>
       <div className="flex flex-wrap items-center gap-3">
         <Badge>
-          {t("step")} {step + 1} / 5
+          {t("step")} {step + 1} / 6
         </Badge>
         <Tabs value={`step-${step}`} className="w-full overflow-x-auto">
-          <TabsList className="grid min-w-[360px] grid-cols-5 md:min-w-0 md:w-full">
-            {[0, 1, 2, 3, 4].map((idx) => (
+          <TabsList className="grid min-w-[420px] grid-cols-6 md:min-w-0 md:w-full">
+            {[0, 1, 2, 3, 4, 5].map((idx) => (
               <TabsTrigger key={idx} value={`step-${idx}`} disabled>
                 {idx + 1}
               </TabsTrigger>
@@ -591,6 +618,13 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
                 ),
               })}
             </p>
+            {step >= 5 ? (
+              <p>
+                {t("summaryAvailability", {
+                  count: totalAvailabilitySlots,
+                })}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}
@@ -1029,9 +1063,85 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
               {uploadError ? <p className="text-xs text-red-600">{uploadError}</p> : null}
               <p className="text-xs text-zinc-500">{t("verificationPdfReplaceHint")}</p>
             </div>
-            {errors.verification_document && (touchedFields.verification_document || isSubmitted) ? (
+            {errors.verification_document &&
+            (step === 4 || touchedFields.verification_document || isSubmitted) ? (
               <p className="mt-1 text-xs text-red-600">{errors.verification_document.message}</p>
             ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {step === 5 ? (
+        <Card>
+          <CardContent className="grid gap-4 pt-6">
+            <div>
+              <p className="text-base font-semibold text-[#1D2129]">{t("scheduleStepTitle")}</p>
+              <p className="mt-1 text-sm text-[#4E5969]">{t("scheduleStepIntro")}</p>
+            </div>
+
+            <form action={addRecurringAvailabilityAction} className="grid gap-3 rounded-lg border border-[#1A2456] bg-[#0A0F35] p-4 md:grid-cols-2">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="wizard_return" value="1" />
+              <label className="text-sm md:col-span-2">
+                {t("scheduleWeekday")}
+                <Select name="day_of_week" className="mt-1 w-full" required defaultValue="1">
+                  {WEEK_DAY_KEYS.map((key, d) => (
+                    <option key={key} value={d}>
+                      {tAvail(key)}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+              <label className="text-sm">
+                {t("scheduleStart")}
+                <Input name="start_time" type="time" required className="mt-1 w-full" />
+              </label>
+              <label className="text-sm">
+                {t("scheduleEnd")}
+                <Input name="end_time" type="time" required className="mt-1 w-full" />
+              </label>
+              <div className="md:col-span-2">
+                <SubmitButton type="submit" className="w-full sm:w-auto" pendingLabel={tCommon("loading")}>
+                  {t("scheduleAddButton")}
+                </SubmitButton>
+              </div>
+            </form>
+
+            <div>
+              <p className="text-sm font-medium text-[#1D2129]">{t("scheduleExistingTitle")}</p>
+              {recurringSlots.length === 0 && futureOneOffCount === 0 ? (
+                <p className="mt-2 text-sm text-amber-800">{t("scheduleEmptyHint")}</p>
+              ) : (
+                <ul className="mt-2 space-y-2">
+                  {recurringSlots.map((row) => (
+                    <li
+                      key={row.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-zinc-200 px-3 py-2 text-sm"
+                    >
+                      <span>
+                        {tAvail(WEEK_DAY_KEYS[row.day_of_week] ?? "week0")}{" "}
+                        {String(row.start_time).slice(0, 5)}–{String(row.end_time).slice(0, 5)}
+                      </span>
+                      <form action={deleteRecurringAvailabilityAction}>
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="id" value={row.id} />
+                        <input type="hidden" name="wizard_return" value="1" />
+                        <SubmitButton type="submit" size="sm" variant="outline" pendingLabel={tCommon("loading")}>
+                          {t("scheduleDelete")}
+                        </SubmitButton>
+                      </form>
+                    </li>
+                  ))}
+                  {futureOneOffCount > 0 ? (
+                    <li className="text-sm text-[#4E5969]">{t("scheduleOneOffNote", { count: futureOneOffCount })}</li>
+                  ) : null}
+                </ul>
+              )}
+            </div>
+
+            <ButtonLink href={`/${locale}/tutor/availability`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
+              {t("scheduleAdvancedLink")}
+            </ButtonLink>
           </CardContent>
         </Card>
       ) : null}
@@ -1046,13 +1156,23 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
           {t("previous")}
         </Button>
 
-        {step < 4 ? (
-          <Button type="button" onClick={nextStep} disabled={isSaving || isAdvancingStep} className="w-[48%] md:w-auto">
-            {isAdvancingStep ? tCommon("loading") : t("next")}
+        {step < 5 ? (
+          <Button
+            type="button"
+            onClick={() => void nextStep()}
+            disabled={isSaving || isAdvancingStep}
+            className="w-[48%] md:w-auto"
+          >
+            {isAdvancingStep || (step === 4 && isSaving) ? tCommon("loading") : t("next")}
           </Button>
         ) : (
-          <Button type="submit" disabled={isSaving} className="w-[48%] md:w-auto">
-            {isSaving ? t("saving") : t("submit")}
+          <Button
+            type="button"
+            onClick={handleFinishSetup}
+            disabled={isSaving || totalAvailabilitySlots < 1}
+            className="w-[48%] md:w-auto"
+          >
+            {t("finishSetup")}
           </Button>
         )}
       </div>
@@ -1060,7 +1180,7 @@ export function TutorProfileSetupForm({ locale, initialValues }: TutorProfileSet
       {errors.working_period_start || errors.working_period_end ? (
         <p className="text-xs text-red-600">{errors.working_period_end?.message ?? t("periodRule")}</p>
       ) : null}
-    </form>
+    </div>
   );
 }
 

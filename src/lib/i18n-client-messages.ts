@@ -8,6 +8,8 @@ export const NEXT_INTL_CLIENT_ROOT_KEYS = [
   "Common",
   "Directory",
   "TutorSetup",
+  /** Step 6 schedule labels (`week0`…`week6`) in `tutor-profile-setup-form`. */
+  "Availability",
 ] as const;
 
 export type NextIntlClientRootKey = (typeof NEXT_INTL_CLIENT_ROOT_KEYS)[number];
