@@ -89,8 +89,8 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
             <h3 className="min-w-0 flex-1 text-base font-bold leading-snug tracking-tight text-[#0F2C59] sm:text-lg">
               {tutor.display_name}
             </h3>
-            <div className="ui-shiny-rating ui-shiny-rating-sweep shrink-0 text-sm font-bold text-[#E6C699] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)] sm:text-base">
-              ⭐ {Number(tutor.average_rating).toFixed(1)}
+            <div className="ui-shiny-rating ui-shiny-rating-sweep max-w-[min(100%,11rem)] shrink-0 text-right text-sm font-bold leading-tight text-[#E6C699] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)] sm:max-w-none sm:text-base">
+              ⭐ {Number(tutor.average_rating).toFixed(1)} · {Number(tutor.total_reviews)} {labels.reviews}
             </div>
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">{displayMacauRegion(locale, tutor.district)}</p>

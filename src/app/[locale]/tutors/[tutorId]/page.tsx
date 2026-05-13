@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { parseServiceAreasFromDb } from "@/lib/tutor-setup-form-helpers";
 import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
+import { mergeTutorRatingDisplay, statsFromReviewRows } from "@/lib/tutor-rating-display";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +39,6 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
 
   const supabase = await createClient();
   const viewer = await getCurrentProfile();
-  const tutorQueryStart = Date.now();
   const { data: tutor, error } = await supabase
     .from("tutor_profiles")
     .select(
@@ -46,11 +46,7 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
     )
     .eq("id", tutorId)
     .maybeSingle();
-  console.info("[perf][tutor-profile][tutor-query-ms]", Date.now() - tutorQueryStart, {
-    locale,
-    tutorId,
-    hasError: !!error,
-  });
+  console.info("[perf][tutor-profile][tutor-query]", { locale, tutorId, hasError: !!error });
 
   if (error || !tutor) notFound();
 
@@ -58,27 +54,20 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
     .from("tutor_subjects")
     .select("subject, grade_level")
     .eq("tutor_id", tutorId);
-  const reviewsQueryStart = Date.now();
   const { data: reviewRows } = await supabase
     .from("reviews")
     .select("rating, comment, created_at")
     .eq("tutor_id", tutorId)
     .order("created_at", { ascending: false });
-  console.info("[perf][tutor-profile][reviews-query-ms]", Date.now() - reviewsQueryStart, {
-    locale,
-    tutorId,
-    rowCount: reviewRows?.length ?? 0,
-  });
+  console.info("[perf][tutor-profile][reviews-query]", { locale, tutorId, rowCount: reviewRows?.length ?? 0 });
 
   const reviews = (reviewRows ?? []).slice(0, 8);
-  const realtimeReviewCount = (reviewRows ?? []).length;
-  const realtimeAverageRating =
-    realtimeReviewCount > 0
-      ? (reviewRows ?? []).reduce((sum, row) => sum + Number(row.rating ?? 0), 0) / realtimeReviewCount
-      : 0;
-  const displayReviewCount = realtimeReviewCount > 0 ? realtimeReviewCount : (tutor.total_reviews ?? 0);
-  const displayAverageRating =
-    realtimeReviewCount > 0 ? realtimeAverageRating : Number(tutor.average_rating ?? 0);
+  const derivedFromReviews = statsFromReviewRows(reviewRows);
+  const { displayAverageRating, displayReviewCount } = mergeTutorRatingDisplay(
+    tutor.average_rating,
+    tutor.total_reviews,
+    derivedFromReviews,
+  );
 
   const uniqueSubjects = Array.from(
     new Set((subjects ?? []).map((s) => String(s.subject ?? "").trim()).filter(Boolean)),

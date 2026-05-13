@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
 import { createPublicServerClient } from "@/lib/supabase/public-server";
+import { aggregateRatingsByTutorId, mergeTutorRatingDisplay } from "@/lib/tutor-rating-display";
 
 export type LandingFeaturedTutor = {
   id: string;
@@ -125,6 +126,23 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
 
     featured.forEach((row) => {
       row.subjectSummary = (subjectMap.get(row.id) ?? []).slice(0, 3).join(" · ");
+    });
+
+    const featuredRatingsStart = Date.now();
+    const { data: featuredReviewRows } = await supabase
+      .from("reviews")
+      .select("tutor_id, rating")
+      .in("tutor_id", featuredIds);
+    console.info("[perf][landing][featured-reviews-query-ms]", Date.now() - featuredRatingsStart, {
+      locale,
+      featuredCount: featuredIds.length,
+      reviewRows: featuredReviewRows?.length ?? 0,
+    });
+    const featuredRatingAgg = aggregateRatingsByTutorId(featuredReviewRows);
+    featured.forEach((row) => {
+      const merged = mergeTutorRatingDisplay(row.average_rating, row.total_reviews, featuredRatingAgg.get(row.id));
+      row.average_rating = merged.displayAverageRating;
+      row.total_reviews = merged.displayReviewCount;
     });
   }
 
