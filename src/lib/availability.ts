@@ -1,4 +1,4 @@
-type TimeRange = {
+export type TimeRange = {
   start_time: string;
   end_time: string;
 };
@@ -8,12 +8,12 @@ export type ComputedSlot = {
   end_time: string;
 };
 
-function toMinutes(time: string) {
+export function toMinutes(time: string) {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 }
 
-function toTime(minutes: number) {
+export function toTime(minutes: number) {
   const h = Math.floor(minutes / 60)
     .toString()
     .padStart(2, "0");

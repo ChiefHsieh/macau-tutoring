@@ -281,7 +281,7 @@
     "step1Instruction": "Select serviceable areas (multiple choices allowed).",
     "step2Instruction": "Set hourly rate and teaching period.",
     "step3Instruction": "Choose teachable subjects and levels.",
-    "step4Instruction": "Fill education, experience, and profile photo.",
+    "step4Instruction": "Fill education, experience, optional bio, and upload a profile headshot (required before continuing).",
     "step5Instruction": "Upload a verification document (optional). Tap Next to save your profile and continue to availability.",
     "step6Instruction": "Add at least one weekly recurring teaching slot, then tap Finish. You can fine-tune later under Manage availability.",
     "scheduleStepTitle": "Teaching availability (required)",
@@ -326,7 +326,8 @@
     "experienceLabel10Plus": "10+ years",
     "experienceLabelDetailed": "{years} years {months} months",
     "bio": "Bio (optional)",
-    "profilePhoto": "Profile photo upload (optional)",
+    "profilePhoto": "Profile photo (required)",
+    "profilePhotoRequired": "Please upload and save your profile photo (choose image, crop, then tap upload) before continuing.",
     "avatarNoFileSelected": "No file selected.",
     "avatarExistingPhotoHint": "Profile photo on file — choose a new image above to replace it.",
     "avatarAfterUploadLine": "Uploaded and saved (cropped JPEG).",
@@ -446,7 +447,22 @@
     "bookNow": "Confirm booking",
     "noTutor": "No tutors available for booking.",
     "back": "Back to student dashboard",
-    "studentsOnlyBookingNote": "Only student accounts can book tutors. Registered tutor accounts cannot book other tutors."
+    "studentsOnlyBookingNote": "Only student accounts can book tutors. Registered tutor accounts cannot book other tutors.",
+    "slotCalendarHint": "Scroll sideways for more days. Green cells are bookable; grey cells are taken or blocked. Times use Asia/Macau (UTC+8).",
+    "slotCalendarAria": "Availability calendar",
+    "slotCalendarSectionTitle": "Availability preview",
+    "hourBand0": "00–04",
+    "hourBand1": "04–08",
+    "hourBand2": "08–12",
+    "hourBand3": "12–16",
+    "hourBand4": "16–20",
+    "hourBand5": "20–24",
+    "fullScheduleLink": "View full availability on tutor profile",
+    "slotSummaryEmpty": "Choose a green time slot in the calendar above.",
+    "selectedSlotLabel": "Selected time",
+    "ariaSlotBookable": "Bookable 1-hour slot, click to select",
+    "slotPickerRowTitle": "Choose a time for this date",
+    "slotPickerListAria": "Available times for this date"
   },
   "TutorPublic": {
     "back": "Back to directory",
@@ -698,7 +714,9 @@
     "noSubjects": "Subjects pending",
     "serviceAreasLabel": "Service subareas",
     "bookThis": "Book",
-    "viewProfile": "View profile"
+    "viewProfile": "View profile",
+    "quickSlotToday": "Slots today",
+    "quickSlotTomorrow": "Slots tomorrow"
   }
 }
 

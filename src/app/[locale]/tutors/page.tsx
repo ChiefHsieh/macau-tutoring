@@ -14,6 +14,8 @@ import {
 } from "@/lib/tutor-directory-filters";
 import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
 import { aggregateRatingsByTutorId, mergeTutorRatingDisplay } from "@/lib/tutor-rating-display";
+import { addDaysMacauYmd, macauTodayYmd } from "@/lib/macau-ymd";
+import { fetchTutorQuickSlotFlags } from "@/lib/tutor-booking-slots";
 
 type TutorsPageProps = {
   params: Promise<{ locale: string }>;
@@ -223,6 +225,17 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     return a.display_name.localeCompare(b.display_name);
   });
 
+  const quickIdList = sortedTutors.map((x) => x.id);
+  const quickSlotFlags =
+    quickIdList.length > 0
+      ? await fetchTutorQuickSlotFlags(
+          supabase,
+          quickIdList,
+          macauTodayYmd(),
+          addDaysMacauYmd(macauTodayYmd(), 1),
+        )
+      : new Map<string, { today: boolean; tomorrow: boolean }>();
+
   return (
     <main className="space-y-8">
       <PageSection
@@ -293,6 +306,7 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
           </Card>
           <section className="grid gap-4 md:grid-cols-2">
             {sortedTutors.map((tutor) => {
+              const q = quickSlotFlags.get(tutor.id);
               const { displayAverageRating: displayRating, displayReviewCount: displayReviews } =
                 mergeTutorRatingDisplay(tutor.average_rating, tutor.total_reviews, ratingAggByTutor.get(tutor.id));
               const serviceAreas = parseServiceAreasFromDb(tutor.exact_location, tutor.district);
@@ -304,6 +318,16 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
+                        {q?.today ? (
+                          <span className="rounded-full border border-[#10b981]/40 bg-[#10b981]/15 px-2 py-0.5 text-xs font-semibold text-[#10b981]">
+                            {t("quickSlotToday")}
+                          </span>
+                        ) : null}
+                        {q?.tomorrow ? (
+                          <span className="rounded-full border border-[#10b981]/40 bg-[#10b981]/15 px-2 py-0.5 text-xs font-semibold text-[#10b981]">
+                            {t("quickSlotTomorrow")}
+                          </span>
+                        ) : null}
                         <h2 className="text-lg font-semibold text-[#1D2129]">{tutor.display_name}</h2>
                         <span className="rounded-full border border-[#E6C699]/40 bg-[#E6C699]/10 px-2 py-0.5 text-xs font-semibold text-[#E6C699]">
                           MOP {tutor.hourly_rate}/hr

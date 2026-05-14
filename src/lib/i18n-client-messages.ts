@@ -7,6 +7,8 @@
 export const NEXT_INTL_CLIENT_ROOT_KEYS = [
   "Common",
   "Directory",
+  /** `booking-new-client`, `booking-availability-calendar`, `booking-create-form` labels. */
+  "Booking",
   "TutorSetup",
   /** Step 6 schedule labels (`week0`…`week6`) in `tutor-profile-setup-form`. */
   "Availability",

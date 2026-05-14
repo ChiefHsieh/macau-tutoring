@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createBookingAction } from "@/app/[locale]/booking/actions";
 import { trackEvent } from "@/lib/analytics";
@@ -44,6 +45,11 @@ type BookingCreateFormProps = {
   labels: {
     bookNow: string;
   };
+  slotValue: string;
+  onSlotValueChange: (v: string) => void;
+  /** When set, replaces the time-slot dropdown. */
+  slotDisplay?: ReactNode;
+  submitDisabled?: boolean;
 };
 
 export function BookingCreateForm({
@@ -53,6 +59,10 @@ export function BookingCreateForm({
   slots,
   subjects,
   labels,
+  slotValue,
+  onSlotValueChange,
+  slotDisplay,
+  submitDisabled,
 }: BookingCreateFormProps) {
   const tCommon = useTranslations("Common");
   const subjectOptions = useMemo(() => uniqueSubjectsInOrder(subjects), [subjects]);
@@ -71,10 +81,6 @@ export function BookingCreateForm({
     setGradeLevel((prev) => (grades.includes(prev) ? prev : grades[0] ?? ""));
   }, [subjects, subject]);
 
-  const [slotValue, setSlotValue] = useState(
-    slots[0] ? `${slots[0].start_time}|${slots[0].end_time}` : "",
-  );
-
   const [start, end] = useMemo(() => slotValue.split("|"), [slotValue]);
 
   return (
@@ -83,7 +89,7 @@ export function BookingCreateForm({
         trackEvent("match_created", { tutor_id: tutorId });
         await createBookingAction(formData);
       }}
-      className="mt-4 grid gap-4"
+      className="mt-4 grid min-w-0 max-w-full gap-4"
     >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="tutor_id" value={tutorId} />
@@ -105,22 +111,26 @@ export function BookingCreateForm({
         ))}
       </Select>
 
-      <Select
-        name="slot"
-        value={slotValue}
-        onChange={(e) => setSlotValue(e.target.value)}
-      >
-        {slots.map((slot) => (
-          <option key={`${slot.start_time}-${slot.end_time}`} value={`${slot.start_time}|${slot.end_time}`}>
-            {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
-          </option>
-        ))}
-      </Select>
+      {slotDisplay ? (
+        <div className="relative rounded-[12px] border border-[#1A2456] bg-[#0A0F35] px-3 py-2 text-sm text-[#F8F9FA]">
+          {slotDisplay}
+        </div>
+      ) : (
+        <Select name="slot" value={slotValue} onChange={(e) => onSlotValueChange(e.target.value)}>
+          {slots.map((slot) => (
+            <option key={`${slot.start_time}-${slot.end_time}`} value={`${slot.start_time}|${slot.end_time}`}>
+              {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
+            </option>
+          ))}
+        </Select>
+      )}
 
       <input type="hidden" name="start_time" value={start ?? ""} />
       <input type="hidden" name="end_time" value={end ?? ""} />
 
-      <SubmitButton pendingLabel={tCommon("loading")}>{labels.bookNow}</SubmitButton>
+      <SubmitButton className="w-full" pendingLabel={tCommon("loading")} disabled={submitDisabled}>
+        {labels.bookNow}
+      </SubmitButton>
     </form>
   );
 }

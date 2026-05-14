@@ -42,7 +42,7 @@ export async function saveTutorProfileAction(input: SaveTutorProfileInput) {
     education_background: data.education_background,
     teaching_experience: data.teaching_experience,
     bio: data.bio || null,
-    profile_photo: data.profile_photo || null,
+    profile_photo: data.profile_photo.trim(),
   };
 
   let { error: profileError } = await supabase

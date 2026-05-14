@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splash_background">#0B1330</color>
+    <color name="splash_gold">#E4C294</color>
+    <color name="splash_tagline">#F8F9FA</color>
+    <color name="colorPrimary">#000225</color>
+    <color name="colorPrimaryDark">#000225</color>
+    <color name="colorAccent">#DAC0A3</color>
+</resources>

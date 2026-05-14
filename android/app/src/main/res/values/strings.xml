@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">Astar Marketplace</string>
     <string name="title_activity_main">Astar Marketplace</string>
-    <string name="package_name">com.astar.marketplace</string>
-    <string name="custom_url_scheme">com.astar.marketplace</string>
+    <string name="package_name">com.astarmarketplace.app</string>
+    <string name="custom_url_scheme">com.astarmarketplace.app</string>
+
+    <string name="splash_tagline_en">Curating your perfect tutor match…</string>
+    <string name="splash_tagline_zh">為你精心匹配專屬導師…</string>
 </resources>

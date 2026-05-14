@@ -3,10 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { computeAvailableSlots } from "@/lib/availability";
 import { displayMacauRegion } from "@/lib/macau-location-display";
-import { BookingCreateForm } from "@/components/booking-create-form";
-import { BookingFiltersAutoLoad } from "@/components/booking-filters-auto-load";
+import { macauTodayYmd } from "@/lib/macau-ymd";
+import { fetchSlotsAndGridsForTutor } from "@/lib/tutor-booking-slots";
+import { BookingNewClient } from "@/components/booking-new-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type BookingNewPageProps = {
@@ -15,13 +15,9 @@ type BookingNewPageProps = {
     tutorId?: string;
     date?: string;
     error?: string;
-    success?: string; // "1" after createBookingAction redirect
+    success?: string;
   }>;
 };
-
-function getWeekDay(dateStr: string) {
-  return new Date(`${dateStr}T00:00:00`).getDay();
-}
 
 export default async function BookingNewPage({ params, searchParams }: BookingNewPageProps) {
   const { locale } = await params;
@@ -31,8 +27,16 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
   const t = await getTranslations("Booking");
 
   const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
-  const selectedDate = query.date ?? today;
+  const todayMacau = macauTodayYmd();
+  const rawDate = query.date ?? todayMacau;
+  const selectedDate = rawDate < todayMacau ? todayMacau : rawDate;
+
+  if (query.date && query.date < todayMacau) {
+    const p = new URLSearchParams();
+    if (query.tutorId) p.set("tutorId", query.tutorId);
+    p.set("date", todayMacau);
+    redirect(`/${locale}/booking/new?${p.toString()}`);
+  }
 
   const { data: tutors } = await supabase
     .from("tutor_profiles")
@@ -43,59 +47,25 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
 
   const { data: subjects } =
     tutorIds.length > 0
-      ? await supabase
-          .from("tutor_subjects")
-          .select("tutor_id, subject, grade_level")
-          .in("tutor_id", tutorIds)
+      ? await supabase.from("tutor_subjects").select("tutor_id, subject, grade_level").in("tutor_id", tutorIds)
       : { data: [] as { tutor_id: string; subject: string; grade_level: string }[] };
 
   const selectedTutorId = query.tutorId ?? tutors?.[0]?.id;
   const selectedTutor = (tutors ?? []).find((item) => item.id === selectedTutorId);
   const isTutorLocked = Boolean(query.tutorId);
 
-  let availableSlots: { start_time: string; end_time: string }[] = [];
+  let bookingDates: string[] = [];
+  let slotsByDate: Record<string, { start_time: string; end_time: string }[]> = {};
+  let hourGridByDate: Record<string, import("@/lib/tutor-booking-slots").HourCellKind[]> = {};
   let selectedTutorSubjects: { subject: string; grade_level: string }[] = [];
 
   if (selectedTutorId) {
-    const weekDay = getWeekDay(selectedDate);
-    const [{ data: availRows }, { data: bookingRows }, blocksResult] = await Promise.all([
-      supabase
-        .from("tutor_availability")
-        .select("start_time, end_time")
-        .eq("tutor_id", selectedTutorId)
-        .eq("day_of_week", weekDay),
-      supabase
-        .from("bookings")
-        .select("start_time, end_time")
-        .eq("tutor_id", selectedTutorId)
-        .eq("session_date", selectedDate)
-        .in("session_status", ["upcoming"]),
-      supabase
-        .from("tutor_unavailability_blocks")
-        .select("start_time, end_time")
-        .eq("tutor_id", selectedTutorId)
-        .eq("block_date", selectedDate),
-    ]);
+    const multi = await fetchSlotsAndGridsForTutor(supabase, selectedTutorId, todayMacau, 42);
+    bookingDates = multi.dates;
+    slotsByDate = multi.slotsByDate;
+    hourGridByDate = multi.hourGridByDate;
 
-    const oneOffRes = await supabase
-      .from("tutor_availability_one_off")
-      .select("start_time, end_time")
-      .eq("tutor_id", selectedTutorId)
-      .eq("session_date", selectedDate);
-    const oneOffRows = oneOffRes.error ? [] : oneOffRes.data ?? [];
-
-    const baseRanges = [...(availRows ?? []), ...oneOffRows];
-
-    availableSlots = computeAvailableSlots(
-      baseRanges,
-      bookingRows ?? [],
-      blocksResult.error ? [] : blocksResult.data ?? [],
-      60,
-    );
-
-    selectedTutorSubjects = (subjects ?? []).filter(
-      (item) => item.tutor_id === selectedTutorId,
-    );
+    selectedTutorSubjects = (subjects ?? []).filter((item) => item.tutor_id === selectedTutorId);
   }
 
   return (
@@ -109,76 +79,48 @@ export default async function BookingNewPage({ params, searchParams }: BookingNe
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-        {query.success ? (
-          <div className="ui-alert ui-alert-success mt-3 space-y-2">
-            <p>{t("success")}</p>
-            {query.tutorId ? (
-              <Link
-                href={`/${locale}/messages/${query.tutorId}`}
-                className="inline-block font-medium text-emerald-900 underline underline-offset-2"
-              >
-                {t("messageTutorAfterBook")}
-              </Link>
-            ) : null}
-          </div>
-        ) : null}
-        {query.error ? (
-          <p className="ui-alert ui-alert-error mt-3">
-            {decodeURIComponent(query.error)}
-          </p>
-        ) : null}
+          {query.success ? (
+            <div className="ui-alert ui-alert-success mt-3 space-y-2">
+              <p>{t("success")}</p>
+              {query.tutorId ? (
+                <Link
+                  href={`/${locale}/messages/${query.tutorId}`}
+                  className="inline-block font-medium text-emerald-900 underline underline-offset-2"
+                >
+                  {t("messageTutorAfterBook")}
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
+          {query.error ? <p className="ui-alert ui-alert-error mt-3">{decodeURIComponent(query.error)}</p> : null}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-4 md:p-5">
-          <BookingFiltersAutoLoad
-            locale={locale}
-            tutors={
-              (tutors ?? []).map((item) => ({
+      {selectedTutor && selectedTutorId ? (
+        <Card className="min-w-0 max-w-full overflow-visible">
+          <CardContent className="min-w-0 max-w-full p-4 md:p-5">
+            <BookingNewClient
+              locale={locale}
+              tutors={(tutors ?? []).map((item) => ({
                 id: item.id,
                 display_name: item.display_name,
                 district: displayMacauRegion(locale, item.district),
                 hourly_rate: item.hourly_rate,
-              }))
-            }
-            selectedTutorId={selectedTutorId}
-            selectedDate={selectedDate}
-            isTutorLocked={isTutorLocked}
-            lockedTutorLabel={
-              selectedTutor
-                ? `${selectedTutor.display_name} · ${displayMacauRegion(locale, selectedTutor.district)} · MOP${selectedTutor.hourly_rate}`
-                : undefined
-            }
-          />
-        </CardContent>
-      </Card>
-
-      {selectedTutor ? (
-        <Card>
-          <CardContent className="p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-[#1D2129]">{t("availableSlots")}</h2>
-          <p className="mt-1 text-sm text-zinc-600">
-            {t("selectedTutor")}: {selectedTutor.display_name}
-          </p>
-          <p className="mt-1 text-sm text-zinc-600">
-            {t("selectedDate")}: {selectedDate}
-          </p>
-
-          {availableSlots.length === 0 ? (
-            <p className="ui-empty-state mt-4">{t("noSlots")}</p>
-          ) : selectedTutorSubjects.length === 0 ? (
-            <p className="ui-empty-state mt-4">{t("noSubject")}</p>
-          ) : (
-            <BookingCreateForm
-              locale={locale}
-              tutorId={selectedTutor.id}
-              sessionDate={selectedDate}
-              slots={availableSlots}
+              }))}
+              selectedTutorId={selectedTutorId}
+              selectedDate={selectedDate}
+              isTutorLocked={isTutorLocked}
+              lockedTutorLabel={
+                isTutorLocked
+                  ? `${selectedTutor.display_name} · ${displayMacauRegion(locale, selectedTutor.district)} · MOP${selectedTutor.hourly_rate}`
+                  : undefined
+              }
+              tutorDisplayName={selectedTutor.display_name}
               subjects={selectedTutorSubjects}
-              labels={{ bookNow: t("bookNow") }}
+              bookingDates={bookingDates}
+              slotsByDate={slotsByDate}
+              hourGridByDate={hourGridByDate}
             />
-          )}
           </CardContent>
         </Card>
       ) : (

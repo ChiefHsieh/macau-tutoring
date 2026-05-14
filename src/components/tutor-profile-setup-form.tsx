@@ -172,7 +172,7 @@ function buildClientFormSchema(t: (key: string) => string) {
       education_entries: z.array(educationEntrySchema).min(1),
       teaching_experience_months: z.coerce.number().int().min(0).max(EXPERIENCE_MAX_MONTHS),
       bio: z.string().optional(),
-      profile_photo: z.string().optional(),
+      profile_photo: z.string().trim().min(1, { message: t("profilePhotoRequired") }),
       verification_document: z.string().optional(),
     })
     .refine(
@@ -239,7 +239,7 @@ function toServerPayload(values: ClientFormInput): TutorProfilePayload {
     education_background,
     teaching_experience: teachingExperience,
     bio: values.bio,
-    profile_photo: values.profile_photo,
+    profile_photo: (values.profile_photo ?? "").trim(),
     verification_document: values.verification_document?.trim() || undefined,
   };
 }
@@ -413,7 +413,7 @@ export function TutorProfileSetupForm({
   };
 
   const mapServerSubmitError = (raw: string) => {
-    if (raw === "tutor_hourly_rate_positive") return t("hourlyRateMinRule");
+    if (raw === "profile_photo_required") return t("profilePhotoRequired");
     return raw;
   };
 

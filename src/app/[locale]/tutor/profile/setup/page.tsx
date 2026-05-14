@@ -85,6 +85,11 @@ export default async function TutorProfileSetupPage({
     redirect(`/${locale}/tutor/profile/setup`);
   }
 
+  const hasProfilePhoto = Boolean(tutorProfile?.profile_photo?.trim());
+  if (!hasProfilePhoto && requestedStepNumber > 4) {
+    redirect(`/${locale}/tutor/profile/setup?step=4`);
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   const [{ data: recurringSlotRows }, oneOffFutureRes] = await Promise.all([
     supabase

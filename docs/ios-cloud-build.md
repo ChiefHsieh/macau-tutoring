@@ -5,7 +5,7 @@
 - 依赖：`@capacitor/ios`（与 `@capacitor/android` 同级）
 - 工作流：`.github/workflows/ios-smoke.yml` — 在 **GitHub macOS Runner** 上执行 `cap add ios`（若缺失）、`cap sync ios`、`pod install`、**模拟器版 xcodebuild**（不要求 Distribution 证书）
 
-`capacitor.config.ts` 中 `appId: com.astar.marketplace` 与 `server.url` 指向线上站点；iOS 壳加载方式与 Android 一致。
+`capacitor.config.ts` 中 `appId: com.astarmarketplace.app` 与 `server.url` 指向线上站点；iOS 壳加载方式与 Android 一致。
 
 ---
 
@@ -34,7 +34,7 @@
 ### 3.1 在 Apple Developer 完成
 
 1. 加入 **Apple Developer Program**。
-2. **Identifiers**：创建与 `com.astar.marketplace` 一致的 App ID；若要用推送，勾选 **Push Notifications**。
+2. **Identifiers**：创建与 `com.astarmarketplace.app` 一致的 App ID；若要用推送，勾选 **Push Notifications**。
 3. **Certificates**：创建 **Apple Distribution** 证书；在 Mac Keychain 导出 **.p12**（含私钥）并设密码。
 4. **Profiles**：创建 **App Store** 类型描述文件，绑定上述 App ID 与证书，下载 **.mobileprovision**。
 5. （推荐）**App Store Connect API Key**：生成 **Issuer ID、Key ID、.p8**，供 CI 上传构建（避免使用 Apple ID 密码）。

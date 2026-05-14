@@ -177,7 +177,7 @@ export default async function TutorPublicProfilePage({ params, searchParams }: T
               </div>
             ) : null}
 
-            <Card className="border border-[#1A2456] bg-[#0A0F35] shadow-lg shadow-black/40">
+            <Card id="availability" className="border border-[#1A2456] bg-[#0A0F35] shadow-lg shadow-black/40">
               <CardHeader className="space-y-1 p-4 pb-2">
                 <CardTitle className="text-sm font-semibold text-white">{t("availabilityTitle")}</CardTitle>
               </CardHeader>

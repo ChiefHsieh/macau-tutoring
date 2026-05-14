@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { computeAvailableSlots } from "@/lib/availability";
+import { getMacauWeekdayIndex } from "@/lib/macau-ymd";
 
 const createBookingSchema = z.object({
   tutor_id: z.string().uuid(),
@@ -15,10 +16,6 @@ const createBookingSchema = z.object({
   start_time: z.string().min(1),
   end_time: z.string().min(1),
 });
-
-function getWeekDay(dateStr: string) {
-  return new Date(`${dateStr}T00:00:00`).getDay();
-}
 
 function minutesBetween(start: string, end: string) {
   const [sh, sm] = start.split(":").map(Number);
@@ -47,7 +44,7 @@ export async function createBookingAction(formData: FormData) {
   }
 
   const payload = parsed.data;
-  const weekDay = getWeekDay(payload.session_date);
+  const weekDay = getMacauWeekdayIndex(payload.session_date);
   const supabase = await createClient();
 
   const [{ data: availRows }, { data: bookingRows }, blocksResult, { data: tutorProfile }] =

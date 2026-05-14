@@ -281,7 +281,7 @@
     "step1Instruction": "選擇可服務區域（可多選）",
     "step2Instruction": "設定時薪與授課時段",
     "step3Instruction": "選擇可教授學科與級別",
-    "step4Instruction": "填寫教育背景、教學經驗與頭像",
+    "step4Instruction": "填寫教育背景、教學經驗、可選簡介，並上傳個人頭像（必填，完成後才可進入下一步）。",
     "step5Instruction": "上傳驗證文件（可選）。完成後請按「下一步」以保存資料並進入可授課時間。",
     "step6Instruction": "新增至少一段「每週固定」可授課時間；完成後按「完成設置」。（亦可稍後在「管理可用時段」微調。）",
     "scheduleStepTitle": "可授課時間（必填）",
@@ -326,7 +326,8 @@
     "experienceLabel10Plus": "10 年以上",
     "experienceLabelDetailed": "{years} 年 {months} 個月",
     "bio": "個人簡介（可選）",
-    "profilePhoto": "頭像上傳（可選）",
+    "profilePhoto": "個人頭像（必填）",
+    "profilePhotoRequired": "請先上傳並保存頭像：選擇圖片、裁剪後點「上傳裁剪後頭像」，成功後再按「下一步」。",
     "avatarNoFileSelected": "尚未選擇檔案",
     "avatarExistingPhotoHint": "已保存頭像；可在上方重新選擇圖片替換。",
     "avatarAfterUploadLine": "已上傳並保存（裁剪後 JPEG）。",
@@ -446,7 +447,22 @@
     "bookNow": "確認預約",
     "noTutor": "暫無導師資料可預約。",
     "back": "返回我的家教中心",
-    "studentsOnlyBookingNote": "僅限學生帳號可預約導師；已註冊的導師帳號不能預約其他導師。"
+    "studentsOnlyBookingNote": "僅限學生帳號可預約導師；已註冊的導師帳號不能預約其他導師。",
+    "slotCalendarHint": "左右滑動可瀏覽更多日期。綠格為可預約；灰格為已約或導師屏蔽。時間為澳門時間（UTC+8）。",
+    "slotCalendarAria": "可約時段日曆",
+    "slotCalendarSectionTitle": "可約時段預覽",
+    "hourBand0": "00–04",
+    "hourBand1": "04–08",
+    "hourBand2": "08–12",
+    "hourBand3": "12–16",
+    "hourBand4": "16–20",
+    "hourBand5": "20–24",
+    "fullScheduleLink": "查看完整日程表（導師公開頁）",
+    "slotSummaryEmpty": "請在上方日曆中點選綠色可約時段。",
+    "selectedSlotLabel": "已選時段",
+    "ariaSlotBookable": "可預約的一小時時段，點擊以選擇",
+    "slotPickerRowTitle": "點擊以更換當日上課時段",
+    "slotPickerListAria": "當日可選時段"
   },
   "TutorPublic": {
     "back": "返回導師目錄",
@@ -698,7 +714,9 @@
     "noSubjects": "科目待完善",
     "serviceAreasLabel": "服務細分區",
     "bookThis": "預約",
-    "viewProfile": "詳情"
+    "viewProfile": "詳情",
+    "quickSlotToday": "今日有時間",
+    "quickSlotTomorrow": "明日有時間"
   }
 }
 

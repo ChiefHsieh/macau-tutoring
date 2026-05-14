@@ -35,7 +35,7 @@ export const tutorProfilePayloadSchema = z
     education_background: z.string().min(5),
     teaching_experience: z.string().min(2),
     bio: z.string().optional(),
-    profile_photo: z.string().optional(),
+    profile_photo: z.string().trim().min(1, { message: "profile_photo_required" }),
     verification_document: z.string().trim().optional(),
     service_areas: z.array(z.string().min(1)).min(1),
   })

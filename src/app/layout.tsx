@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 
@@ -18,9 +18,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#000225",
+};
+
 export const metadata: Metadata = {
   title: "A* Marketplace · 星級頂尖教育平台",
   description: "MVP for Macau tutor-student matching and booking",
+  applicationName: "A* Marketplace",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "A* Marketplace",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({

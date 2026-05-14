@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.astar.marketplace',
+  appId: 'com.astarmarketplace.app',
   appName: 'Astar Marketplace',
   webDir: 'out',
   server: {

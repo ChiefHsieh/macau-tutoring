@@ -574,5 +574,15 @@ section {
     max-height: none;
     object-fit: cover;
   }
+
+  /**
+   * Booking availability grid: global `button { min-height: 48px }` would stretch cells;
+   * use compact 32px rows so the grid stays usable on phones.
+   */
+  button.booking-avail-hour {
+    min-height: 2rem;
+    height: 2rem;
+    padding: 0;
+  }
 }
 
