@@ -16,10 +16,6 @@ import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-di
 import { aggregateRatingsByTutorId, mergeTutorRatingDisplay } from "@/lib/tutor-rating-display";
 import { addDaysMacauYmd, macauTodayYmd } from "@/lib/macau-ymd";
 import { fetchTutorQuickSlotFlags } from "@/lib/tutor-booking-slots";
-import {
-  getCachedPlatformRegistrationCounts,
-  getDisplayTutorCount,
-} from "@/lib/platform-registration-stats";
 
 type TutorsPageProps = {
   params: Promise<{ locale: string }>;
@@ -229,10 +225,6 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
     return a.display_name.localeCompare(b.display_name);
   });
 
-  const registrationCounts = await getCachedPlatformRegistrationCounts();
-  const displayPlatformTutorCount = getDisplayTutorCount(registrationCounts.liveTutorCount);
-  const filteredTutorCount = tutors?.length ?? 0;
-
   const quickIdList = sortedTutors.map((x) => x.id);
   const quickSlotFlags =
     quickIdList.length > 0
@@ -305,14 +297,9 @@ export default async function TutorsDirectoryPage({ params, searchParams }: Tuto
           <Card>
             <CardContent className="pt-5">
               <p className="text-sm text-zinc-600">
-                {displayPlatformTutorCount} {t("platformTutorTotal")}
+                {tutors?.length ?? 0} {t("resultsCount")}
               </p>
-              {hasActiveFilters && filteredTutorCount !== displayPlatformTutorCount ? (
-                <p className="mt-1 text-xs text-zinc-500">
-                  {t("filteredTutorCount", { count: filteredTutorCount })}
-                </p>
-              ) : null}
-              {!tutorsError && filteredTutorCount === 0 && hasActiveFilters ? (
+              {!tutorsError && (tutors?.length ?? 0) === 0 && hasActiveFilters ? (
                 <p className="ui-empty-state mt-2">{t("empty")}</p>
               ) : null}
             </CardContent>

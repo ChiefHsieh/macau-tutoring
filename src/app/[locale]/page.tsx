@@ -65,7 +65,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const contactWeChat = process.env.NEXT_PUBLIC_CONTACT_WECHAT?.trim() || "Chief552211";
   const contactHours = process.env.NEXT_PUBLIC_CONTACT_HOURS?.trim() ?? "";
 
-  /** Same formula as tutor directory (platform-registration-stats.ts). */
+  /** tutor_profiles row count — same ground truth as tutor directory listing. */
   const displayTutorCount = getDisplayTutorCount(tutorCount);
   const displayStudentCount = getDisplayStudentCount(studentCount);
   /** Public stat floor for 30-day active demand card. */
