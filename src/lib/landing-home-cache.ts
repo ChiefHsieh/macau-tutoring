@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
 import { createPublicServerClient } from "@/lib/supabase/public-server";
+import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { aggregateRatingsByTutorId, mergeTutorRatingDisplay } from "@/lib/tutor-rating-display";
 
 export type LandingFeaturedTutor = {
@@ -55,14 +56,18 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
   if (!hasSupabaseEnv()) return empty;
 
   const supabase = createPublicServerClient();
+  const admin = getAdminSupabaseClient();
   const since = new Date();
   since.setDate(since.getDate() - 30);
   const sinceIso = since.toISOString();
 
   const landingStatsQueryStart = Date.now();
+  const roleCountsClient = admin ?? supabase;
+
   const [
-    { count: tutorCountResult },
-    { count: studentCountResult },
+    { count: tutorUsersCount },
+    { count: studentUsersCount },
+    { count: tutorProfilesCount },
     { count: reviewActivityCountResult },
     { count: verifiedTutorCountResult },
     { count: bookingMatchCountResult },
@@ -70,8 +75,9 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
     { data: featuredRows },
     { data: feedData, error: feedError },
   ] = await Promise.all([
+    roleCountsClient.from("users").select("id", { head: true, count: "exact" }).eq("role", "tutor"),
+    roleCountsClient.from("users").select("id", { head: true, count: "exact" }).eq("role", "student"),
     supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }),
-    supabase.from("users").select("id", { head: true, count: "exact" }).eq("role", "student"),
     supabase.from("reviews").select("id", { head: true, count: "exact" }),
     supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }).eq("is_verified", true),
     supabase.from("bookings").select("id", { head: true, count: "exact" }),
@@ -151,9 +157,13 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
   }
 
   const hasLiveFeed = !feedError && !!feedData && feedData.length > 0;
+  const tutorFromUsers = tutorUsersCount ?? 0;
+  const tutorFromProfiles = tutorProfilesCount ?? 0;
+  const tutorCountResult = tutorFromUsers > 0 ? tutorFromUsers : tutorFromProfiles;
+
   return {
-    tutorCount: tutorCountResult ?? 0,
-    studentCount: studentCountResult ?? 0,
+    tutorCount: tutorCountResult,
+    studentCount: studentUsersCount ?? 0,
     reviewActivityCount: reviewActivityCountResult ?? 0,
     verifiedTutorCount: verifiedTutorCountResult ?? 0,
     bookingMatchCount: bookingMatchCountResult ?? 0,

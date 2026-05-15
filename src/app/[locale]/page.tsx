@@ -18,6 +18,11 @@ import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCachedLandingHomeData } from "@/lib/landing-home-cache";
+import {
+  LANDING_STAT_BASE_STUDENTS,
+  LANDING_STAT_BASE_TUTORS,
+  landingDisplayCount,
+} from "@/lib/landing-public-stats";
 
 type LandingPageProps = {
   params: Promise<{ locale: string }>;
@@ -64,8 +69,9 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const contactWeChat = process.env.NEXT_PUBLIC_CONTACT_WECHAT?.trim() || "Chief552211";
   const contactHours = process.env.NEXT_PUBLIC_CONTACT_HOURS?.trim() ?? "";
 
-  /** Public stat floor for student count card. */
-  const displayStudentCount = Math.max(22, studentCount);
+  /** Homepage cards = env baseline + live DB counts (see landing-public-stats.ts). */
+  const displayTutorCount = landingDisplayCount(LANDING_STAT_BASE_TUTORS, tutorCount);
+  const displayStudentCount = landingDisplayCount(LANDING_STAT_BASE_STUDENTS, studentCount);
   /** Public stat floor for 30-day active demand card. */
   const displayActiveLeadCount = Math.max(11, activeLeadCount);
   /** Public stat floor for cumulative bookings / matches card. */
@@ -218,7 +224,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
           <CardContent className="pt-5">
             <Users className="h-5 w-5 text-zinc-400" />
             <p className="text-sm text-zinc-600">{t("statTutors")}</p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-800">{tutorCount}</p>
+            <p className="mt-2 text-2xl font-semibold text-zinc-800">{displayTutorCount}</p>
           </CardContent>
         </Card>
         <Card className="border-dashed">
