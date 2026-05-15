@@ -18,6 +18,7 @@ import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCachedLandingHomeData } from "@/lib/landing-home-cache";
+import { getDisplayActiveDemandCount } from "@/lib/tutor-directory-filter-demand";
 import { getDisplayStudentCount, getDisplayTutorCount } from "@/lib/platform-registration-stats";
 
 type LandingPageProps = {
@@ -68,8 +69,8 @@ export default async function LandingPage({ params }: LandingPageProps) {
   /** tutor_profiles row count — same ground truth as tutor directory listing. */
   const displayTutorCount = getDisplayTutorCount(tutorCount);
   const displayStudentCount = getDisplayStudentCount(studentCount);
-  /** Tutor directory「應用篩選」clicks in the last 30 days (see tutor_directory_filter_events). */
-  const displayActiveLeadCount = activeLeadCount;
+  /** BASE (default 23) + tutor directory「應用篩選」clicks in the last 30 days. */
+  const displayActiveLeadCount = getDisplayActiveDemandCount(activeLeadCount);
   /** Public stat floor for cumulative bookings / matches card. */
   const displayBookingMatchCount = Math.max(10, bookingMatchCount);
 

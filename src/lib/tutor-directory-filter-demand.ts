@@ -2,6 +2,20 @@ import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createPublicServerClient } from "@/lib/supabase/public-server";
 
+function parseBase(name: string, fallback: number): number {
+  const raw = process.env[name]?.trim();
+  if (!raw) return fallback;
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+/** Marketing baseline for homepage「近 30 日活躍需求」(+ live filter-apply clicks). */
+export const PLATFORM_STAT_BASE_ACTIVE_DEMANDS = parseBase("LANDING_STAT_BASE_ACTIVE_DEMANDS", 23);
+
+export function getDisplayActiveDemandCount(liveFilterApplyCount: number): number {
+  return PLATFORM_STAT_BASE_ACTIVE_DEMANDS + Math.max(0, liveFilterApplyCount);
+}
+
 export function activeDemandSinceIso(days = 30): string {
   const since = new Date();
   since.setDate(since.getDate() - days);
