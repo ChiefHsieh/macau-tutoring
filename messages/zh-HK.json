@@ -709,6 +709,8 @@
     "closeFilters": "收起篩選",
     "clearFilters": "清空篩選",
     "resultsCount": "位導師",
+    "platformTutorTotal": "位已入駐導師",
+    "filteredTutorCount": "符合目前篩選：{count} 位",
     "verified": "已認證",
     "reviews": "評價",
     "noSubjects": "科目待完善",

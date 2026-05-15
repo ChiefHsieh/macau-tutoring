@@ -709,6 +709,8 @@
     "closeFilters": "Close filters",
     "clearFilters": "Clear all filters",
     "resultsCount": "results",
+    "platformTutorTotal": "tutors onboarded",
+    "filteredTutorCount": "Matching filters: {count}",
     "verified": "Verified",
     "reviews": "reviews",
     "noSubjects": "Subjects pending",
