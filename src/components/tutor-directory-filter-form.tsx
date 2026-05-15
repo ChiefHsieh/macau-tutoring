@@ -16,6 +16,7 @@ import {
   macauSubareasByRegion,
 } from "@/lib/tutor-directory-filters";
 import { displayMacauRegion, displayMacauSubarea } from "@/lib/macau-location-display";
+import { trackEvent } from "@/lib/analytics";
 
 export type TutorDirectoryFilterDefaults = {
   subjects: string[];
@@ -120,7 +121,30 @@ export function TutorDirectoryFilterForm({ locale, defaults, onApply }: TutorDir
   const [selectedAreas, setSelectedAreas] = useState<string[]>(defaults.areas);
   const [sort, setSort] = useState(defaults.sort);
 
+  function recordFilterApplyDemand() {
+    trackEvent("tutor_directory_filter_apply", { locale });
+    try {
+      const body = JSON.stringify({ locale });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(
+          "/api/platform/tutor-filter-apply",
+          new Blob([body], { type: "application/json" }),
+        );
+      } else {
+        void fetch("/api/platform/tutor-filter-apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          keepalive: true,
+        });
+      }
+    } catch {
+      // non-blocking
+    }
+  }
+
   function applyFiltersAndNavigate() {
+    recordFilterApplyDemand();
     const params = new URLSearchParams();
     params.set("min", String(low));
     params.set("max", String(high));

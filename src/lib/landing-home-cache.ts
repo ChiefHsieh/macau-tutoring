@@ -4,6 +4,7 @@ import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
 import { createPublicServerClient } from "@/lib/supabase/public-server";
 import { getCachedPlatformRegistrationCounts } from "@/lib/platform-registration-stats";
 import { aggregateRatingsByTutorId, mergeTutorRatingDisplay } from "@/lib/tutor-rating-display";
+import { countTutorDirectoryFilterEventsLast30Days } from "@/lib/tutor-directory-filter-demand";
 
 export type LandingFeaturedTutor = {
   id: string;
@@ -57,24 +58,20 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
 
   const supabase = createPublicServerClient();
   const registrationCounts = await getCachedPlatformRegistrationCounts();
-  const since = new Date();
-  since.setDate(since.getDate() - 30);
-  const sinceIso = since.toISOString();
-
   const landingStatsQueryStart = Date.now();
 
   const [
     { count: reviewActivityCountResult },
     { count: verifiedTutorCountResult },
     { count: bookingMatchCountResult },
-    { count: activeLeadCountResult },
+    activeLeadCountResult,
     { data: featuredRows },
     { data: feedData, error: feedError },
   ] = await Promise.all([
     supabase.from("reviews").select("id", { head: true, count: "exact" }),
     supabase.from("tutor_profiles").select("id", { head: true, count: "exact" }).eq("is_verified", true),
     supabase.from("bookings").select("id", { head: true, count: "exact" }),
-    supabase.from("bookings").select("id", { head: true, count: "exact" }).gte("created_at", sinceIso),
+    countTutorDirectoryFilterEventsLast30Days(),
     supabase
       .from("tutor_profiles")
       .select(
@@ -157,7 +154,7 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
     reviewActivityCount: reviewActivityCountResult ?? 0,
     verifiedTutorCount: verifiedTutorCountResult ?? 0,
     bookingMatchCount: bookingMatchCountResult ?? 0,
-    activeLeadCount: activeLeadCountResult ?? 0,
+    activeLeadCount: activeLeadCountResult,
     featured,
     demandFeedRows: hasLiveFeed ? (feedData as LandingDemandFeedRow[]) : getDemoRecentLeadRows(locale),
     demandsFromLiveFeed: hasLiveFeed,
@@ -167,7 +164,7 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
 export async function getCachedLandingHomeData(locale: string): Promise<LandingHomeData> {
   const run = unstable_cache(() => queryLandingHomeData(locale), ["landing-home-data", locale], {
     revalidate: 120,
-    tags: [`landing-home:${locale}`],
+    tags: [`landing-home:${locale}`, "landing-active-demand"],
   });
   return run();
 }

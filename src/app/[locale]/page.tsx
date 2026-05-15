@@ -68,8 +68,8 @@ export default async function LandingPage({ params }: LandingPageProps) {
   /** tutor_profiles row count — same ground truth as tutor directory listing. */
   const displayTutorCount = getDisplayTutorCount(tutorCount);
   const displayStudentCount = getDisplayStudentCount(studentCount);
-  /** Public stat floor for 30-day active demand card. */
-  const displayActiveLeadCount = Math.max(11, activeLeadCount);
+  /** Tutor directory「應用篩選」clicks in the last 30 days (see tutor_directory_filter_events). */
+  const displayActiveLeadCount = activeLeadCount;
   /** Public stat floor for cumulative bookings / matches card. */
   const displayBookingMatchCount = Math.max(10, bookingMatchCount);
 
