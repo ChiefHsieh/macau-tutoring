@@ -8,7 +8,6 @@ import { AppToaster } from "@/components/app-toaster";
 import { NavigationTopLoader } from "@/components/navigation-top-loader";
 import { NativePushBootstrap } from "@/components/native-push-bootstrap";
 import { pickClientMessages } from "@/lib/i18n-client-messages";
-
 type LocaleLayoutProps = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;

@@ -586,3 +586,34 @@ section {
   }
 }
 
+/* University tutor banner — transparent on dark landing background */
+.university-tutor-banner {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+@keyframes university-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.university-marquee-track {
+  animation: university-marquee 20s linear infinite;
+  will-change: transform;
+}
+
+.university-marquee-track.is-paused {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .university-marquee-track {
+    animation: none;
+  }
+}
+

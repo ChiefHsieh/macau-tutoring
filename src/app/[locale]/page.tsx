@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { teachableSubjectOptions } from "@/lib/tutor-setup-form-helpers";
 import { FeaturedTutorCard } from "@/components/featured-tutor-card";
+import { UniversityTutorBanner } from "@/components/university-tutor-banner";
 import { RecentDemandSection, type RecentDemandCardModel } from "@/components/recent-demand-section";
 import { LandingSiteFooter } from "@/components/landing-site-footer";
 import { PageSection } from "@/components/page-section";
@@ -155,6 +156,8 @@ export default async function LandingPage({ params }: LandingPageProps) {
           <p className="whitespace-pre-line text-sm italic leading-relaxed text-[#94A3B8]">{t("developerPostSignature")}</p>
         </CardContent>
       </Card>
+
+      <UniversityTutorBanner />
 
       <PageSection
         title={t("featuredTitle")}

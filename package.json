@@ -13,7 +13,8 @@
     "test:routes": "node --test tests/routes-buttons.snapshot.test.mjs",
     "test:e2e": "playwright test",
     "cap:add:ios": "npx cap add ios",
-    "cap:sync:ios": "npx cap sync ios"
+    "cap:sync:ios": "npx cap sync ios",
+    "sync:logos": "node scripts/sync-university-logos.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
