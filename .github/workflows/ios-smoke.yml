@@ -55,22 +55,18 @@ jobs:
         working-directory: ios/App
         run: |
           set -euo pipefail
-          if [ -f App.xcworkspace/contents.xcworkspacedata ]; then
-            XCODE_TARGET=(-workspace App.xcworkspace)
-          else
-            XCODE_TARGET=(-project App.xcodeproj)
-          fi
+          xcodebuild -project App.xcodeproj -list
           xcodebuild \
-            "${XCODE_TARGET[@]}" \
+            -project App.xcodeproj \
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
+            -resolvePackageDependencies \
+            CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Upload ios/ snapshot (optional: commit once to repo to speed up CI)
+      - name: "Upload ios/ snapshot (optional — commit once to repo to speed up CI)"
         if: success()
         uses: actions/upload-artifact@v4
         with:
