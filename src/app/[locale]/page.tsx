@@ -157,7 +157,10 @@ export default async function LandingPage({ params }: LandingPageProps) {
         </CardContent>
       </Card>
 
-      <UniversityTutorBanner />
+      <UniversityTutorBanner
+        title={t("universityBannerTitle")}
+        ariaLabel={t("universityBannerAria")}
+      />
 
       <PageSection
         title={t("featuredTitle")}

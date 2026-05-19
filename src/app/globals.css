@@ -591,6 +591,13 @@ section {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  overflow-x: clip;
+}
+
+@media (max-width: 767px) {
+  .university-marquee-track {
+    animation-duration: 28s;
+  }
 }
 
 @keyframes university-marquee {
