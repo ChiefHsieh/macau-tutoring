@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { syncAuthUserMetadata } from "@/lib/sync-auth-user-metadata";
 
 export async function completeOnboardingAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "zh-HK");
@@ -36,6 +37,15 @@ export async function completeOnboardingAction(formData: FormData) {
   );
 
   if (error) redirect(`/${locale}/onboarding?error=${encodeURIComponent(error.message)}`);
+
+  const fullNameTrimmed = fullName.trim();
+  const { error: metadataError } = await syncAuthUserMetadata(supabase, {
+    role: role as "student" | "tutor",
+    full_name: fullNameTrimmed,
+  });
+  if (metadataError) {
+    redirect(`/${locale}/onboarding?error=${encodeURIComponent(metadataError)}`);
+  }
 
   redirect(`/${locale}/dashboard`);
 }

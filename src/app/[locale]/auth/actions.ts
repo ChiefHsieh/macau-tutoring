@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
+import { syncAuthUserMetadata } from "@/lib/sync-auth-user-metadata";
 
 export async function signInAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
@@ -52,7 +53,16 @@ export async function signUpAction(formData: FormData) {
 
   const supabase = await createClient();
   // 若开启「Confirm email」，通常无 session：只能回登录页提示去邮箱验证（见 .env.example）。
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        role,
+        full_name: fullName,
+      },
+    },
+  });
   if (error) redirect(`/${locale}/auth?error=${encodeURIComponent(error.message)}`);
 
   const user = data.user;
@@ -72,6 +82,14 @@ export async function signUpAction(formData: FormData) {
 
     if (profileError) {
       redirect(`/${locale}/onboarding?error=${encodeURIComponent(profileError.message)}`);
+    }
+
+    const { error: metadataError } = await syncAuthUserMetadata(supabase, {
+      role,
+      full_name: fullName,
+    });
+    if (metadataError) {
+      redirect(`/${locale}/onboarding?error=${encodeURIComponent(metadataError)}`);
     }
 
     if (role === "tutor") {
