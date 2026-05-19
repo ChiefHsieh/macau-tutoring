@@ -4,6 +4,14 @@ name: iOS Smoke (Capacitor)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "capacitor.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "ios/**"
+      - ".github/workflows/ios-smoke.yml"
   pull_request:
     paths:
       - "capacitor.config.ts"
