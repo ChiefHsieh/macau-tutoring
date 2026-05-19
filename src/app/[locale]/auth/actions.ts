@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { syncAuthUserMetadata } from "@/lib/sync-auth-user-metadata";
+import { dashboardPathForRole } from "@/lib/dashboard-path";
 
 export async function signInAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
@@ -117,7 +118,7 @@ export async function signUpAction(formData: FormData) {
       }
     }
 
-    redirect(`/${locale}/dashboard`);
+    redirect(dashboardPathForRole(locale, role));
   }
 
   redirect(`/${locale}/auth?registered=1`);

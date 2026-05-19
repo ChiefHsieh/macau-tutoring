@@ -586,18 +586,147 @@ section {
   }
 }
 
-/* University tutor banner — transparent on dark landing background */
+/* University tutor banner — isolated from global mobile `img { max-width:100% }` */
 .university-tutor-banner {
-  background-color: transparent !important;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  overflow-x: clip;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0.5rem 0 0.75rem;
 }
 
-@media (max-width: 767px) {
-  .university-marquee-track {
-    animation-duration: 28s;
-  }
+.university-tutor-banner-inner {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.university-tutor-banner-title {
+  max-width: 20rem;
+  padding: 0 0.75rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-wrap: balance;
+  color: #f8f9fa;
+  font-family: var(--font-geist-sans), "Noto Sans TC", sans-serif;
+}
+
+.university-logo-viewport {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 3rem;
+  overflow: hidden;
+}
+
+.university-logo-measure {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  display: flex;
+  list-style: none;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.university-logo-item {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+}
+
+.university-logo-img {
+  display: block;
+  width: auto !important;
+  max-width: 7rem !important;
+  height: 2.25rem !important;
+  max-height: 2.25rem !important;
+  object-fit: contain !important;
+  object-position: center;
+}
+
+/* Mobile / narrow: horizontal swipe (no transform marquee — avoids Android paint glitches) */
+.university-logo-scroll {
+  display: flex;
+  width: max-content;
+  max-width: none;
+  list-style: none;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto;
+  padding: 0 0.5rem;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.university-logo-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.university-logo-scroll .university-logo-item {
+  scroll-snap-align: center;
+}
+
+.university-logo-viewport.is-static {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.university-logo-viewport.is-static::-webkit-scrollbar {
+  display: none;
+}
+
+.university-logo-viewport.is-static .university-logo-scroll {
+  overflow: visible;
+}
+
+/* Desktop: infinite marquee when content overflows */
+.university-logo-marquee-shell {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  overflow: hidden;
+}
+
+.university-marquee-track {
+  display: flex;
+  width: max-content;
+  list-style: none;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  animation: university-marquee 22s linear infinite;
+  will-change: transform;
+}
+
+.university-marquee-track.is-paused {
+  animation-play-state: paused;
 }
 
 @keyframes university-marquee {
@@ -609,18 +738,78 @@ section {
   }
 }
 
-.university-marquee-track {
-  animation: university-marquee 20s linear infinite;
-  will-change: transform;
+@media (min-width: 640px) {
+  .university-tutor-banner-title {
+    max-width: 28rem;
+    font-size: 1.125rem;
+  }
+
+  .university-logo-viewport {
+    height: 3.25rem;
+  }
+
+  .university-logo-img {
+    max-width: 8.75rem !important;
+    height: 2.5rem !important;
+    max-height: 2.5rem !important;
+  }
 }
 
-.university-marquee-track.is-paused {
-  animation-play-state: paused;
+@media (min-width: 768px) {
+  .university-tutor-banner-inner {
+    gap: 1.25rem;
+  }
+
+  .university-tutor-banner-title {
+    max-width: none;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+  }
+
+  .university-logo-viewport {
+    height: 3.5rem;
+  }
+
+  .university-logo-img {
+    max-width: 11.25rem !important;
+    height: 3rem !important;
+    max-height: 3rem !important;
+  }
+
+  .university-marquee-track {
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .university-logo-viewport {
+    height: 3.75rem;
+  }
+
+  .university-logo-img {
+    max-width: 13.75rem !important;
+    height: 3.5rem !important;
+    max-height: 3.5rem !important;
+  }
+
+  .university-tutor-banner-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .university-tutor-banner img.university-logo-img {
+    width: auto !important;
+    max-width: 6.5rem !important;
+    height: 2.25rem !important;
+    max-height: 2.25rem !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .university-marquee-track {
     animation: none;
+    transform: none;
   }
 }
 

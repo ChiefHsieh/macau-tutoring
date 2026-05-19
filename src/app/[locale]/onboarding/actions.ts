@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { syncAuthUserMetadata } from "@/lib/sync-auth-user-metadata";
+import { dashboardPathForRole } from "@/lib/dashboard-path";
 
 export async function completeOnboardingAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "zh-HK");
@@ -47,5 +48,5 @@ export async function completeOnboardingAction(formData: FormData) {
     redirect(`/${locale}/onboarding?error=${encodeURIComponent(metadataError)}`);
   }
 
-  redirect(`/${locale}/dashboard`);
+  redirect(dashboardPathForRole(locale, role as "student" | "tutor"));
 }
