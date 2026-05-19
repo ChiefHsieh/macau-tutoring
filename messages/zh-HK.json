@@ -283,6 +283,7 @@
     "step3Instruction": "選擇可教授學科與級別",
     "step4Instruction": "填寫教育背景、教學經驗、可選簡介，並上傳個人頭像（必填，完成後才可進入下一步）。",
     "step5Instruction": "上傳驗證文件（可選）。完成後請按「下一步」以保存資料並進入可授課時間。",
+    "step5VerificationWarning": "此步驟為可選；若未提交學歷／資歷佐證文件，系統無法將你升級為「已認證導師」（Verified）。",
     "step6Instruction": "新增至少一段「每週固定」可授課時間；完成後按「完成設置」。（亦可稍後在「管理可用時段」微調。）",
     "scheduleStepTitle": "可授課時間（必填）",
     "scheduleStepIntro": "請至少新增一組每週重複時段，讓學生可以預約。你也可以點下方連結開啟完整月曆編輯。",

@@ -283,6 +283,7 @@
     "step3Instruction": "Choose teachable subjects and levels.",
     "step4Instruction": "Fill education, experience, optional bio, and upload a profile headshot (required before continuing).",
     "step5Instruction": "Upload a verification document (optional). Tap Next to save your profile and continue to availability.",
+    "step5VerificationWarning": "This step is optional. If you do not submit supporting evidence, the system cannot upgrade you to a verified tutor.",
     "step6Instruction": "Add at least one weekly recurring teaching slot, then tap Finish. You can fine-tune later under Manage availability.",
     "scheduleStepTitle": "Teaching availability (required)",
     "scheduleStepIntro": "Add at least one weekly recurring slot so students can book. You can open the full calendar editor below if needed.",

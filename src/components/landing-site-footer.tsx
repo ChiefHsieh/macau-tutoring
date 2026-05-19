@@ -25,6 +25,9 @@ function IconLinkedIn({ className }: { className?: string }) {
   );
 }
 
+/** Official page — env `NEXT_PUBLIC_SOCIAL_FACEBOOK_URL` overrides when set. */
+const DEFAULT_FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61589697296280";
+
 type LandingSiteFooterProps = {
   locale: string;
   contactWeChat: string;
@@ -41,7 +44,8 @@ export async function LandingSiteFooter({
   const t = await getTranslations("Landing");
   const tNav = await getTranslations("Nav");
 
-  const fb = process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL?.trim() ?? "";
+  const fb =
+    process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL?.trim() || DEFAULT_FACEBOOK_URL;
   const ig = process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL?.trim() ?? "";
   const ln = process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL?.trim() ?? "";
 

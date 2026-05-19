@@ -1019,6 +1019,12 @@ export function TutorProfileSetupForm({
         <Card>
           <CardContent className="grid gap-4 pt-6">
             <input type="hidden" {...register("verification_document")} />
+            <p
+              role="alert"
+              className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm leading-relaxed text-amber-100"
+            >
+              {t("step5VerificationWarning")}
+            </p>
             <p className="text-sm text-[#4E5969]">{t("verificationPdfIntro")}</p>
             <p className="text-xs text-zinc-600">{t("verificationSampleNote")}</p>
             <label className="text-sm">
