@@ -1,5 +1,4 @@
 # iOS 工程在 macOS Runner 上 sync 并做模拟器编译（无需本机 Mac）。
-# Windows 开发：推送代码后，在 GitHub Actions 手动运行本 workflow 即可验证 iOS 壳能否构建。
 name: iOS Smoke (Capacitor)
 
 on:
@@ -22,12 +21,18 @@ on:
 
 concurrency:
   group: ios-smoke-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   ios-simulator-build:
     runs-on: macos-latest
     timeout-minutes: 45
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -52,7 +57,7 @@ jobs:
           fi
 
       - name: Capacitor sync iOS
-        run: npx cap sync ios
+        run: npx cap sync ios 2>&1 | tee cap-sync.log
 
       - name: CocoaPods install (legacy Capacitor projects only)
         if: hashFiles('ios/App/Podfile') != ''
@@ -60,10 +65,13 @@ jobs:
         run: pod install --repo-update
 
       - name: Xcode build (iOS Simulator, no distribution signing)
+        id: xcodebuild
         working-directory: ios/App
         run: |
           set -euo pipefail
+          xcodebuild -version
           xcodebuild -project App.xcodeproj -list
+          ls -la App/public || true
           xcodebuild \
             -project App.xcodeproj \
             -target App \
@@ -72,9 +80,19 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO \
-            build
+            build 2>&1 | tee xcodebuild.log
 
-      - name: "Upload ios/ snapshot (optional — commit once to repo to speed up CI)"
+      - name: Upload debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-smoke-debug-logs
+          path: |
+            cap-sync.log
+            ios/App/xcodebuild.log
+          if-no-files-found: ignore
+
+      - name: Upload ios/ snapshot
         if: success()
         uses: actions/upload-artifact@v4
         with:
