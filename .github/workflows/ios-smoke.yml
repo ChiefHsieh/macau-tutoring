@@ -59,25 +59,19 @@ jobs:
         working-directory: ios/App
         run: pod install --repo-update
 
-      - name: Resolve Swift packages
-        working-directory: ios/App
-        run: |
-          set -euo pipefail
-          xcodebuild -project App.xcodeproj -list
-          xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
-
       - name: Xcode build (iOS Simulator, no distribution signing)
         working-directory: ios/App
         run: |
           set -euo pipefail
+          xcodebuild -project App.xcodeproj -list
           xcodebuild \
             -project App.xcodeproj \
-            -scheme App \
+            -target App \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             CODE_SIGNING_ALLOWED=NO \
-            ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
             build
 
       - name: "Upload ios/ snapshot (optional — commit once to repo to speed up CI)"
