@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -59,19 +59,25 @@ jobs:
         working-directory: ios/App
         run: pod install --repo-update
 
-      - name: Xcode build (iOS Simulator, no distribution signing)
+      - name: Resolve Swift packages
         working-directory: ios/App
         run: |
           set -euo pipefail
           xcodebuild -project App.xcodeproj -list
+          xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
+
+      - name: Xcode build (iOS Simulator, no distribution signing)
+        working-directory: ios/App
+        run: |
+          set -euo pipefail
           xcodebuild \
             -project App.xcodeproj \
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -resolvePackageDependencies \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=YES \
             build
 
       - name: "Upload ios/ snapshot (optional — commit once to repo to speed up CI)"
