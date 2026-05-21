@@ -42,10 +42,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci 2>&1 | tee npm-ci.log
 
       - name: Ensure out/ webDir exists
         run: mkdir -p out
@@ -74,9 +74,9 @@ jobs:
           ls -la App/public || true
           xcodebuild \
             -project App.xcodeproj \
-            -target App \
+            -scheme App \
             -configuration Debug \
-            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO \
@@ -88,6 +88,7 @@ jobs:
         with:
           name: ios-smoke-debug-logs
           path: |
+            npm-ci.log
             cap-sync.log
             ios/App/xcodebuild.log
           if-no-files-found: ignore
