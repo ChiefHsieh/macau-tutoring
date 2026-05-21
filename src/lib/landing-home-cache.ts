@@ -3,22 +3,11 @@ import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { getDemoRecentLeadRows } from "@/lib/demo-recent-leads";
 import { createPublicServerClient } from "@/lib/supabase/public-server";
 import { getCachedPlatformRegistrationCounts } from "@/lib/platform-registration-stats";
-import { aggregateRatingsByTutorId, mergeTutorRatingDisplay } from "@/lib/tutor-rating-display";
 import { countTutorDirectoryFilterEventsLast30Days } from "@/lib/tutor-directory-filter-demand";
+import { fetchLandingAvailableTutors } from "@/lib/landing-available-tutors";
+import { enrichLandingTutorCards, type LandingTutorCardModel } from "@/lib/landing-tutor-enrichment";
 
-export type LandingFeaturedTutor = {
-  id: string;
-  display_name: string;
-  district: string;
-  hourly_rate: number;
-  service_type: string;
-  is_verified: boolean;
-  average_rating: number;
-  total_reviews: number;
-  education_background: string;
-  profile_photo: string | null;
-  subjectSummary: string;
-};
+export type LandingFeaturedTutor = LandingTutorCardModel;
 
 export type LandingDemandFeedRow = {
   lead_id: string;
@@ -37,6 +26,8 @@ export type LandingHomeData = {
   activeLeadCount: number;
   bookingMatchCount: number;
   featured: LandingFeaturedTutor[];
+  availableToday: LandingFeaturedTutor[];
+  availableTomorrow: LandingFeaturedTutor[];
   demandFeedRows: LandingDemandFeedRow[];
   demandsFromLiveFeed: boolean;
 };
@@ -50,6 +41,8 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
     activeLeadCount: 0,
     bookingMatchCount: 0,
     featured: [],
+    availableToday: [],
+    availableTomorrow: [],
     demandFeedRows: getDemoRecentLeadRows(locale),
     demandsFromLiveFeed: false,
   };
@@ -66,6 +59,7 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
     { count: bookingMatchCountResult },
     activeLeadCountResult,
     { data: featuredRows },
+    availableBuckets,
     { data: feedData, error: feedError },
   ] = await Promise.all([
     supabase.from("reviews").select("id", { head: true, count: "exact" }),
@@ -80,6 +74,7 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
       .neq("display_name", "")
       .order("created_at", { ascending: false })
       .limit(9),
+    fetchLandingAvailableTutors(supabase),
     supabase
       .from("parent_lead_public_feed")
       .select("lead_id, child_grade, subject, district, budget_max, created_at")
@@ -93,54 +88,10 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
     hasFeedError: !!feedError,
   });
 
-  const featured: LandingFeaturedTutor[] = (featuredRows ?? []).map((row) => ({
-    ...row,
-    subjectSummary: "",
-  }));
-
-  const featuredIds = featured.map((item) => item.id);
-  if (featuredIds.length > 0) {
-    const featuredMetaQueryStart = Date.now();
-    const { data: subjectLines } = await supabase
-      .from("tutor_subjects")
-      .select("tutor_id, subject")
-      .in("tutor_id", featuredIds);
-    console.info("[perf][landing][featured-subjects-query-ms]", Date.now() - featuredMetaQueryStart, {
-      locale,
-      featuredCount: featuredIds.length,
-      subjectRows: subjectLines?.length ?? 0,
-    });
-
-    const subjectMap = new Map<string, string[]>();
-    (subjectLines ?? []).forEach((row) => {
-      const label = row.subject?.trim() ?? "";
-      if (!label) return;
-      const list = subjectMap.get(row.tutor_id) ?? [];
-      if (!list.includes(label)) list.push(label);
-      subjectMap.set(row.tutor_id, list);
-    });
-
-    featured.forEach((row) => {
-      row.subjectSummary = (subjectMap.get(row.id) ?? []).slice(0, 3).join(" · ");
-    });
-
-    const featuredRatingsStart = Date.now();
-    const { data: featuredReviewRows } = await supabase
-      .from("reviews")
-      .select("tutor_id, rating")
-      .in("tutor_id", featuredIds);
-    console.info("[perf][landing][featured-reviews-query-ms]", Date.now() - featuredRatingsStart, {
-      locale,
-      featuredCount: featuredIds.length,
-      reviewRows: featuredReviewRows?.length ?? 0,
-    });
-    const featuredRatingAgg = aggregateRatingsByTutorId(featuredReviewRows);
-    featured.forEach((row) => {
-      const merged = mergeTutorRatingDisplay(row.average_rating, row.total_reviews, featuredRatingAgg.get(row.id));
-      row.average_rating = merged.displayAverageRating;
-      row.total_reviews = merged.displayReviewCount;
-    });
-  }
+  const featured: LandingFeaturedTutor[] = await enrichLandingTutorCards(
+    supabase,
+    (featuredRows ?? []).map((row) => ({ ...row, subjectSummary: "" })),
+  );
 
   if (feedError) {
     console.warn("[Landing] parent_lead_public_feed:", feedError.message);
@@ -156,15 +107,17 @@ async function queryLandingHomeData(locale: string): Promise<LandingHomeData> {
     bookingMatchCount: bookingMatchCountResult ?? 0,
     activeLeadCount: activeLeadCountResult,
     featured,
+    availableToday: availableBuckets.today,
+    availableTomorrow: availableBuckets.tomorrow,
     demandFeedRows: hasLiveFeed ? (feedData as LandingDemandFeedRow[]) : getDemoRecentLeadRows(locale),
     demandsFromLiveFeed: hasLiveFeed,
   };
 }
 
 export async function getCachedLandingHomeData(locale: string): Promise<LandingHomeData> {
-  const run = unstable_cache(() => queryLandingHomeData(locale), ["landing-home-data", locale], {
+  const run = unstable_cache(() => queryLandingHomeData(locale), ["landing-home-data-v2", locale], {
     revalidate: 120,
-    tags: [`landing-home:${locale}`, "landing-active-demand"],
+    tags: [`landing-home:${locale}`, "landing-active-demand", "landing-availability"],
   });
   return run();
 }

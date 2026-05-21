@@ -41,9 +41,27 @@ export default async function LandingPage({ params }: LandingPageProps) {
     activeLeadCount,
     bookingMatchCount,
     featured,
+    availableToday = [],
+    availableTomorrow = [],
     demandFeedRows,
     demandsFromLiveFeed,
   } = await getCachedLandingHomeData(locale);
+
+  const featuredCardLabels = {
+    verified: t("verified"),
+    reviews: t("reviews"),
+    noSubjects: t("noSubjects"),
+    viewProfile: t("featuredView"),
+    book: t("featuredBook"),
+    online: t("tagOnline"),
+    inPerson: t("tagInPerson"),
+    both: t("tagBoth"),
+    slotToday: t("slotToday"),
+    slotTomorrow: t("slotTomorrow"),
+    loading: tCommon("loading"),
+  };
+
+  const showAvailableSection = availableToday.length > 0 || availableTomorrow.length > 0;
 
   const dateLocale = locale === "en" ? "en-GB" : "zh-HK";
   const recentDemandItems: RecentDemandCardModel[] = demandFeedRows.map((row) => ({
@@ -178,25 +196,63 @@ export default async function LandingPage({ params }: LandingPageProps) {
       >
         <div className="grid gap-5 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {featured.map((tutor) => (
-            <FeaturedTutorCard
-              key={tutor.id}
-              locale={locale}
-              tutor={tutor}
-              labels={{
-                verified: t("verified"),
-                reviews: t("reviews"),
-                noSubjects: t("noSubjects"),
-                viewProfile: t("featuredView"),
-                book: t("featuredBook"),
-                online: t("tagOnline"),
-                inPerson: t("tagInPerson"),
-                both: t("tagBoth"),
-                loading: tCommon("loading"),
-              }}
-            />
+            <FeaturedTutorCard key={tutor.id} locale={locale} tutor={tutor} labels={featuredCardLabels} />
           ))}
         </div>
       </PageSection>
+
+      {showAvailableSection ? (
+        <PageSection
+          title={t("availableTitle")}
+          description={t("availableSubtitle")}
+          action={
+            <ButtonLink
+              href={`/${locale}/tutors`}
+              variant="ghost"
+              size="sm"
+              className="h-auto px-0 font-medium text-white underline decoration-white/70 underline-offset-2 hover:text-[#E6C699] hover:decoration-[#E6C699]"
+              pendingLabel={tCommon("loading")}
+            >
+              {t("featuredAll")}
+            </ButtonLink>
+          }
+        >
+          <div className="space-y-10">
+            {availableToday.length > 0 ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#F8F9FA] md:text-xl">{t("availableTodayHeading")}</h3>
+                <div className="grid gap-5 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+                  {availableToday.map((tutor) => (
+                    <FeaturedTutorCard
+                      key={`today-${tutor.id}`}
+                      locale={locale}
+                      tutor={tutor}
+                      labels={featuredCardLabels}
+                      availability={{ today: true }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {availableTomorrow.length > 0 ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#F8F9FA] md:text-xl">{t("availableTomorrowHeading")}</h3>
+                <div className="grid gap-5 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+                  {availableTomorrow.map((tutor) => (
+                    <FeaturedTutorCard
+                      key={`tomorrow-${tutor.id}`}
+                      locale={locale}
+                      tutor={tutor}
+                      labels={featuredCardLabels}
+                      availability={{ tomorrow: true }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </PageSection>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="ui-hover-lift">

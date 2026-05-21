@@ -29,7 +29,11 @@ export type FeaturedTutorCardProps = {
     both: string;
     /** Shown while `ButtonLink` navigation is pending (avoids client `useTranslations` in `LinkPendingBody`). */
     loading: string;
+    slotToday?: string;
+    slotTomorrow?: string;
   };
+  /** Show green availability pills on the photo (today / tomorrow). */
+  availability?: { today?: boolean; tomorrow?: boolean };
 };
 
 function serviceLabel(serviceType: string, labels: FeaturedTutorCardProps["labels"]) {
@@ -39,7 +43,7 @@ function serviceLabel(serviceType: string, labels: FeaturedTutorCardProps["label
   return labels.both;
 }
 
-export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardProps) {
+export function FeaturedTutorCard({ locale, tutor, labels, availability }: FeaturedTutorCardProps) {
   const initials = tutor.display_name
     .split(/\s+/)
     .map((p) => p[0])
@@ -66,6 +70,16 @@ export function FeaturedTutorCard({ locale, tutor, labels }: FeaturedTutorCardPr
           </div>
         )}
         <div className="pointer-events-none absolute left-2 top-2 flex max-w-[calc(100%-1rem)] flex-wrap gap-1.5 sm:left-3 sm:top-3 sm:gap-2">
+          {availability?.today && labels.slotToday ? (
+            <Badge className="pointer-events-auto border border-[#10b981]/40 bg-[#10b981]/90 text-[11px] font-semibold text-white shadow-sm sm:text-xs">
+              {labels.slotToday}
+            </Badge>
+          ) : null}
+          {availability?.tomorrow && labels.slotTomorrow ? (
+            <Badge className="pointer-events-auto border border-[#10b981]/40 bg-[#10b981]/90 text-[11px] font-semibold text-white shadow-sm sm:text-xs">
+              {labels.slotTomorrow}
+            </Badge>
+          ) : null}
           {tutor.is_verified ? (
             <Badge variant="default" className="pointer-events-auto text-[11px] font-medium sm:text-xs">
               {labels.verified}
