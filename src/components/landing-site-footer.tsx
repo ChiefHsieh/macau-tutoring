@@ -93,6 +93,9 @@ export async function LandingSiteFooter({
           <Link href={`/${locale}/faq`} className="block text-zinc-700 hover:text-[#000225]">
             {t("footerLinkFaq")}
           </Link>
+          <Link href={`/${locale}/download`} className="block text-zinc-700 hover:text-[#000225]">
+            {t("footerLinkDownload")}
+          </Link>
         </div>
         <div className="space-y-3 text-sm">
           <h3 className="font-semibold">{t("footerContactTitle")}</h3>

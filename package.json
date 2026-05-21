@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "cap:add:ios": "npx cap add ios",
     "cap:sync:ios": "npx cap sync ios",
-    "sync:logos": "node scripts/sync-university-logos.mjs"
+    "sync:logos": "node scripts/sync-university-logos.mjs",
+    "publish:android-apk": "node scripts/publish-android-apk.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
