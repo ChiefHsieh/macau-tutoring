@@ -1,14 +1,9 @@
-# Next.js on Netlify
-# If the Netlify UI has Publish directory = "out", clear it there OR keep publish = ".next" below.
-# ("out" is Capacitor webDir only — using it breaks @netlify/plugin-nextjs deploys.)
+# Next.js on Netlify — use @netlify/plugin-nextjs in the Netlify UI.
+# Do NOT set publish = "out" (Capacitor only) or publish = ".next" (plugin handles output).
 [build]
   command = "npm run build"
-  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NPM_CONFIG_LEGACY_PEER_DEPS = "true"
   SECRETS_SCAN_ENABLED = "false"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
