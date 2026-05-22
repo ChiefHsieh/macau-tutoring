@@ -48,3 +48,7 @@ ios/**/DerivedData/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# APK hosted via GitHub Releases or copied before deploy
+/public/downloads/*.apk
+

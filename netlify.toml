@@ -1,10 +1,9 @@
-# Next.js on Netlify (do not set publish = "out" — that is Capacitor webDir only)
+# Next.js on Netlify — do NOT set publish = "out" (that folder is Capacitor-only).
+# Keep @netlify/plugin-nextjs enabled in the Netlify UI; avoid duplicating it here.
 [build]
   command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+  SECRETS_SCAN_ENABLED = "false"

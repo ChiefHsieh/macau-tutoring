@@ -1,0 +1,54 @@
+# Build signed APK and attach to a GitHub Release (for NEXT_PUBLIC_ANDROID_APK_URL).
+name: Android APK release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. android-v1.0.1)"
+        required: true
+        default: "android-v1.0.1"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Restore signing secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PROPS: ${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PROPS" ]; then
+            echo "Missing ANDROID_KEYSTORE_BASE64 or ANDROID_KEYSTORE_PROPERTIES repo secrets."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > android/release.keystore
+          echo "$KEYSTORE_PROPS" | sed 's|storeFile=.*|storeFile=release.keystore|' > android/keystore.properties
+
+      - run: npm ci
+      - run: cd android && chmod +x gradlew && ./gradlew assembleRelease
+
+      - name: Create GitHub Release with APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          OUT="AstarMarketplace-${{ inputs.tag }}.apk"
+          cp "$APK" "$OUT"
+          gh release create "${{ inputs.tag }}" "$OUT" \
+            --title "Android ${{ inputs.tag }}" \
+            --notes "Install via https://astarmarktetplace.netlify.app/zh-HK/download — set NEXT_PUBLIC_ANDROID_APK_URL to this asset URL on Netlify."
