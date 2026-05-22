@@ -4,11 +4,11 @@ import { Smartphone } from "lucide-react";
 import { PageSection } from "@/components/page-section";
 import { Button } from "@/components/ui/button";
 import {
-  ANDROID_APK_DOWNLOAD_PATH,
   ANDROID_APK_FILE_NAME,
   ANDROID_APK_VERSION_CODE,
   ANDROID_APK_VERSION_NAME,
   ANDROID_PACKAGE_ID,
+  getAndroidApkDownloadUrl,
 } from "@/lib/android-apk-release";
 import { getTermsPageUrl } from "@/lib/public-urls";
 
@@ -28,6 +28,7 @@ export default async function DownloadPage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations("Download");
   const termsUrl = getTermsPageUrl();
+  const apkUrl = getAndroidApkDownloadUrl();
 
   const steps = [t("step1"), t("step2"), t("step3"), t("step4"), t("step5")];
   const notes = [t("note1"), t("note2"), t("note3")];
@@ -56,7 +57,7 @@ export default async function DownloadPage({ params }: PageProps) {
           </p>
         </div>
         <Button asChild size="lg" className="w-full sm:w-auto">
-          <a href={ANDROID_APK_DOWNLOAD_PATH} download={ANDROID_APK_FILE_NAME}>
+          <a href={apkUrl} download={ANDROID_APK_FILE_NAME}>
             {t("downloadButton")}
           </a>
         </Button>
