@@ -4,11 +4,16 @@ Release file name: `AstarMarketplace-v1.0.1.apk`
 
 ## Local / before deploy
 
+See `docs/android-apk-security.md` for signing, ProGuard, and optional 第三方加固.
+
 ```bash
+npx cap sync android
 cd android && gradlew.bat assembleRelease
 cd ..
 npm run publish:android-apk
 ```
+
+`publish:android-apk` updates `src/lib/android-apk-checksum.ts` and this folder’s `checksums.json`.
 
 ## Production (Netlify)
 

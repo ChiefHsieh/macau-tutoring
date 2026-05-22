@@ -34,8 +34,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.release
             }
@@ -44,16 +45,20 @@ android {
 }
 
 // Play Console rejects unsigned AABs. Fail fast instead of producing a silent unsigned bundle.
+def requireReleaseKeystore = { ->
+    if (!keystorePropertiesFile.exists()) {
+        throw new GradleException(
+            "Release signing is not configured: missing android/keystore.properties. "
+                + "Copy keystore.properties.example to keystore.properties, fill storeFile/keyAlias/passwords, "
+                + "then run assembleRelease again. Never commit the keystore or this file to git."
+        )
+    }
+}
+
 tasks.configureEach { task ->
-    if (task.name == "bundleRelease") {
+    if (task.name == "bundleRelease" || task.name == "assembleRelease") {
         task.doFirst {
-            if (!keystorePropertiesFile.exists()) {
-                throw new GradleException(
-                    "Release signing is not configured: missing android/keystore.properties. "
-                        + "Copy keystore.properties.example to keystore.properties, fill storeFile/keyAlias/passwords, "
-                        + "then run bundleRelease again (or use Android Studio: Build → Generate Signed App Bundle)."
-                )
-            }
+            requireReleaseKeystore()
         }
     }
 }

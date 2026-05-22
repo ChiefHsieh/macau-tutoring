@@ -8,7 +8,11 @@ const apkName = "AstarMarketplace-v1.0.1.apk";
 
 const checks = [
   { name: "home zh-HK", url: `${base}/zh-HK`, mustInclude: ["/zh-HK/download", "Android"] },
-  { name: "download zh-HK", url: `${base}/zh-HK/download`, mustInclude: ["下載 Android", apkName] },
+  {
+    name: "download zh-HK",
+    url: `${base}/zh-HK/download`,
+    mustInclude: ["下載 Android", apkName, "SHA-256", "bc5f2d88fec361f2da1baa864030ddd6d7d987fd8a71c2efd8470e2e9a38f857"],
+  },
   { name: "download en", url: `${base}/en/download`, mustInclude: ["Download Android", apkName] },
   { name: "apk file", url: `${base}/downloads/${apkName}`, head: true, minBytes: 1_000_000 },
 ];

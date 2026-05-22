@@ -3,11 +3,13 @@ import Link from "next/link";
 import { Smartphone } from "lucide-react";
 import { PageSection } from "@/components/page-section";
 import { Button } from "@/components/ui/button";
+import { ANDROID_APK_SHA256 } from "@/lib/android-apk-checksum";
 import {
   ANDROID_APK_FILE_NAME,
   ANDROID_APK_VERSION_CODE,
   ANDROID_APK_VERSION_NAME,
   ANDROID_PACKAGE_ID,
+  OFFICIAL_SITE_ORIGIN,
   getAndroidApkDownloadUrl,
 } from "@/lib/android-apk-release";
 import { getTermsPageUrl } from "@/lib/public-urls";
@@ -62,6 +64,19 @@ export default async function DownloadPage({ params }: PageProps) {
           </a>
         </Button>
         <p className="text-xs text-[#94A3B8]">{t("downloadHint")}</p>
+      </PageSection>
+
+      <PageSection title={t("securityTitle")} cardClassName={downloadCardClass}>
+        <p className={bodyTextClass}>{t("officialChannel", { url: OFFICIAL_SITE_ORIGIN })}</p>
+        <p className={`mt-3 ${mutedTextClass}`}>{t("httpsNote")}</p>
+        <div className="mt-4 rounded-lg border border-[#E6C699]/25 bg-[#101742]/80 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#DAC0A3]">{t("sha256Label")}</p>
+          <p className="mt-2 break-all font-mono text-xs leading-relaxed text-[#F8F9FA]">{ANDROID_APK_SHA256}</p>
+          <p className="mt-2 text-xs text-[#94A3B8]">{t("sha256Hint", { file: ANDROID_APK_FILE_NAME })}</p>
+        </div>
+        <p className={`mt-4 ${bodyTextClass}`}>
+          <strong className="text-[#F8F9FA]">{t("permissionsTitle")}</strong> {t("permissionsBody")}
+        </p>
       </PageSection>
 
       <PageSection title={t("installTitle")} cardClassName={downloadCardClass}>

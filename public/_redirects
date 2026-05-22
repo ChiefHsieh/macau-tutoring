@@ -1,0 +1,7 @@
+# No directory listing — send folder URL to the official download page
+/downloads /zh-HK/download 302
+/downloads/ /zh-HK/download 302
+
+# Force HTTPS (Netlify also enables this in UI; belt-and-suspenders)
+http://astarmarktetplace.netlify.app/* https://astarmarktetplace.netlify.app/:splat 301!
+http://www.astarmarktetplace.netlify.app/* https://astarmarktetplace.netlify.app/:splat 301!
