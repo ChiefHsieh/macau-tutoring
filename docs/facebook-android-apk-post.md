@@ -22,7 +22,7 @@ https://astarmarktetplace.netlify.app/zh-HK/download
 4. 打开下载好的文件并完成安装
 5. 首次使用请以电邮注册 / 登录
 
-⚠️ 本 App **未上架 Google Play**；安装时若出现 Play 保护机制提示，属正常现象。请勿安装来历不明的同名 App。
+⚠️ 请只从上方官方链接下载，勿安装来历不明的同名 App。若系统提示「未知来源」，请在设置中允许浏览器安装。
 
 📄 隐私政策：https://astarmarktetplace.netlify.app/terms.html
 
@@ -40,7 +40,7 @@ https://astarmarktetplace.netlify.app/zh-HK/download
 
 📱 **A\* Marketplace — Android app now available**
 
-Official download & install guide (sideload, not on Google Play):
+Official download & install guide:
 https://astarmarktetplace.netlify.app/en/download
 
 Privacy: https://astarmarktetplace.netlify.app/terms.html
