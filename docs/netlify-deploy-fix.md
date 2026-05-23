@@ -8,7 +8,8 @@
    - **Publish directory：留空**（删除 `out` 或 `.next`）
 3. **Plugins**：保留 **@netlify/plugin-nextjs**（不要重复添加）
 4. **Domain management → HTTPS**：开启 **Force HTTPS**
-5. 点击 **Deploys → Trigger deploy → Deploy site**
+5. **Deploys → Deploy settings → Clear cache and deploy site**（建议清缓存，避免旧 `out` 缓存干扰）
+6. 若仍在 “Collecting build traces” 失败，确认已部署最新 `master`（含 `NODE_OPTIONS` 与 `outputFileTracingExcludes`）
 
 部署成功后运行：
 
