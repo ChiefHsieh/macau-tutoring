@@ -1,4 +1,6 @@
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
+import { isWebPushConfigured } from "@/lib/vapid-config";
+import { isExpiredWebPushError, sendWebPushNotification } from "@/lib/web-push-send";
 import { JWT } from "google-auth-library";
 
 type SendMessagePushArgs = {
@@ -13,16 +15,19 @@ type DevicePushTokenRow = {
   push_token: string;
 };
 
-type PushSelfTestResult = {
+type PushAttempt = {
+  platform: "android" | "web";
+  tokenSuffix: string;
+  ok: boolean;
+  status?: number;
+  response?: string;
+};
+
+export type PushSelfTestResult = {
   ok: boolean;
   reason?: string;
   tokenCount: number;
-  attempts: Array<{
-    tokenSuffix: string;
-    ok: boolean;
-    status?: number;
-    response?: string;
-  }>;
+  attempts: PushAttempt[];
 };
 
 type FirebaseServiceAccount = {
@@ -74,7 +79,7 @@ async function getFcmAccessToken(account: FirebaseServiceAccount) {
   return tokens.access_token ?? null;
 }
 
-function hasInvalidTokenError(payload: string) {
+function hasInvalidFcmTokenError(payload: string) {
   return (
     payload.includes("UNREGISTERED") ||
     payload.includes("registration token is not a valid FCM registration token")
@@ -111,111 +116,248 @@ async function sendFcmHttpV1(args: {
   });
 }
 
-export async function sendNewMessagePushNotification(args: SendMessagePushArgs) {
+async function sendFcmToUser(args: {
+  admin: NonNullable<ReturnType<typeof getAdminSupabaseClient>>;
+  userId: string;
+  title: string;
+  body: string;
+  path: string;
+  locale: string;
+  peerId: string;
+  type: "new_message" | "self_test";
+}) {
   const serviceAccount = readFirebaseServiceAccount();
   if (!serviceAccount) return;
+
   const accessToken = await getFcmAccessToken(serviceAccount);
   if (!accessToken) return;
 
-  const admin = getAdminSupabaseClient();
-  if (!admin) return;
-
-  const { data: tokens, error } = await admin
+  const { data: tokens, error } = await args.admin
     .from("device_push_tokens")
     .select("push_token")
-    .eq("user_id", args.receiverId)
+    .eq("user_id", args.userId)
     .eq("platform", "android");
-  if (error || !tokens || tokens.length === 0) return;
+  if (error || !tokens?.length) return;
 
-  const title = args.senderName || "New message";
-  const body = trimPreview(args.contentPreview);
-  const path = `/${args.locale}/messages/${args.peerId}`;
+  const uniqueTokens = Array.from(
+    new Set((tokens as DevicePushTokenRow[]).map((t) => t.push_token).filter(Boolean)),
+  );
 
-  const uniqueTokens = Array.from(new Set((tokens as DevicePushTokenRow[]).map((t) => t.push_token).filter(Boolean)));
   await Promise.all(
     uniqueTokens.map(async (token) => {
       const res = await sendFcmHttpV1({
         projectId: serviceAccount.projectId,
         accessToken,
         token,
-        title,
-        body,
-        path,
+        title: args.title,
+        body: args.body,
+        path: args.path,
         locale: args.locale,
         peerId: args.peerId,
-        type: "new_message",
+        type: args.type,
       });
 
-      // FCM marks stale/invalid tokens; prune them to avoid repeated failures.
       if (res.ok) return;
       const errorText = await res.text().catch(() => "");
-      if (hasInvalidTokenError(errorText)) {
-        await admin.from("device_push_tokens").delete().eq("push_token", token);
+      if (hasInvalidFcmTokenError(errorText)) {
+        await args.admin.from("device_push_tokens").delete().eq("push_token", token);
       }
     }),
   );
 }
 
-export async function runPushSelfTest(args: { userId: string; locale: string }): Promise<PushSelfTestResult> {
+async function sendWebPushToUser(args: {
+  admin: NonNullable<ReturnType<typeof getAdminSupabaseClient>>;
+  userId: string;
+  title: string;
+  body: string;
+  path: string;
+}) {
+  if (!isWebPushConfigured()) return;
+
+  const { data: tokens, error } = await args.admin
+    .from("device_push_tokens")
+    .select("push_token")
+    .eq("user_id", args.userId)
+    .eq("platform", "web");
+  if (error || !tokens?.length) return;
+
+  const uniqueTokens = Array.from(
+    new Set((tokens as DevicePushTokenRow[]).map((t) => t.push_token).filter(Boolean)),
+  );
+
+  await Promise.all(
+    uniqueTokens.map(async (token) => {
+      const result = await sendWebPushNotification(token, {
+        title: args.title,
+        body: args.body,
+        url: args.path,
+      });
+
+      if (result.ok) return;
+      if (isExpiredWebPushError({ statusCode: result.statusCode })) {
+        await args.admin.from("device_push_tokens").delete().eq("push_token", token);
+      }
+    }),
+  );
+}
+
+export async function sendNewMessagePushNotification(args: SendMessagePushArgs) {
+  const admin = getAdminSupabaseClient();
+  if (!admin) return;
+
+  const title = args.senderName || "New message";
+  const body = trimPreview(args.contentPreview);
+  const path = `/${args.locale}/messages/${args.peerId}`;
+
+  await Promise.all([
+    sendFcmToUser({
+      admin,
+      userId: args.receiverId,
+      title,
+      body,
+      path,
+      locale: args.locale,
+      peerId: args.peerId,
+      type: "new_message",
+    }),
+    sendWebPushToUser({
+      admin,
+      userId: args.receiverId,
+      title,
+      body,
+      path,
+    }),
+  ]);
+}
+
+async function runFcmSelfTest(
+  admin: NonNullable<ReturnType<typeof getAdminSupabaseClient>>,
+  args: { userId: string; locale: string },
+): Promise<PushAttempt[]> {
   const serviceAccount = readFirebaseServiceAccount();
-  if (!serviceAccount) {
-    return { ok: false, reason: "Missing Firebase service account env.", tokenCount: 0, attempts: [] };
-  }
+  if (!serviceAccount) return [];
 
   const accessToken = await getFcmAccessToken(serviceAccount);
-  if (!accessToken) {
-    return { ok: false, reason: "Failed to obtain FCM access token.", tokenCount: 0, attempts: [] };
-  }
-
-  const admin = getAdminSupabaseClient();
-  if (!admin) {
-    return { ok: false, reason: "Missing SUPABASE_SERVICE_ROLE_KEY.", tokenCount: 0, attempts: [] };
-  }
+  if (!accessToken) return [];
 
   const { data: tokens, error } = await admin
     .from("device_push_tokens")
     .select("push_token")
     .eq("user_id", args.userId)
     .eq("platform", "android");
-  if (error) {
-    return { ok: false, reason: error.message, tokenCount: 0, attempts: [] };
-  }
+  if (error || !tokens?.length) return [];
 
-  const uniqueTokens = Array.from(new Set((tokens as DevicePushTokenRow[] | null)?.map((t) => t.push_token).filter(Boolean) ?? []));
-  if (uniqueTokens.length === 0) {
-    return { ok: false, reason: "No Android push token found for this user.", tokenCount: 0, attempts: [] };
-  }
+  const uniqueTokens = Array.from(
+    new Set((tokens as DevicePushTokenRow[]).map((t) => t.push_token).filter(Boolean)),
+  );
 
-  const attempts: PushSelfTestResult["attempts"] = [];
+  const attempts: PushAttempt[] = [];
+  const path = `/${args.locale}/notifications`;
+
   for (const token of uniqueTokens) {
     const res = await sendFcmHttpV1({
       projectId: serviceAccount.projectId,
       accessToken,
       token,
       title: "Push self-test",
-      body: "If you see this, mobile push is working.",
-      path: `/${args.locale}/notifications`,
+      body: "If you see this, Android push is working.",
+      path,
       locale: args.locale,
       peerId: args.userId,
       type: "self_test",
     });
     const text = await res.text().catch(() => "");
     attempts.push({
+      platform: "android",
       tokenSuffix: token.slice(-10),
       ok: res.ok,
       status: res.status,
       response: text.slice(0, 400),
     });
 
-    if (!res.ok && hasInvalidTokenError(text)) {
+    if (!res.ok && hasInvalidFcmTokenError(text)) {
       await admin.from("device_push_tokens").delete().eq("push_token", token);
     }
   }
 
+  return attempts;
+}
+
+async function runWebPushSelfTest(
+  admin: NonNullable<ReturnType<typeof getAdminSupabaseClient>>,
+  args: { userId: string; locale: string },
+): Promise<PushAttempt[]> {
+  if (!isWebPushConfigured()) return [];
+
+  const { data: tokens, error } = await admin
+    .from("device_push_tokens")
+    .select("push_token")
+    .eq("user_id", args.userId)
+    .eq("platform", "web");
+  if (error || !tokens?.length) return [];
+
+  const uniqueTokens = Array.from(
+    new Set((tokens as DevicePushTokenRow[]).map((t) => t.push_token).filter(Boolean)),
+  );
+
+  const attempts: PushAttempt[] = [];
+  const path = `/${args.locale}/notifications`;
+
+  for (const token of uniqueTokens) {
+    const result = await sendWebPushNotification(token, {
+      title: "Push self-test",
+      body: "If you see this, PWA Web Push is working.",
+      url: path,
+    });
+
+    attempts.push({
+      platform: "web",
+      tokenSuffix: token.slice(-12),
+      ok: result.ok,
+      status: result.statusCode,
+      response: result.body,
+    });
+
+    if (!result.ok && isExpiredWebPushError({ statusCode: result.statusCode })) {
+      await admin.from("device_push_tokens").delete().eq("push_token", token);
+    }
+  }
+
+  return attempts;
+}
+
+export async function runPushSelfTest(args: { userId: string; locale: string }): Promise<PushSelfTestResult> {
+  const admin = getAdminSupabaseClient();
+  if (!admin) {
+    return { ok: false, reason: "Missing SUPABASE_SERVICE_ROLE_KEY.", tokenCount: 0, attempts: [] };
+  }
+
+  const [fcmAttempts, webAttempts] = await Promise.all([
+    runFcmSelfTest(admin, args),
+    runWebPushSelfTest(admin, args),
+  ]);
+
+  const attempts = [...fcmAttempts, ...webAttempts];
+  const tokenCount = attempts.length;
+
+  if (tokenCount === 0) {
+    const reasons: string[] = [];
+    if (!readFirebaseServiceAccount()) reasons.push("no Firebase config");
+    if (!isWebPushConfigured()) reasons.push("no VAPID config");
+    return {
+      ok: false,
+      reason: `No push tokens for this user (${reasons.join("; ") || "subscribe first"}).`,
+      tokenCount: 0,
+      attempts: [],
+    };
+  }
+
+  const ok = attempts.some((x) => x.ok);
   return {
-    ok: attempts.some((x) => x.ok),
-    tokenCount: uniqueTokens.length,
+    ok,
+    tokenCount,
     attempts,
-    reason: attempts.some((x) => x.ok) ? undefined : "All push attempts failed.",
+    reason: ok ? undefined : "All push attempts failed.",
   };
 }

@@ -29,10 +29,15 @@ export const metadata: Metadata = {
   title: "A* Marketplace · 星級頂尖教育平台",
   description: "MVP for Macau tutor-student matching and booking",
   applicationName: "A* Marketplace",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "A* Marketplace",
+  },
+  icons: {
+    icon: [{ url: "/pwa/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/pwa/icon.svg", type: "image/svg+xml" }],
   },
   formatDetection: {
     telephone: false,
@@ -49,7 +54,9 @@ export default function RootLayout({
       lang="zh-HK"
       className={`${inter.variable} ${notoSansTc.variable} ${geistMono.variable} h-full bg-[#000225] antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#000225]">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#000225]">
+        {children}
+      </body>
     </html>
   );
 }

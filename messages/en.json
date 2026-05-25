@@ -615,8 +615,8 @@
     "assurance3Body": "Onboarding requires academic proof. Approved tutors show a verified badge to reduce decision risk for families."
   },
   "Download": {
-    "title": "Download Android app",
-    "subtitle": "A* Marketplace mobile app — install from this official page only.",
+    "title": "Download app",
+    "subtitle": "A* Marketplace mobile — Android APK below; iPhone/iPad see the iOS section.",
     "backHome": "Back to home",
     "versionLabel": "Version",
     "buildLabel": "build ",
@@ -641,7 +641,27 @@
     "note2": "Do not install look-alike apps from other sources. For updates, return to this page and download the latest APK.",
     "note3": "Need help? Message us on Facebook or use the site support / FAQ pages.",
     "termsLink": "Terms of Service & Privacy Policy",
-    "iosHint": "iPhone/iPad users can use the website in Safari for now. iOS App Store release will be announced separately."
+    "androidSectionTitle": "Android",
+    "iosSectionTitle": "iPhone / iPad (iOS)",
+    "iosBundleLabel": "Bundle ID",
+    "iosAppStoreButton": "Download on the App Store",
+    "iosTestFlightButton": "Join TestFlight beta",
+    "iosPublishedBody": "The iOS app is the same official WebView shell as Android. Install only via the Apple links below — not from third-party IPA sites.",
+    "iosNoStoreTitle": "Recommended: Add to Home Screen (PWA, free)",
+    "iosNoStoreBody": "No Apple Developer account or App Store required. Open this site in Safari, tap Share → Add to Home Screen for a full-screen app experience (browse tutors, book, messages). On iOS 16.4+ you can enable notifications after installing to the Home Screen (push requires VAPID setup).",
+    "iosPwaStep1": "Open astarmarktetplace.netlify.app in Safari",
+    "iosPwaStep2": "Tap Share → Add to Home Screen",
+    "iosPwaStep3": "Open from your Home Screen and sign in",
+    "iosHint": "Android users: use the APK above. App Store link appears here when published."
+  },
+  "Pwa": {
+    "iosBannerAria": "iPhone add to Home Screen hint",
+    "iosBannerTitle": "📱 iOS: Add to Home Screen for an app-like experience",
+    "iosBannerBody": "No IPA download or Apple Developer fee. Three steps in Safari:",
+    "iosStep1": "Tap the Share button at the bottom of Safari",
+    "iosStep2": "Choose Add to Home Screen",
+    "iosStep3": "Tap Add, then open A* Marketplace from your Home Screen",
+    "iosBannerDismiss": "Dismiss"
   },
   "Faq": {
     "title": "FAQ",

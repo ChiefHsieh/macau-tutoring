@@ -12,6 +12,12 @@ import {
   OFFICIAL_SITE_ORIGIN,
   getAndroidApkDownloadUrl,
 } from "@/lib/android-apk-release";
+import {
+  IOS_BUNDLE_ID,
+  getIosAppStoreUrl,
+  getIosTestFlightUrl,
+  hasIosPublicDownload,
+} from "@/lib/ios-app-release";
 import { getTermsPageUrl } from "@/lib/public-urls";
 
 type PageProps = {
@@ -31,6 +37,9 @@ export default async function DownloadPage({ params }: PageProps) {
   const t = await getTranslations("Download");
   const termsUrl = getTermsPageUrl();
   const apkUrl = getAndroidApkDownloadUrl();
+  const iosAppStoreUrl = getIosAppStoreUrl();
+  const iosTestFlightUrl = getIosTestFlightUrl();
+  const iosPublished = hasIosPublicDownload();
 
   const steps = [t("step1"), t("step2"), t("step3"), t("step4"), t("step5")];
   const notes = [t("note1"), t("note2"), t("note3")];
@@ -43,7 +52,7 @@ export default async function DownloadPage({ params }: PageProps) {
         </Link>
       </PageSection>
 
-      <PageSection cardClassName={downloadCardClass} contentClassName="space-y-4 pt-5">
+      <PageSection title={t("androidSectionTitle")} cardClassName={downloadCardClass} contentClassName="space-y-4 pt-5">
         <div className="flex items-start gap-3">
           <span
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#E6C699]/40 bg-[#101742] text-[#E6C699]"
@@ -64,6 +73,44 @@ export default async function DownloadPage({ params }: PageProps) {
           </a>
         </Button>
         <p className="text-xs text-[#94A3B8]">{t("downloadHint")}</p>
+      </PageSection>
+
+      <PageSection title={t("iosSectionTitle")} cardClassName={downloadCardClass} contentClassName="space-y-4 pt-5">
+        <p className={mutedTextClass}>
+          {t("iosBundleLabel")}: <span className="font-mono text-xs text-[#DAC0A3]">{IOS_BUNDLE_ID}</span>
+        </p>
+        {iosPublished ? (
+          <>
+            <p className={bodyTextClass}>{t("iosPublishedBody")}</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {iosAppStoreUrl ? (
+                <Button asChild size="lg" className="w-full sm:w-auto">
+                  <a href={iosAppStoreUrl} target="_blank" rel="noopener noreferrer">
+                    {t("iosAppStoreButton")}
+                  </a>
+                </Button>
+              ) : null}
+              {iosTestFlightUrl ? (
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+                  <a href={iosTestFlightUrl} target="_blank" rel="noopener noreferrer">
+                    {t("iosTestFlightButton")}
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-base font-semibold text-[#F8F9FA]">{t("iosNoStoreTitle")}</p>
+            <p className={bodyTextClass}>{t("iosNoStoreBody")}</p>
+            <ol className={`mt-3 list-decimal space-y-2 pl-5 ${bodyTextClass}`}>
+              <li>{t("iosPwaStep1")}</li>
+              <li>{t("iosPwaStep2")}</li>
+              <li>{t("iosPwaStep3")}</li>
+            </ol>
+            <p className={`mt-3 ${mutedTextClass}`}>{t("iosHint")}</p>
+          </>
+        )}
       </PageSection>
 
       <PageSection title={t("securityTitle")} cardClassName={downloadCardClass}>
@@ -99,8 +146,6 @@ export default async function DownloadPage({ params }: PageProps) {
           </a>
         </p>
       </PageSection>
-
-      <p className={`text-center ${mutedTextClass}`}>{t("iosHint")}</p>
     </main>
   );
 }

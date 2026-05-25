@@ -33,6 +33,6 @@ where tutor_id = '965e7e0b-b969-4cc4-b704-e4f96e70f699';
 
 insert into public.reviews (tutor_id, student_id, booking_id, rating, comment, created_at)
 values
-  ('965e7e0b-b969-4cc4-b704-e4f96e70f699', null, null, 5, null, now() - interval '14 days');
+  ('965e7e0b-b969-4cc4-b704-e4f96e70f699', null, null, 5, null, now() - interval '2 days');
 
 commit;

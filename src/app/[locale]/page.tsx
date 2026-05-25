@@ -15,6 +15,7 @@ import Link from "next/link";
 import { teachableSubjectOptions } from "@/lib/tutor-setup-form-helpers";
 import { FeaturedTutorCard } from "@/components/featured-tutor-card";
 import { UniversityTutorBanner } from "@/components/university-tutor-banner";
+import { IosPwaInstallBanner } from "@/components/ios-pwa-install-banner";
 import { RecentDemandSection, type RecentDemandCardModel } from "@/components/recent-demand-section";
 import { LandingSiteFooter } from "@/components/landing-site-footer";
 import { PageSection } from "@/components/page-section";
@@ -135,6 +136,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
               <li>{t("heroValue2")}</li>
               <li>{t("heroValue3")}</li>
             </ul>
+            <IosPwaInstallBanner />
             <Link
               href={`/${locale}/download`}
               aria-label={`${t("heroDownloadTitle")} — ${t("heroDownloadCta")}`}

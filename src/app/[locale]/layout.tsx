@@ -7,6 +7,8 @@ import { AuthNav } from "@/components/auth-nav";
 import { AppToaster } from "@/components/app-toaster";
 import { NavigationTopLoader } from "@/components/navigation-top-loader";
 import { NativePushBootstrap } from "@/components/native-push-bootstrap";
+import { PwaBootstrap } from "@/components/pwa-bootstrap";
+import { PwaPushBootstrap } from "@/components/pwa-push-bootstrap";
 import { pickClientMessages } from "@/lib/i18n-client-messages";
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -29,6 +31,8 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={clientMessages}>
+      <PwaBootstrap />
+      <PwaPushBootstrap />
       <NativePushBootstrap locale={locale} />
       <NavigationTopLoader />
       <div className="min-h-screen w-full bg-[#000225]">

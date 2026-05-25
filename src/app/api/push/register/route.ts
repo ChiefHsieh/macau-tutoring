@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { parseWebPushSubscription } from "@/lib/web-push-subscription";
+
+const PLATFORMS = new Set(["android", "ios", "web"]);
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -17,6 +20,12 @@ export async function POST(request: Request) {
   const platform = String(body?.platform ?? "android").trim();
   if (!token) {
     return NextResponse.json({ ok: false, error: "Missing token" }, { status: 400 });
+  }
+  if (!PLATFORMS.has(platform)) {
+    return NextResponse.json({ ok: false, error: "Invalid platform" }, { status: 400 });
+  }
+  if (platform === "web" && !parseWebPushSubscription(token)) {
+    return NextResponse.json({ ok: false, error: "Invalid web push subscription" }, { status: 400 });
   }
 
   const { error } = await supabase.from("device_push_tokens").upsert(
