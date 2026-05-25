@@ -13,6 +13,9 @@ function parseBase(name: string, fallback: number): number {
 /** Students only: optional marketing baseline added to live student registrations. */
 export const PLATFORM_STAT_BASE_STUDENTS = parseBase("LANDING_STAT_BASE_STUDENTS", 22);
 
+/** Cumulative bookings / matches card — never show below this (live count can exceed). */
+export const PLATFORM_STAT_FLOOR_BOOKING_MATCHES = parseBase("LANDING_STAT_FLOOR_BOOKING_MATCHES", 16);
+
 export type PlatformRegistrationCounts = {
   /** Listed tutors on the marketplace (`tutor_profiles`) — same ground truth as the directory. */
   liveTutorCount: number;
@@ -25,6 +28,10 @@ export function getDisplayTutorCount(liveTutorProfileCount: number): number {
 
 export function getDisplayStudentCount(liveStudentCount: number): number {
   return PLATFORM_STAT_BASE_STUDENTS + Math.max(0, liveStudentCount);
+}
+
+export function getDisplayBookingMatchCount(liveBookingCount: number): number {
+  return Math.max(PLATFORM_STAT_FLOOR_BOOKING_MATCHES, Math.max(0, liveBookingCount));
 }
 
 async function fetchPlatformRegistrationCounts(): Promise<PlatformRegistrationCounts> {

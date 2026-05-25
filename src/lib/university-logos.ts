@@ -1,10 +1,12 @@
 export type UniversityLogo = {
   src: string;
   alt: string;
+  /** Black-background source files — screen blend on the dark banner */
+  blendScreen?: boolean;
 };
 
 /** Bump when replacing files in public/university_logos (cache-bust for browsers + Next image optimizer). */
-export const LOGO_ASSET_VERSION = "20260519b";
+export const LOGO_ASSET_VERSION = "20260525a";
 
 function logoPath(filename: string): string {
   return `/university_logos/${filename}?v=${LOGO_ASSET_VERSION}`;
@@ -22,5 +24,20 @@ export const UNIVERSITY_LOGOS: UniversityLogo[] = [
   {
     src: logoPath("macau-university-of-science-and-technology.png"),
     alt: "Macau University of Science and Technology",
+  },
+  {
+    src: logoPath("beijing-normal-university.jpg"),
+    alt: "Beijing Normal University · 北京師範大學",
+    blendScreen: true,
+  },
+  {
+    src: logoPath("universidade-catolica-portuguesa.png"),
+    alt: "Universidade Católica Portuguesa",
+    blendScreen: true,
+  },
+  {
+    src: logoPath("national-taiwan-university.png"),
+    alt: "National Taiwan University · 國立臺灣大學",
+    blendScreen: true,
   },
 ];

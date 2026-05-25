@@ -17,7 +17,20 @@ const MAP = [
   ["University_of_the_Arts_London_Logo.jpg", "university-of-the-arts-london.jpg"],
   ["University_of_Macau_logo.png", "university-of-macau.png"],
   ["Macau_University_of_Science_Technology_logo.png", "macau-university-of-science-and-technology.png"],
+  ["Beijing_Normal_Unviersity_Logo.jpg", "beijing-normal-university.jpg"],
+  ["ntu_logo.png", "national-taiwan-university.png"],
 ];
+
+function findCatolicaSrc() {
+  const hit = readdirSync(srcDir).find(
+    (name) =>
+      /Universidade/i.test(name) &&
+      /Portuguesa/i.test(name) &&
+      /\.png$/i.test(name),
+  );
+  if (!hit) return null;
+  return hit;
+}
 
 const KNOWN_SRC = new Set(MAP.map(([s]) => s));
 
@@ -37,6 +50,15 @@ function main() {
     copyFileSync(fromPath, join(dstDir, to));
     console.log("✓", to);
   }
+
+  const catolicaSrc = findCatolicaSrc();
+  if (!catolicaSrc) {
+    console.error("Missing: Universidade Católica Portuguesa logo (*.png with Portuguesa in name)");
+    process.exit(1);
+  }
+  KNOWN_SRC.add(catolicaSrc);
+  copyFileSync(join(srcDir, catolicaSrc), join(dstDir, "universidade-catolica-portuguesa.png"));
+  console.log("✓ universidade-catolica-portuguesa.png  (from", catolicaSrc + ")");
 
   const nthu = readdirSync(srcDir).find((name) => !KNOWN_SRC.has(name));
   if (!nthu) {

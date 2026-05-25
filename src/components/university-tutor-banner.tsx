@@ -14,7 +14,7 @@ function LogoImg({ logo, hideAlt }: { logo: UniversityLogo; hideAlt?: boolean })
       height={56}
       loading="lazy"
       decoding="async"
-      className="university-logo-img"
+      className={`university-logo-img${logo.blendScreen ? " is-blend-screen" : ""}`}
       draggable={false}
     />
   );

@@ -663,6 +663,11 @@ section {
   object-position: center;
 }
 
+/* Black-background logo files — drop matte on dark navy banner */
+.university-logo-img.is-blend-screen {
+  mix-blend-mode: screen;
+}
+
 /* Mobile / narrow: horizontal swipe (no transform marquee — avoids Android paint glitches) */
 .university-logo-scroll {
   display: flex;
