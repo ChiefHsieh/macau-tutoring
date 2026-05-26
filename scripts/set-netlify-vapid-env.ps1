@@ -1,10 +1,10 @@
-# Sync VAPID vars from .env.local to Netlify (requires: netlify login once).
+# Sync VAPID vars from .env.local to Netlify (requires: netlify login + netlify link).
 # Usage: powershell -ExecutionPolicy Bypass -File scripts/set-netlify-vapid-env.ps1
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $envFile = Join-Path $root ".env.local"
 if (-not (Test-Path $envFile)) {
-  Write-Error "Missing .env.local — run: npm run generate:vapid and add keys first."
+  Write-Error "Missing .env.local. Run: npm run generate:vapid"
 }
 
 function Get-EnvValue([string]$name) {
@@ -21,28 +21,15 @@ if (-not $publicKey -or -not $privateKey) {
   Write-Error "VAPID keys missing in .env.local"
 }
 
-$netlify = Get-Command netlify -ErrorAction SilentlyContinue
-if (-not $netlify) {
-  $netlify = "npx"
-  $npxArgs = @("--yes", "netlify-cli")
-} else {
-  $npxArgs = @()
-}
-
-function Invoke-Netlify([string[]]$args) {
-  if ($netlify -eq "npx") {
-    & npx @npxArgs @args
-  } else {
-    & netlify @args
-  }
-}
-
 Write-Host "Setting Netlify env (production + deploy-preview)..."
 foreach ($ctx in @("production", "deploy-preview")) {
-  Invoke-Netlify @("env:set", "NEXT_PUBLIC_VAPID_PUBLIC_KEY", $publicKey, "--context", $ctx)
-  Invoke-Netlify @("env:set", "VAPID_PRIVATE_KEY", $privateKey, "--context", $ctx)
+  npx --yes netlify-cli env:set NEXT_PUBLIC_VAPID_PUBLIC_KEY $publicKey --context $ctx --force
+  if ($LASTEXITCODE -ne 0) { throw "env:set NEXT_PUBLIC_VAPID_PUBLIC_KEY failed" }
+  npx --yes netlify-cli env:set VAPID_PRIVATE_KEY $privateKey --context $ctx --force
+  if ($LASTEXITCODE -ne 0) { throw "env:set VAPID_PRIVATE_KEY failed" }
   if ($subject) {
-    Invoke-Netlify @("env:set", "VAPID_SUBJECT", $subject, "--context", $ctx)
+    npx --yes netlify-cli env:set VAPID_SUBJECT $subject --context $ctx --force
+    if ($LASTEXITCODE -ne 0) { throw "env:set VAPID_SUBJECT failed" }
   }
 }
-Write-Host "Done. In Netlify UI: Deploys, then Clear cache and deploy site."
+Write-Host "Done. Run: npx netlify-cli deploy --prod --build"
