@@ -138,7 +138,7 @@ export default async function TutorDashboard({
             submitText={t("nameSave")}
             pendingText={tCommon("loading")}
           />
-          <PwaNotificationSettings />
+          <PwaNotificationSettings authenticated />
           <p
             className={`ui-alert ${
               myProfile?.is_verified

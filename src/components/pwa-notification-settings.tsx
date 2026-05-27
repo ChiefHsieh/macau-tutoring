@@ -14,27 +14,46 @@ import { isCapacitorNative } from "@/lib/pwa-detect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-type PushUiState = "hidden" | "loading" | "install_first" | "enable" | "denied" | "enabled" | "unsupported";
+type PushUiState =
+  | "loading"
+  | "install_first"
+  | "enable"
+  | "denied"
+  | "enabled"
+  | "unsupported"
+  | "session_pending";
 
-export function PwaNotificationSettings() {
+type PwaNotificationSettingsProps = {
+  /** Set on server when the page already verified login — avoids hiding when client auth is slow. */
+  authenticated?: boolean;
+};
+
+export function PwaNotificationSettings({ authenticated = false }: PwaNotificationSettingsProps) {
   const t = useTranslations("Pwa");
   const locale = useLocale();
-  const [state, setState] = useState<PushUiState>("loading");
+  const [state, setState] = useState<PushUiState>(authenticated ? "loading" : "loading");
   const [busy, setBusy] = useState(false);
   const [testMsg, setTestMsg] = useState<string | null>(null);
+  const [hideNative, setHideNative] = useState(false);
 
   const refresh = useCallback(async () => {
     if (isCapacitorNative()) {
-      setState("hidden");
+      setHideNative(true);
       return;
     }
+    setHideNative(false);
 
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
     if (!user) {
-      setState("hidden");
+      if (authenticated) {
+        setState("session_pending");
+      } else {
+        setHideNative(true);
+      }
       return;
     }
 
@@ -71,10 +90,17 @@ export function PwaNotificationSettings() {
       return;
     }
     setState("enable");
-  }, []);
+  }, [authenticated]);
 
   useEffect(() => {
     void refresh();
+    const supabase = createClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void refresh();
+    });
+    return () => subscription.unsubscribe();
   }, [refresh]);
 
   const onEnable = async () => {
@@ -91,6 +117,9 @@ export function PwaNotificationSettings() {
       } else if (result.reason === "not_standalone") {
         setState("install_first");
         setTestMsg(t("installFirstHint"));
+      } else if (result.reason === "not_logged_in") {
+        setState("session_pending");
+        setTestMsg(t("sessionPendingHint"));
       } else {
         setTestMsg(result.message ?? t("enableFailed"));
       }
@@ -127,10 +156,17 @@ export function PwaNotificationSettings() {
     }
   };
 
-  if (state === "hidden" || state === "loading") return null;
+  if (hideNative) return null;
+
+  const showEnableButton =
+    state === "enable" ||
+    state === "session_pending" ||
+    state === "loading" ||
+    state === "install_first";
+  const showRetryButton = state === "denied";
 
   return (
-    <Card className="border-[#E6C699]/35 bg-[#101742]">
+    <Card className="border-2 border-[#E6C699]/50 bg-[#101742] shadow-md shadow-black/25">
       <CardContent className="space-y-3 pt-5">
         <div className="flex items-start gap-3">
           {state === "denied" ? (
@@ -141,24 +177,23 @@ export function PwaNotificationSettings() {
           <div className="min-w-0 flex-1 space-y-2">
             <p className="text-sm font-semibold text-[#F8F9FA]">{t("notificationsCardTitle")}</p>
 
+            {state === "loading" ? (
+              <p className="flex items-center gap-2 text-xs text-[#94A3B8]">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                {t("notificationsLoading")}
+              </p>
+            ) : null}
+
             {state === "install_first" ? (
               <p className="text-xs leading-relaxed text-[#94A3B8]">{t("notificationsInstallFirst")}</p>
             ) : null}
 
+            {state === "session_pending" ? (
+              <p className="text-xs leading-relaxed text-[#94A3B8]">{t("sessionPendingBody")}</p>
+            ) : null}
+
             {state === "enable" ? (
-              <>
-                <p className="text-xs leading-relaxed text-[#94A3B8]">{t("notificationsEnableBody")}</p>
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={busy}
-                  onClick={() => void onEnable()}
-                  className="bg-[#E6C699] text-[#000225] hover:bg-[#d4b88a]"
-                >
-                  {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {t("notificationsEnableButton")}
-                </Button>
-              </>
+              <p className="text-xs leading-relaxed text-[#94A3B8]">{t("notificationsEnableBody")}</p>
             ) : null}
 
             {state === "denied" ? (
@@ -166,24 +201,51 @@ export function PwaNotificationSettings() {
             ) : null}
 
             {state === "enabled" ? (
-              <>
-                <p className="text-xs leading-relaxed text-[#94A3B8]">{t("notificationsEnabledBody")}</p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={busy}
-                  onClick={() => void onSelfTest()}
-                  className="border-[#2D4263] text-[#E2E8F0]"
-                >
-                  {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {t("notificationsTestButton")}
-                </Button>
-              </>
+              <p className="text-xs leading-relaxed text-[#94A3B8]">{t("notificationsEnabledBody")}</p>
             ) : null}
 
             {state === "unsupported" ? (
               <p className="text-xs leading-relaxed text-[#94A3B8]">{t("notificationsUnsupported")}</p>
+            ) : null}
+
+            {showEnableButton ? (
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy || state === "loading"}
+                onClick={() => void onEnable()}
+                className="bg-[#E6C699] text-[#000225] hover:bg-[#d4b88a]"
+              >
+                {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {t("notificationsEnableButton")}
+              </Button>
+            ) : null}
+
+            {showRetryButton ? (
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy}
+                onClick={() => void onEnable()}
+                className="bg-[#E6C699] text-[#000225] hover:bg-[#d4b88a]"
+              >
+                {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {t("notificationsRetryButton")}
+              </Button>
+            ) : null}
+
+            {state === "enabled" ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => void onSelfTest()}
+                className="border-[#2D4263] text-[#E2E8F0]"
+              >
+                {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {t("notificationsTestButton")}
+              </Button>
             ) : null}
 
             {testMsg ? <p className="text-xs text-[#E6C699]">{testMsg}</p> : null}

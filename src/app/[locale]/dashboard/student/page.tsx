@@ -99,7 +99,7 @@ export default async function StudentDashboard({ params, searchParams }: Student
             submitText={t("nameSave")}
             pendingText={tCommon("loading")}
           />
-          <PwaNotificationSettings />
+          <PwaNotificationSettings authenticated />
           <div className="flex flex-wrap gap-2">
             <ButtonLink href={`/${locale}/notifications`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
               {t("notificationsCta")}

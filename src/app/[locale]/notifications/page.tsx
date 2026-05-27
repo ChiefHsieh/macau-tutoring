@@ -87,7 +87,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
   return (
     <main className="space-y-6">
       <PageSection title={t("title")} description={t("subtitle")}>
-        <PwaNotificationSettings />
+        <PwaNotificationSettings authenticated />
         <div className="grid gap-3">
         {(rows ?? []).length === 0 ? (
           <Card>
