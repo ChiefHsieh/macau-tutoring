@@ -52,3 +52,6 @@ next-env.d.ts
 # APK hosted via GitHub Releases or copied before deploy
 /public/downloads/*.apk
 
+
+# Local Netlify folder
+.netlify

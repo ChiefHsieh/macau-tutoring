@@ -160,6 +160,29 @@ export default async function LandingPage({ params }: LandingPageProps) {
                 {t("heroDownloadCta")}
               </span>
             </Link>
+            <Link
+              href={`/${locale}/download`}
+              aria-label={`${t("heroIosDownloadTitle")} — ${t("heroIosDownloadCta")}`}
+              className="group flex w-full max-w-lg items-center gap-3 rounded-xl border-2 border-[#2D4263] bg-[linear-gradient(135deg,rgba(15,44,89,0.55)_0%,rgba(10,15,53,0.9)_100%)] px-4 py-3.5 shadow-lg shadow-black/20 ring-2 ring-[#2D4263]/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B5274] hover:shadow-xl hover:ring-[#3B5274]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3B5274]"
+            >
+              <span
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#2D4263]/70 bg-[#2D4263]/15 text-[#E2E8F0] transition-colors group-hover:bg-[#2D4263]/25"
+                aria-hidden
+              >
+                <Smartphone className="h-6 w-6" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-bold leading-snug text-[#F8F9FA] md:text-lg">
+                  {t("heroIosDownloadTitle")}
+                </span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-[#94A3B8] md:text-sm">
+                  {t("heroIosDownloadSubtitle")}
+                </span>
+              </span>
+              <span className="shrink-0 rounded-md bg-[#2D4263] px-3 py-2 text-sm font-bold text-[#E2E8F0] shadow-md transition-colors group-hover:bg-[#3B5274]">
+                {t("heroIosDownloadCta")}
+              </span>
+            </Link>
             <div className="flex flex-wrap gap-3">
               <ButtonLink href={`/${locale}/tutors`} pendingLabel={tCommon("loading")}>
                 {t("ctaBrowse")}
