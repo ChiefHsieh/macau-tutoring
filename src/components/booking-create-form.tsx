@@ -4,11 +4,11 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createBookingAction } from "@/app/[locale]/booking/actions";
 import { trackEvent } from "@/lib/analytics";
+import type { BookingSlotPick } from "@/lib/booking-slot-picks";
 import { Select } from "@/components/ui/select";
 import { SubmitButton } from "@/components/submit-button";
 import { useTranslations } from "next-intl";
 
-type Slot = { start_time: string; end_time: string };
 type TutorSubject = { subject: string; grade_level: string };
 
 function uniqueSubjectsInOrder(rows: TutorSubject[]): string[] {
@@ -39,15 +39,11 @@ function gradeLevelsForSubject(rows: TutorSubject[], subject: string): string[] 
 type BookingCreateFormProps = {
   locale: string;
   tutorId: string;
-  sessionDate: string;
-  slots: Slot[];
+  selectedSlots: BookingSlotPick[];
   subjects: TutorSubject[];
   labels: {
     bookNow: string;
   };
-  slotValue: string;
-  onSlotValueChange: (v: string) => void;
-  /** When set, replaces the time-slot dropdown. */
   slotDisplay?: ReactNode;
   submitDisabled?: boolean;
 };
@@ -55,15 +51,13 @@ type BookingCreateFormProps = {
 export function BookingCreateForm({
   locale,
   tutorId,
-  sessionDate,
-  slots,
+  selectedSlots,
   subjects,
   labels,
-  slotValue,
-  onSlotValueChange,
   slotDisplay,
   submitDisabled,
 }: BookingCreateFormProps) {
+  const t = useTranslations("Booking");
   const tCommon = useTranslations("Common");
   const subjectOptions = useMemo(() => uniqueSubjectsInOrder(subjects), [subjects]);
 
@@ -81,19 +75,19 @@ export function BookingCreateForm({
     setGradeLevel((prev) => (grades.includes(prev) ? prev : grades[0] ?? ""));
   }, [subjects, subject]);
 
-  const [start, end] = useMemo(() => slotValue.split("|"), [slotValue]);
+  const sessionsJson = useMemo(() => JSON.stringify(selectedSlots), [selectedSlots]);
 
   return (
     <form
       action={async (formData) => {
-        trackEvent("match_created", { tutor_id: tutorId });
+        trackEvent("match_created", { tutor_id: tutorId, session_count: selectedSlots.length });
         await createBookingAction(formData);
       }}
       className="mt-4 grid min-w-0 max-w-full gap-4"
     >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="tutor_id" value={tutorId} />
-      <input type="hidden" name="session_date" value={sessionDate} />
+      <input type="hidden" name="sessions_json" value={sessionsJson} />
 
       <Select name="subject" value={subject} onChange={(e) => setSubject(e.target.value)} required>
         {subjectOptions.map((sub) => (
@@ -115,21 +109,12 @@ export function BookingCreateForm({
         <div className="relative rounded-[12px] border border-[#1A2456] bg-[#0A0F35] px-3 py-2 text-sm text-[#F8F9FA]">
           {slotDisplay}
         </div>
-      ) : (
-        <Select name="slot" value={slotValue} onChange={(e) => onSlotValueChange(e.target.value)}>
-          {slots.map((slot) => (
-            <option key={`${slot.start_time}-${slot.end_time}`} value={`${slot.start_time}|${slot.end_time}`}>
-              {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
-            </option>
-          ))}
-        </Select>
-      )}
-
-      <input type="hidden" name="start_time" value={start ?? ""} />
-      <input type="hidden" name="end_time" value={end ?? ""} />
+      ) : null}
 
       <SubmitButton className="w-full" pendingLabel={tCommon("loading")} disabled={submitDisabled}>
-        {labels.bookNow}
+        {selectedSlots.length > 1
+          ? t("bookNowMultiple", { count: selectedSlots.length })
+          : labels.bookNow}
       </SubmitButton>
     </form>
   );

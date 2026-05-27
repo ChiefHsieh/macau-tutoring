@@ -36,8 +36,11 @@ export const metadata: Metadata = {
     title: "A* Marketplace",
   },
   icons: {
-    icon: [{ url: "/pwa/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/pwa/icon.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.png", sizes: "any", type: "image/png" },
+    ],
+    apple: [{ url: "/pwa/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   formatDetection: {
     telephone: false,

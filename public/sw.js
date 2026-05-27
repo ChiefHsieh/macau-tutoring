@@ -1,7 +1,7 @@
 /* A* Marketplace PWA — cache static assets; push handler ready for Web Push (VAPID). */
-const CACHE_VERSION = "astar-pwa-v2";
+const CACHE_VERSION = "astar-pwa-v3";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
-const PRECACHE_URLS = ["/pwa/icon.svg", "/pwa/offline.html"];
+const PRECACHE_URLS = ["/pwa/apple-touch-icon.png", "/pwa/icon-192.png", "/pwa/offline.html"];
 
 function isNavigationRequest(request) {
   return request.mode === "navigate" || (request.method === "GET" && request.headers.get("accept")?.includes("text/html"));
@@ -80,8 +80,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(payload.title, {
       body: payload.body,
-      icon: "/pwa/icon.svg",
-      badge: "/pwa/icon.svg",
+      icon: "/pwa/icon-192.png",
+      badge: "/pwa/apple-touch-icon.png",
       data: { url: payload.url ?? "/" },
     }),
   );

@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import { toMinutes } from "@/lib/availability";
 import type { HourCellKind } from "@/lib/tutor-booking-slots";
 import { formatMacauWeekdayDay, formatMacauCalendarDateLine } from "@/lib/macau-ymd";
+import type { BookingSlotPick } from "@/lib/booking-slot-picks";
+import { isHourSelectedForDate } from "@/lib/booking-slot-picks";
 import { cn } from "@/lib/utils";
 
-export type SlotPick = { sessionDate: string; start_time: string; end_time: string };
+export type SlotPick = BookingSlotPick;
 
 type Slot = { start_time: string; end_time: string };
 
@@ -82,8 +84,8 @@ export function BookingAvailabilityCalendar({
   dates,
   slotsByDate,
   hourGridByDate,
-  selected,
-  onSelect,
+  selectedSlots,
+  onToggleSlot,
   fullScheduleHref,
   loading,
   className,
@@ -92,8 +94,8 @@ export function BookingAvailabilityCalendar({
   dates: string[];
   slotsByDate: Record<string, Slot[]>;
   hourGridByDate: Record<string, HourCellKind[]>;
-  selected: SlotPick | null;
-  onSelect: (p: SlotPick) => void;
+  selectedSlots: SlotPick[];
+  onToggleSlot: (p: SlotPick) => void;
   fullScheduleHref: string;
   loading?: boolean;
   className?: string;
@@ -157,9 +159,7 @@ export function BookingAvailabilityCalendar({
                             {[0, 1, 2, 3].map((k) => {
                               const hour = qi * 4 + k;
                               const kind = grid[hour] ?? "off";
-                              const isSel =
-                                selected?.sessionDate === d &&
-                                Math.floor(toMinutes(selected.start_time) / 60) === hour;
+                              const isSel = isHourSelectedForDate(selectedSlots, d, hour);
                               return (
                                 <HourCell
                                   key={hour}
@@ -169,7 +169,7 @@ export function BookingAvailabilityCalendar({
                                   onPick={() => {
                                     const slot = slotForHour(slots, hour);
                                     if (!slot) return;
-                                    onSelect({
+                                    onToggleSlot({
                                       sessionDate: d,
                                       start_time: slot.start_time,
                                       end_time: slot.end_time,

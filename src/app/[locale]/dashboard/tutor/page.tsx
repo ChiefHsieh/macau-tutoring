@@ -6,6 +6,7 @@ import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
 import { SubmitButton } from "@/components/submit-button";
 import { DashboardNameForm } from "@/components/dashboard-name-form";
+import { PwaNotificationSettings } from "@/components/pwa-notification-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { acceptBookingAction, rejectBookingAction } from "./actions";
 
@@ -137,6 +138,7 @@ export default async function TutorDashboard({
             submitText={t("nameSave")}
             pendingText={tCommon("loading")}
           />
+          <PwaNotificationSettings />
           <p
             className={`ui-alert ${
               myProfile?.is_verified

@@ -3,30 +3,35 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { isSlotPickSelected, slotPickKey, toggleSlotPick, type BookingSlotPick } from "@/lib/booking-slot-picks";
 
 type Slot = { start_time: string; end_time: string };
 
-function slotKey(s: Slot) {
-  return `${s.start_time}|${s.end_time}`;
+function slotToPick(sessionDate: string, slot: Slot): BookingSlotPick {
+  return { sessionDate, start_time: slot.start_time, end_time: slot.end_time };
 }
 
 export function BookingSlotPickerRow({
   slots,
-  slotValue,
-  onSlotValueChange,
+  selectedSlots,
+  onSelectedSlotsChange,
   sessionDate,
 }: {
   slots: Slot[];
-  slotValue: string;
-  onSlotValueChange: (v: string) => void;
-  /** When the lesson date changes, the menu closes. */
+  selectedSlots: BookingSlotPick[];
+  onSelectedSlotsChange: (picks: BookingSlotPick[]) => void;
   sessionDate: string;
 }) {
   const t = useTranslations("Booking");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const slotsSig = useMemo(() => slots.map((s) => slotKey(s)).join(","), [slots]);
+  const slotsSig = useMemo(() => slots.map((s) => slotPickKey(slotToPick(sessionDate, s))).join(","), [slots, sessionDate]);
+
+  const selectedForDay = useMemo(
+    () => selectedSlots.filter((p) => p.sessionDate === sessionDate),
+    [selectedSlots, sessionDate],
+  );
 
   useEffect(() => {
     setOpen(false);
@@ -55,9 +60,6 @@ export function BookingSlotPickerRow({
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const [startT, endT] = slotValue.split("|");
-  const hasSelection = Boolean(startT && endT);
-
   return (
     <div ref={rootRef} className="relative w-full">
       <button
@@ -69,15 +71,13 @@ export function BookingSlotPickerRow({
         onClick={() => setOpen((o) => !o)}
       >
         <span className="min-w-0 flex-1">
-          {hasSelection ? (
+          {selectedForDay.length > 0 ? (
             <span>
-              <span className="text-[#94a3b8]">{t("selectedSlotLabel")}</span>{" "}
-              <span className="font-medium text-white">
-                {startT.slice(0, 5)} – {endT.slice(0, 5)}
-              </span>
+              <span className="text-[#94a3b8]">{t("selectedForDayLabel", { count: selectedForDay.length })}</span>{" "}
+              <span className="font-medium text-white">{t("slotPickerTapToEdit")}</span>
             </span>
           ) : (
-            <span className="text-[#94a3b8]">{t("slotSummaryEmpty")}</span>
+            <span className="text-[#94a3b8]">{t("slotPickerAddForDay")}</span>
           )}
         </span>
         <span className="shrink-0 text-[#94a3b8]" aria-hidden>
@@ -94,25 +94,34 @@ export function BookingSlotPickerRow({
           )}
           role="listbox"
           aria-label={t("slotPickerListAria")}
+          aria-multiselectable="true"
         >
           {slots.map((slot) => {
-            const v = slotKey(slot);
-            const active = v === slotValue;
+            const pick = slotToPick(sessionDate, slot);
+            const active = isSlotPickSelected(selectedSlots, pick);
             return (
-              <li key={v} role="none">
+              <li key={slotPickKey(pick)} role="none">
                 <button
                   type="button"
                   role="option"
                   aria-selected={active}
                   className={cn(
-                    "w-full px-3 py-2.5 text-left text-sm text-[#F8F9FA] transition-colors hover:bg-white/[0.06]",
+                    "flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-[#F8F9FA] transition-colors hover:bg-white/[0.06]",
                     active && "bg-white/[0.08] font-medium text-[#e5c598]",
                   )}
                   onClick={() => {
-                    onSlotValueChange(v);
-                    setOpen(false);
+                    onSelectedSlotsChange(toggleSlotPick(selectedSlots, pick));
                   }}
                 >
+                  <span
+                    className={cn(
+                      "flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px]",
+                      active ? "border-[#e5c598] bg-[#e5c598] text-[#000225]" : "border-[#94a3b8]/60",
+                    )}
+                    aria-hidden
+                  >
+                    {active ? "✓" : ""}
+                  </span>
                   {slot.start_time.slice(0, 5)} – {slot.end_time.slice(0, 5)}
                 </button>
               </li>

@@ -16,7 +16,8 @@
     "cap:sync:ios": "npx cap sync ios",
     "sync:logos": "node scripts/sync-university-logos.mjs",
     "publish:android-apk": "node scripts/publish-android-apk.mjs",
-    "generate:vapid": "node scripts/generate-vapid-keys.mjs"
+    "generate:vapid": "node scripts/generate-vapid-keys.mjs",
+    "sync:pwa-icons": "node scripts/sync-pwa-icons.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",

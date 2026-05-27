@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { BookingCreateForm } from "@/components/booking-create-form";
 import { BookingAvailabilityCalendar } from "@/components/booking-availability-calendar";
 import { BookingSlotPickerRow } from "@/components/booking-slot-picker-row";
+import { BookingSelectedSlotsSummary } from "@/components/booking-selected-slots-summary";
 import { formatMacauCalendarDateLine } from "@/lib/macau-ymd";
+import { toggleSlotPick, type BookingSlotPick } from "@/lib/booking-slot-picks";
 
 type TutorOption = {
   id: string;
@@ -25,7 +27,6 @@ type HourCellKind = import("@/lib/tutor-booking-slots").HourCellKind;
 type BookingNewClientProps = {
   locale: string;
   tutors: TutorOption[];
-  /** Current tutor id from URL / server (data matches this id). */
   selectedTutorId: string;
   selectedDate: string;
   isTutorLocked: boolean;
@@ -36,11 +37,6 @@ type BookingNewClientProps = {
   slotsByDate: Record<string, Slot[]>;
   hourGridByDate: Record<string, HourCellKind[]>;
 };
-
-function firstSlotValue(slots: Slot[]): string {
-  if (!slots[0]) return "";
-  return `${slots[0].start_time}|${slots[0].end_time}`;
-}
 
 export function BookingNewClient({
   locale,
@@ -59,6 +55,7 @@ export function BookingNewClient({
   const t = useTranslations("Booking");
   const [isPending, startTransition] = useTransition();
   const [sessionDate, setSessionDate] = useState(selectedDate);
+  const [selectedSlots, setSelectedSlots] = useState<BookingSlotPick[]>([]);
 
   const basePath = useMemo(() => `/${locale}/booking/new`, [locale]);
 
@@ -86,27 +83,6 @@ export function BookingNewClient({
 
   const slotsForDay = slotsByDate[sessionDate] ?? [];
 
-  const [slotValue, setSlotValue] = useState(() => firstSlotValue(slotsForDay));
-
-  useEffect(() => {
-    const slots = slotsByDate[sessionDate] ?? [];
-    const valid = slots.some((s) => `${s.start_time}|${s.end_time}` === slotValue);
-    if (!valid) {
-      setSlotValue(firstSlotValue(slots));
-    }
-  }, [sessionDate, slotsByDate, slotValue]);
-
-  const selectedPick: {
-    sessionDate: string;
-    start_time: string;
-    end_time: string;
-  } | null = useMemo(() => {
-    if (!slotValue) return null;
-    const [start_time, end_time] = slotValue.split("|");
-    if (!start_time || !end_time) return null;
-    return { sessionDate, start_time, end_time };
-  }, [slotValue, sessionDate]);
-
   const fullScheduleHref = `/${locale}/tutors/${selectedTutorId}#availability`;
 
   const dateMin = bookingDates[0] ?? "";
@@ -115,8 +91,8 @@ export function BookingNewClient({
   const slotPickerRow = (
     <BookingSlotPickerRow
       slots={slotsForDay}
-      slotValue={slotValue}
-      onSlotValueChange={setSlotValue}
+      selectedSlots={selectedSlots}
+      onSelectedSlotsChange={setSelectedSlots}
       sessionDate={sessionDate}
     />
   );
@@ -130,8 +106,9 @@ export function BookingNewClient({
         {t("selectedTutor")}: {tutorDisplayName}
       </p>
       <p className="break-words text-sm text-zinc-600 dark:text-[#94a3b8]">
-        {t("selectedDate")}: {formatMacauCalendarDateLine(sessionDate, locale)}
+        {t("browseDate")}: {formatMacauCalendarDateLine(sessionDate, locale)}
       </p>
+      <p className="break-words text-xs text-zinc-500 dark:text-[#64748b]">{t("multiSlotHint")}</p>
 
       <div className="grid min-w-0 max-w-full gap-3 md:grid-cols-3">
         {isTutorLocked ? (
@@ -147,6 +124,7 @@ export function BookingNewClient({
             value={selectedTutorId}
             onChange={(e) => {
               const next = e.target.value;
+              setSelectedSlots([]);
               pushFilters(next, sessionDate);
             }}
           >
@@ -182,33 +160,34 @@ export function BookingNewClient({
           dates={bookingDates}
           slotsByDate={slotsByDate}
           hourGridByDate={hourGridByDate}
-          selected={selectedPick}
+          selectedSlots={selectedSlots}
           loading={isPending}
           fullScheduleHref={fullScheduleHref}
-          onSelect={(pick) => {
-            setSessionDate(pick.sessionDate);
-            setSlotValue(`${pick.start_time}|${pick.end_time}`);
-            pushFilters(selectedTutorId, pick.sessionDate);
+          onToggleSlot={(pick) => {
+            setSelectedSlots((prev) => toggleSlotPick(prev, pick));
           }}
         />
       ) : null}
 
+      <BookingSelectedSlotsSummary
+        locale={locale}
+        picks={selectedSlots}
+        onRemove={(pick) => setSelectedSlots((prev) => toggleSlotPick(prev, pick))}
+      />
+
       {subjects.length === 0 ? (
         <p className="ui-empty-state mt-2">{t("noSubject")}</p>
-      ) : slotsForDay.length === 0 ? (
+      ) : slotsForDay.length === 0 && selectedSlots.length === 0 ? (
         <p className="ui-empty-state mt-2">{t("noSlots")}</p>
       ) : (
         <BookingCreateForm
           locale={locale}
           tutorId={selectedTutorId}
-          sessionDate={sessionDate}
-          slots={slotsForDay}
+          selectedSlots={selectedSlots}
           subjects={subjects}
           labels={{ bookNow: t("bookNow") }}
-          slotValue={slotValue}
-          onSlotValueChange={setSlotValue}
           slotDisplay={slotPickerRow}
-          submitDisabled={!slotValue || slotsForDay.length === 0}
+          submitDisabled={selectedSlots.length === 0}
         />
       )}
     </div>

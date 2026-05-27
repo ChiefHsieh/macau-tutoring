@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getNotificationHref } from "@/lib/notification-links";
 import { PageSection } from "@/components/page-section";
 import { Card, CardContent } from "@/components/ui/card";
+import { PwaNotificationSettings } from "@/components/pwa-notification-settings";
 import { openNotificationAction } from "./actions";
 
 type NotificationsPageProps = {
@@ -86,6 +87,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
   return (
     <main className="space-y-6">
       <PageSection title={t("title")} description={t("subtitle")}>
+        <PwaNotificationSettings />
         <div className="grid gap-3">
         {(rows ?? []).length === 0 ? (
           <Card>

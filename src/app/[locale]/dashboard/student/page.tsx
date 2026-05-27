@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageSection } from "@/components/page-section";
 import { ButtonLink } from "@/components/button-link";
 import { DashboardNameForm } from "@/components/dashboard-name-form";
+import { PwaNotificationSettings } from "@/components/pwa-notification-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type StudentDashboardProps = {
@@ -98,6 +99,7 @@ export default async function StudentDashboard({ params, searchParams }: Student
             submitText={t("nameSave")}
             pendingText={tCommon("loading")}
           />
+          <PwaNotificationSettings />
           <div className="flex flex-wrap gap-2">
             <ButtonLink href={`/${locale}/notifications`} variant="outline" size="sm" pendingLabel={tCommon("loading")}>
               {t("notificationsCta")}
