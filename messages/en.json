@@ -658,12 +658,15 @@
     "iosAppStoreButton": "Download on the App Store",
     "iosTestFlightButton": "Join TestFlight beta",
     "iosPublishedBody": "The iOS app is the same official WebView shell as Android. Install only via the Apple links below — not from third-party IPA sites.",
-    "iosNoStoreTitle": "Recommended: Add to Home Screen (PWA, free)",
-    "iosNoStoreBody": "No Apple Developer account or App Store required. Open this site in Safari, tap Share → Add to Home Screen for a full-screen app experience (browse tutors, book, messages). On iOS 16.4+ you can enable notifications after installing to the Home Screen (push requires VAPID setup).",
-    "iosPwaStep1": "Open astarmarktetplace.netlify.app in Safari",
-    "iosPwaStep2": "Tap Share → Add to Home Screen",
-    "iosPwaStep3": "Open from your Home Screen and sign in",
-    "iosHint": "Android users: use the APK above. App Store link appears here when published."
+    "iosOpenSiteButton": "Open site in Safari",
+    "iosNoStoreTitle": "How to install (no App Store)",
+    "iosNoStoreBody": "Add this site to your Home Screen in Safari for a full-screen app: browse tutors, book, and message.",
+    "iosPwaStep1": "Open the site in Safari: {site}",
+    "iosPwaStep2": "Tap Share 📤 → Add to Home Screen → Add",
+    "iosPwaStep3": "Open A* Marketplace from your Home Screen",
+    "iosPwaStep4": "Sign in to your account",
+    "iosPwaStep5": "Go to Notifications → Turn on notifications → Allow (iOS 16.4+)",
+    "iosHint": "Always open from the Home Screen icon. Safari tabs alone cannot receive message push. Android: use the APK above."
   },
   "Pwa": {
     "iosBannerAria": "iPhone add to Home Screen hint",

@@ -658,12 +658,15 @@
     "iosAppStoreButton": "在 App Store 下載",
     "iosTestFlightButton": "加入 TestFlight 測試",
     "iosPublishedBody": "iOS 版與 Android 相同，為官方網頁殼層 App。請僅透過下方 Apple 官方連結安裝，勿從第三方 IPA 來源下載。",
-    "iosNoStoreTitle": "推薦：Safari「加入主畫面」（PWA，免費）",
-    "iosNoStoreBody": "無需 Apple 開發者帳號、無需 App Store。用 Safari 開啟本站後，點分享 →「加入主畫面」，即可像 App 一樣全屏使用（瀏覽、預約、訊息）。iOS 16.4+ 在加入主畫面後可開啟通知權限（推送需另行配置 VAPID）。",
-    "iosPwaStep1": "使用 Safari 開啟 astarmarktetplace.netlify.app",
-    "iosPwaStep2": "點底部分享按鈕 →「加入主畫面」",
-    "iosPwaStep3": "從主畫面圖示開啟，登入即可使用",
-    "iosHint": "Android 用戶請使用上方 APK；已上架 App Store 時會顯示官方連結。"
+    "iosOpenSiteButton": "在 Safari 打開官網",
+    "iosNoStoreTitle": "安裝方式（無需 App Store）",
+    "iosNoStoreBody": "用 Safari 把網站加到主畫面，即可全屏使用：瀏覽導師、預約、收發訊息。",
+    "iosPwaStep1": "用 Safari 打開官網：{site}",
+    "iosPwaStep2": "點底部分享 📤 →「加入主畫面」→ 點「加入」",
+    "iosPwaStep3": "回到主畫面，點 A* Marketplace 圖示打開",
+    "iosPwaStep4": "登入你的帳號",
+    "iosPwaStep5": "打開「通知」頁 → 點「開啟通知」→ 系統彈窗選「允許」（需 iOS 16.4+）",
+    "iosHint": "請一定從主畫面圖示開啟；只在 Safari 分頁裡瀏覽，無法收到訊息推送。Android 用戶請用上方 APK。"
   },
   "Pwa": {
     "iosBannerAria": "iPhone 加入主畫面提示",

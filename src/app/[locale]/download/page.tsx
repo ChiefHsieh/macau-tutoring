@@ -43,6 +43,14 @@ export default async function DownloadPage({ params }: PageProps) {
 
   const steps = [t("step1"), t("step2"), t("step3"), t("step4"), t("step5")];
   const notes = [t("note1"), t("note2"), t("note3")];
+  const siteHost = OFFICIAL_SITE_ORIGIN.replace(/^https?:\/\//i, "");
+  const iosPwaSteps = [
+    t("iosPwaStep1", { site: siteHost }),
+    t("iosPwaStep2"),
+    t("iosPwaStep3"),
+    t("iosPwaStep4"),
+    t("iosPwaStep5"),
+  ];
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 pb-12">
@@ -103,12 +111,17 @@ export default async function DownloadPage({ params }: PageProps) {
           <>
             <p className="text-base font-semibold text-[#F8F9FA]">{t("iosNoStoreTitle")}</p>
             <p className={bodyTextClass}>{t("iosNoStoreBody")}</p>
-            <ol className={`mt-3 list-decimal space-y-2 pl-5 ${bodyTextClass}`}>
-              <li>{t("iosPwaStep1")}</li>
-              <li>{t("iosPwaStep2")}</li>
-              <li>{t("iosPwaStep3")}</li>
+            <Button asChild size="lg" variant="outline" className="w-full border-[#E6C699]/40 sm:w-auto">
+              <a href={OFFICIAL_SITE_ORIGIN}>{t("iosOpenSiteButton")}</a>
+            </Button>
+            <ol className={`list-decimal space-y-3 pl-5 ${bodyTextClass}`}>
+              {iosPwaSteps.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
             </ol>
-            <p className={`mt-3 ${mutedTextClass}`}>{t("iosHint")}</p>
+            <p className={`mt-4 rounded-lg border border-[#E6C699]/25 bg-[#101742]/60 px-3 py-2.5 text-xs leading-relaxed text-[#94A3B8] md:text-sm`}>
+              {t("iosHint")}
+            </p>
           </>
         )}
       </PageSection>
